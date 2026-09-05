@@ -1,0 +1,65 @@
+@use '@/styles/variables' as variables;
+
+.salary-computation-section {
+    margin-top: variables.$spacing-xl;
+    margin-bottom: variables.$spacing-xl;
+
+    .computation-title {
+        font-size: variables.$font-size-md;
+        font-weight: 600;
+        color: variables.$color-gray-900;
+        margin: 0 0 variables.$spacing-md;
+    }
+
+    .computation-table-card {
+        background-color: variables.$color-white;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-large;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: variables.$shadow-sm;
+
+        .salary-rule-name {
+            font-weight: 500;
+            color: variables.$color-gray-900;
+            font-size: variables.$font-size-sm;
+
+            &--summary {
+                font-weight: 700;
+            }
+        }
+
+        .salary-rule-code-chip {
+            background-color: variables.$color-gray-100;
+            border: 1px solid variables.$color-gray-200;
+            border-radius: variables.$radius-tiny;
+            padding: 2px 6px;
+            font-size: variables.$font-size-xxs;
+            color: variables.$color-gray-600;
+            font-family: monospace;
+        }
+
+        .salary-computation__deduction {
+            color: variables.$color-danger;
+            font-weight: 600;
+        }
+
+        .salary-computation__gross-highlight {
+            color: variables.$color-gray-900;
+            font-weight: 700;
+            font-size: variables.$font-size-sm;
+        }
+
+        .salary-computation__net-highlight {
+            color: variables.$color-success;
+            font-weight: 700;
+            font-size: variables.$font-size-md;
+        }
+
+        .salary-computation__amount {
+            color: variables.$color-gray-800;
+            font-size: variables.$font-size-sm;
+            font-weight: 500;
+        }
+    }
+}
