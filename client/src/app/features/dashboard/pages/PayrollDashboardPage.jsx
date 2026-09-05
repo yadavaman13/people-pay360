@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { BarChart2 } from 'lucide-react';
 import { DashboardProvider } from '../context/dashboard.context';
 import { useDashboardData } from '../hooks/useDashboardData';
@@ -17,6 +17,12 @@ import './PayrollDashboardPage.scss';
  * Split from the provider so it can consume DashboardContext.
  */
 function PayrollDashboardInner() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        const rightPane = document.querySelector('.dashboard-right-pane');
+        if (rightPane) rightPane.scrollTop = 0;
+    }, []);
+
     const {
         summaryData,
         attendanceData,
