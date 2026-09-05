@@ -227,3 +227,42 @@ export const accountCreatedEmailTemplate = ({
     </html>
   `;
 };
+
+export const payslipEmailTemplate = ({
+    employeeName,
+    payrunName,
+    periodStart,
+    periodEnd,
+    netAmount,
+}) => {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Your Payslip is Ready - PeoplePay360</title>
+      <style>
+        ${emailStyles}
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>PeoplePay360</h1>
+        </div>
+        <div class="content">
+          <p>Dear ${employeeName || 'Employee'},</p>
+          <p>Your payslip for <strong>${payrunName || 'the pay period'}</strong> (${periodStart || ''} to ${periodEnd || ''}) has been finalized and processed.</p>
+          <div class="otp-box" style="font-size: 22px; letter-spacing: 1px; font-family: inherit;">Net Pay: ₹${netAmount || '0.00'}</div>
+          <p>Your official salary slip has been attached to this email as a PDF document for your records.</p>
+          <p class="note">If you have any discrepancies or questions regarding your salary computation or tax deductions, please reach out to your HR/Payroll department.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} PeoplePay360. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};

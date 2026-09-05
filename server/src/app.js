@@ -6,7 +6,13 @@ import path from 'path';
 import envConfig from './config/env.config.js';
 import { authRouter, userRouter, adminRouter } from './modules/auth/index.js';
 import { pdfRouter } from './modules/pdf/index.js';
+import { payrollValidationRouter } from './modules/validation/index.js';
+import { payslipDocumentRouter } from './modules/payslips/index.js';
 import { errorHandler } from './modules/auth/middleware/errorHandler.js';
+
+import { scheduleRouter } from './modules/schedules/index.js';
+import { attendanceRouter } from './modules/attendance/index.js';
+import { timeOffRouter } from './modules/time-off/index.js';
 
 const app = express();
 
@@ -30,10 +36,15 @@ app.use('/api/admin', adminRouter);
 app.use('/api/pdf', pdfRouter);
 
 //dev-2
+app.use('/api/working-schedules', scheduleRouter);
+app.use('/api/attendance', attendanceRouter);
+app.use('/api/time-off', timeOffRouter);
 
 //dev-3
 
 //dev-4
+app.use('/api/payruns', payrollValidationRouter);
+app.use('/api/payslips', payslipDocumentRouter);
 
 //For SPA
 app.use((req, res, next) => {
