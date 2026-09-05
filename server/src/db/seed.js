@@ -1,28 +1,7 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
-import { db, pool } from '../config/database.config.js';
-import {
-    users,
-    departments,
-    jobPositions,
-    workingSchedules,
-    scheduleLines,
-    employees,
-    bankAccounts,
-    contracts,
-    salaryStructures,
-    salaryRules,
-    timeOffTypes,
-    timeOffAllocations,
-    timeOffRequests,
-    attendanceRecords,
-    attendancePunches,
-    payruns,
-    payrunEmployees,
-    payslips,
-    payslipLines,
-} from './schema/schema.js';
-import { eq, and } from 'drizzle-orm';
+import { pool } from '../config/database.config.js';
+import { generateEmployeeCode } from '../utils/employeeCode.utils.js';
 
 /**
  * ============================================================================
@@ -47,7 +26,6 @@ import { eq, and } from 'drizzle-orm';
 const SEED_USERS_CONFIG = [
     // 1–21: Original Seed Users (Strictly Preserved Credentials & Roles)
     {
-        empCode: 'EMP-001',
         firstName: 'Aryan',
         lastName: 'Patel',
         email: 'aryanpatel.me@gmail.com',
@@ -64,7 +42,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-002',
         firstName: 'Itesh',
         lastName: 'Prajapati',
         email: 'iteshofficial@gmail.com',
@@ -81,7 +58,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-003',
         firstName: 'Asr',
         lastName: 'Singh',
         email: 'asr24983@gmail.com',
@@ -98,7 +74,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'SBIN0005678',
     },
     {
-        empCode: 'EMP-004',
         firstName: 'Ankur',
         lastName: 'Rajput',
         email: 'asrajput5656@gmail.com',
@@ -115,7 +90,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-005',
         firstName: 'Aman',
         lastName: 'Yadav',
         email: 'yadavaman1948@gmail.com',
@@ -132,7 +106,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'KKBK0000123',
     },
     {
-        empCode: 'EMP-006',
         firstName: 'Leo',
         lastName: 'Patel',
         email: 'leopatel967@gmail.com',
@@ -149,7 +122,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-007',
         firstName: 'Doom',
         lastName: 'Wiser',
         email: 'doomwiser@gmail.com',
@@ -166,7 +138,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-008',
         firstName: 'Priya',
         lastName: 'Nair',
         email: 'hr@example.com',
@@ -183,7 +154,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'SBIN0005678',
     },
     {
-        empCode: 'EMP-009',
         firstName: 'Aman',
         lastName: 'Yadav',
         email: 'work.yadavaman@gmail.com',
@@ -200,7 +170,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-010',
         firstName: 'Sky',
         lastName: 'High',
         email: 'skyh53624@gmail.com',
@@ -217,7 +186,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'KKBK0000123',
     },
     {
-        empCode: 'EMP-011',
         firstName: 'Aman',
         lastName: 'Yadav',
         email: 'yadavaman1388@example.com',
@@ -234,7 +202,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-012',
         firstName: 'Rahul',
         lastName: 'Sharma',
         email: 'rahul.sharma@peoplepay360.internal',
@@ -251,7 +218,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-013',
         firstName: 'Sneha',
         lastName: 'Kulkarni',
         email: 'sneha.kulkarni@peoplepay360.internal',
@@ -268,7 +234,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'SBIN0005678',
     },
     {
-        empCode: 'EMP-014',
         firstName: 'Vikram',
         lastName: 'Malhotra',
         email: 'vikram.malhotra@peoplepay360.internal',
@@ -285,7 +250,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-015',
         firstName: 'Ananya',
         lastName: 'Iyer',
         email: 'ananya.iyer@peoplepay360.internal',
@@ -302,7 +266,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'KKBK0000123',
     },
     {
-        empCode: 'EMP-016',
         firstName: 'Rohan',
         lastName: 'Gupta',
         email: 'rohan.gupta@peoplepay360.internal',
@@ -319,7 +282,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-017',
         firstName: 'Pooja',
         lastName: 'Verma',
         email: 'pooja.verma@peoplepay360.internal',
@@ -336,7 +298,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-018',
         firstName: 'Deepak',
         lastName: 'Verma',
         email: 'deepak.verma@peoplepay360.internal',
@@ -354,7 +315,6 @@ const SEED_USERS_CONFIG = [
         contractExpiring: true, // triggers alert
     },
     {
-        empCode: 'EMP-019',
         firstName: 'Kavita',
         lastName: 'Reddy',
         email: 'kavita.reddy@peoplepay360.internal',
@@ -371,7 +331,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-020',
         firstName: 'Rajesh',
         lastName: 'Deshmukh',
         email: 'rajesh.deshmukh@peoplepay360.internal',
@@ -388,7 +347,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'KKBK0000123',
     },
     {
-        empCode: 'EMP-021',
         firstName: 'Neha',
         lastName: 'Joshi',
         email: 'neha.joshi@peoplepay360.internal',
@@ -407,7 +365,6 @@ const SEED_USERS_CONFIG = [
 
     // 22–50: Additional Personnel (Extending to 50 Total Personnel)
     {
-        empCode: 'EMP-022',
         firstName: 'Aditya',
         lastName: 'Saxena',
         email: 'aditya.saxena@peoplepay360.internal',
@@ -424,7 +381,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-023',
         firstName: 'Meera',
         lastName: 'Nambiar',
         email: 'meera.nambiar@peoplepay360.internal',
@@ -441,7 +397,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-024',
         firstName: 'Kunal',
         lastName: 'Bhatia',
         email: 'kunal.bhatia@peoplepay360.internal',
@@ -458,7 +413,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'SBIN0005678',
     },
     {
-        empCode: 'EMP-025',
         firstName: 'Swati',
         lastName: 'Chatterjee',
         email: 'swati.chatterjee@peoplepay360.internal',
@@ -475,7 +429,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-026',
         firstName: 'Varun',
         lastName: 'Menon',
         email: 'varun.menon@peoplepay360.internal',
@@ -492,7 +445,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'KKBK0000123',
     },
     {
-        empCode: 'EMP-027',
         firstName: 'Ritu',
         lastName: 'Singhal',
         email: 'ritu.singhal@peoplepay360.internal',
@@ -510,7 +462,6 @@ const SEED_USERS_CONFIG = [
         contractExpiring: true, // triggers alert
     },
     {
-        empCode: 'EMP-028',
         firstName: 'Harish',
         lastName: 'Pillai',
         email: 'harish.pillai@peoplepay360.internal',
@@ -527,7 +478,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-029',
         firstName: 'Divya',
         lastName: 'Srinivasan',
         email: 'divya.srinivasan@peoplepay360.internal',
@@ -544,7 +494,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'SBIN0005678',
     },
     {
-        empCode: 'EMP-030',
         firstName: 'Sanjay',
         lastName: 'Mukherjee',
         email: 'sanjay.mukherjee@peoplepay360.internal',
@@ -561,7 +510,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-031',
         firstName: 'Tanvi',
         lastName: 'Kapoor',
         email: 'tanvi.kapoor@peoplepay360.internal',
@@ -578,7 +526,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'KKBK0000123',
     },
     {
-        empCode: 'EMP-032',
         firstName: 'Nikhil',
         lastName: 'Agrawal',
         email: 'nikhil.agrawal@peoplepay360.internal',
@@ -595,7 +542,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-033',
         firstName: 'Bhavna',
         lastName: 'Chawla',
         email: 'bhavna.chawla@peoplepay360.internal',
@@ -612,7 +558,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-034',
         firstName: 'Gaurav',
         lastName: 'Bansal',
         email: 'gaurav.bansal@peoplepay360.internal',
@@ -629,7 +574,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'SBIN0005678',
     },
     {
-        empCode: 'EMP-035',
         firstName: 'Pallavi',
         lastName: 'Hegde',
         email: 'pallavi.hegde@peoplepay360.internal',
@@ -646,7 +590,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-036',
         firstName: 'Manish',
         lastName: 'Tiwari',
         email: 'manish.tiwari@peoplepay360.internal',
@@ -664,7 +607,6 @@ const SEED_USERS_CONFIG = [
         contractExpiring: true, // triggers alert
     },
     {
-        empCode: 'EMP-037',
         firstName: 'Shreya',
         lastName: 'Sen',
         email: 'shreya.sen@peoplepay360.internal',
@@ -681,7 +623,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-038',
         firstName: 'Alok',
         lastName: 'Pandey',
         email: 'alok.pandey@peoplepay360.internal',
@@ -698,7 +639,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-039',
         firstName: 'Rashmi',
         lastName: 'Kulkarni',
         email: 'rashmi.kulkarni@peoplepay360.internal',
@@ -715,7 +655,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'SBIN0005678',
     },
     {
-        empCode: 'EMP-040',
         firstName: 'Vivek',
         lastName: 'Rao',
         email: 'vivek.rao@peoplepay360.internal',
@@ -732,7 +671,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-041',
         firstName: 'Shruti',
         lastName: 'Mishra',
         email: 'shruti.mishra@peoplepay360.internal',
@@ -749,7 +687,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'KKBK0000123',
     },
     {
-        empCode: 'EMP-042',
         firstName: 'Tarun',
         lastName: 'Sethi',
         email: 'tarun.sethi@peoplepay360.internal',
@@ -766,7 +703,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-043',
         firstName: 'Monica',
         lastName: 'Ghosh',
         email: 'monica.ghosh@peoplepay360.internal',
@@ -783,7 +719,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-044',
         firstName: 'Pradeep',
         lastName: 'Chauhan',
         email: 'pradeep.chauhan@peoplepay360.internal',
@@ -800,7 +735,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'SBIN0005678',
     },
     {
-        empCode: 'EMP-045',
         firstName: 'Archana',
         lastName: 'Nair',
         email: 'archana.nair@peoplepay360.internal',
@@ -817,7 +751,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'UTIB0000789',
     },
     {
-        empCode: 'EMP-046',
         firstName: 'Karthik',
         lastName: 'Raman',
         email: 'karthik.raman@peoplepay360.internal',
@@ -834,7 +767,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'KKBK0000123',
     },
     {
-        empCode: 'EMP-047',
         firstName: 'Deepa',
         lastName: 'Joshi',
         email: 'deepa.joshi@peoplepay360.internal',
@@ -851,7 +783,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'HDFC0001234',
     },
     {
-        empCode: 'EMP-048',
         firstName: 'Sumit',
         lastName: 'Kashyap',
         email: 'sumit.kashyap@peoplepay360.internal',
@@ -868,7 +799,6 @@ const SEED_USERS_CONFIG = [
         ifscCode: 'ICIC0000456',
     },
     {
-        empCode: 'EMP-049',
         firstName: 'Lavanya',
         lastName: 'Sundaram',
         email: 'lavanya.sundaram@peoplepay360.internal',
@@ -883,7 +813,6 @@ const SEED_USERS_CONFIG = [
         noBankDetails: true, // Intentionally missing bank details for Dashboard Anomaly Alert
     },
     {
-        empCode: 'EMP-050',
         firstName: 'Chetan',
         lastName: 'Rawat',
         email: 'chetan.rawat@peoplepay360.internal',
@@ -1348,8 +1277,12 @@ async function seed() {
             return userHashCache[pw];
         };
 
-        const empMap = {}; // empCode -> employee DB record
+        const empMap = {}; // employeeCode -> employee DB record
+        const empByEmail = {}; // email -> employee DB record
         const userMap = {}; // email -> user DB record
+
+        // Track employee sequence per hire year according to employeeCode.utils.js
+        const yearSeqMap = {};
 
         for (const u of SEED_USERS_CONFIG) {
             const hash = await getHash(u.plainPassword);
@@ -1364,6 +1297,17 @@ async function seed() {
             const userId = userRes.rows[0].id;
             userMap[u.email] = userRes.rows[0];
 
+            // Generate enterprise formatted employee code: {ORG}-{INITIALS}-{YEAR}-{SEQ:4}
+            const hireYear = new Date(u.hireDate).getFullYear();
+            yearSeqMap[hireYear] = (yearSeqMap[hireYear] || 0) + 1;
+            const employeeCode = generateEmployeeCode({
+                firstName: u.firstName,
+                lastName: u.lastName,
+                email: u.email,
+                year: hireYear,
+                sequenceNumber: yearSeqMap[hireYear],
+            });
+
             // Insert employee
             const empRes = await client.query(
                 `INSERT INTO employees (user_id, employee_code, first_name, last_name, email, phone, gender, hire_date, department_id, job_position_id, working_schedule_id, status, is_active, created_at, updated_at)
@@ -1371,7 +1315,7 @@ async function seed() {
                  RETURNING id, employee_code, first_name, last_name, email, department_id`,
                 [
                     userId,
-                    u.empCode,
+                    employeeCode,
                     u.firstName,
                     u.lastName,
                     u.email,
@@ -1383,7 +1327,7 @@ async function seed() {
                     defaultSchedId,
                 ],
             );
-            empMap[u.empCode] = {
+            const empRecord = {
                 ...empRes.rows[0],
                 wage: u.wage,
                 bankName: u.bankName,
@@ -1392,53 +1336,72 @@ async function seed() {
                 noBankDetails: !!u.noBankDetails,
                 contractExpiring: !!u.contractExpiring,
             };
+            empMap[employeeCode] = empRecord;
+            empByEmail[u.email] = empRecord;
         }
         console.log(`✓ 50 users and 50 employees successfully created.`);
 
         // Establish managerial hierarchy
-        const topAdminId = empMap['EMP-001'].id; // Aryan Patel (Director/CEO)
-        const engLeadId = empMap['EMP-005'].id; // Aman Yadav
-        const hrLeadId = empMap['EMP-006'].id; // Leo Patel
-        const finLeadId = empMap['EMP-003'].id; // Asr Singh
-        const opsLeadId = empMap['EMP-015'].id; // Ananya Iyer
+        const topAdminId = empByEmail['aryanpatel.me@gmail.com'].id; // Aryan Patel (Director/CEO)
+        const engLeadId = empByEmail['yadavaman1948@gmail.com'].id; // Aman Yadav (Engineering Lead)
+        const hrLeadId = empByEmail['leopatel967@gmail.com'].id; // Leo Patel (HR Lead)
+        const finLeadId = empByEmail['asr24983@gmail.com'].id; // Asr Singh (Finance & Payroll Lead)
+        const opsLeadId = empByEmail['ananya.iyer@peoplepay360.internal'].id; // Ananya Iyer (Operations Lead)
 
-        for (const [code, emp] of Object.entries(empMap)) {
+        const engStaffEmails = new Set([
+            'asrajput5656@gmail.com',
+            'yadavaman1388@example.com',
+            'rahul.sharma@peoplepay360.internal',
+            'rajesh.deshmukh@peoplepay360.internal',
+            'aditya.saxena@peoplepay360.internal',
+            'harish.pillai@peoplepay360.internal',
+            'nikhil.agrawal@peoplepay360.internal',
+            'gaurav.bansal@peoplepay360.internal',
+            'alok.pandey@peoplepay360.internal',
+            'tarun.sethi@peoplepay360.internal',
+            'karthik.raman@peoplepay360.internal',
+            'chetan.rawat@peoplepay360.internal',
+        ]);
+
+        const hrStaffEmails = new Set([
+            'doomwiser@gmail.com',
+            'hr@example.com',
+            'work.yadavaman@gmail.com',
+            'neha.joshi@peoplepay360.internal',
+            'bhavna.chawla@peoplepay360.internal',
+            'monica.ghosh@peoplepay360.internal',
+        ]);
+
+        const finStaffEmails = new Set([
+            'skyh53624@gmail.com',
+            'sneha.kulkarni@peoplepay360.internal',
+            'vikram.malhotra@peoplepay360.internal',
+            'rohan.gupta@peoplepay360.internal',
+            'divya.srinivasan@peoplepay360.internal',
+            'rashmi.kulkarni@peoplepay360.internal',
+            'deepa.joshi@peoplepay360.internal',
+        ]);
+
+        const opsStaffEmails = new Set([
+            'pooja.verma@peoplepay360.internal',
+            'sanjay.mukherjee@peoplepay360.internal',
+            'vivek.rao@peoplepay360.internal',
+            'sumit.kashyap@peoplepay360.internal',
+        ]);
+
+        for (const emp of Object.values(empMap)) {
             let mgr = topAdminId;
-            if (['EMP-001'].includes(code)) mgr = null;
-            else if (
-                [
-                    'EMP-004',
-                    'EMP-011',
-                    'EMP-012',
-                    'EMP-020',
-                    'EMP-022',
-                    'EMP-028',
-                    'EMP-032',
-                    'EMP-034',
-                    'EMP-038',
-                    'EMP-042',
-                    'EMP-046',
-                    'EMP-050',
-                ].includes(code)
-            )
+            if (emp.email === 'aryanpatel.me@gmail.com') {
+                mgr = null;
+            } else if (engStaffEmails.has(emp.email)) {
                 mgr = engLeadId;
-            else if (
-                ['EMP-007', 'EMP-008', 'EMP-009', 'EMP-021', 'EMP-033', 'EMP-043'].includes(code)
-            )
+            } else if (hrStaffEmails.has(emp.email)) {
                 mgr = hrLeadId;
-            else if (
-                [
-                    'EMP-010',
-                    'EMP-013',
-                    'EMP-014',
-                    'EMP-016',
-                    'EMP-029',
-                    'EMP-039',
-                    'EMP-047',
-                ].includes(code)
-            )
+            } else if (finStaffEmails.has(emp.email)) {
                 mgr = finLeadId;
-            else if (['EMP-017', 'EMP-030', 'EMP-040', 'EMP-048'].includes(code)) mgr = opsLeadId;
+            } else if (opsStaffEmails.has(emp.email)) {
+                mgr = opsLeadId;
+            }
 
             if (mgr) {
                 await client.query(`UPDATE employees SET manager_id = $1 WHERE id = $2`, [
@@ -1503,9 +1466,15 @@ async function seed() {
         }
 
         // Add 5 historical expired contracts to test contract history
-        const seniorEmpCodes = ['EMP-001', 'EMP-002', 'EMP-005', 'EMP-006', 'EMP-046'];
-        for (const code of seniorEmpCodes) {
-            const emp = empMap[code];
+        const seniorEmpEmails = [
+            'aryanpatel.me@gmail.com',
+            'iteshofficial@gmail.com',
+            'yadavaman1948@gmail.com',
+            'leopatel967@gmail.com',
+            'karthik.raman@peoplepay360.internal',
+        ];
+        for (const email of seniorEmpEmails) {
+            const emp = empByEmail[email];
             await client.query(
                 `INSERT INTO contracts (employee_id, salary_structure_id, start_date, end_date, wage, department_id, working_schedule_id, status, max_punches_per_day, notes, created_at, updated_at)
                  VALUES ($1, $2, '2024-01-01', '2024-12-31', $3, $4, $5, 'EXPIRED', 3, 'Previous tenure contract renewed', NOW(), NOW())`,

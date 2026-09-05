@@ -1,0 +1,75 @@
+@use '@/styles/variables' as v;
+
+.dashboard-kpi-grid {
+    &--loading {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: v.$spacing-md;
+    }
+
+    &--error {
+        grid-column: 1 / -1;
+    }
+}
+
+.dashboard-kpi-card {
+    height: 100%;
+}
+
+// ─── Skeleton Loading State ───────────────────────────────────────────────────
+.kpi-skeleton-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: v.$radius-large;
+    padding: v.$spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: v.$spacing-sm;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.kpi-skeleton-label {
+    height: 12px;
+    border-radius: v.$radius-tiny;
+    background: var(--color-gray-200);
+    width: 60%;
+}
+
+.kpi-skeleton-value {
+    height: 28px;
+    border-radius: v.$radius-small;
+    background: var(--color-gray-200);
+    width: 80%;
+}
+
+.kpi-skeleton-trend {
+    height: 10px;
+    border-radius: v.$radius-tiny;
+    background: var(--color-gray-100);
+    width: 90%;
+}
+
+@keyframes skeleton-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+// ─── Error State ──────────────────────────────────────────────────────────────
+.kpi-error-state {
+    display: flex;
+    align-items: center;
+    gap: v.$spacing-sm;
+    padding: v.$spacing-md;
+    background-color: var(--color-warning-light);
+    border: 1px solid var(--color-warning-border);
+    border-radius: v.$radius-medium;
+    color: var(--color-warning-dark);
+    font-size: v.$font-size-sm;
+    font-family: v.$font-sans;
+}

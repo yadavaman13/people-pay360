@@ -1,0 +1,154 @@
+@use '@/styles/variables' as v;
+
+// ─── Page Wrapper ─────────────────────────────────────────────────────────────
+.payroll-dashboard-page {
+    display: flex;
+    flex-direction: column;
+    gap: v.$spacing-lg;
+    padding: v.$spacing-lg;
+    min-height: 100%;
+    background-color: var(--color-gray-50);
+    box-sizing: border-box;
+}
+
+// ─── Page Header ─────────────────────────────────────────────────────────────
+.dashboard-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dashboard-page-header-left {
+    display: flex;
+    align-items: center;
+    gap: v.$spacing-sm;
+}
+
+.dashboard-page-header-icon {
+    color: var(--color-blue-accent);
+    flex-shrink: 0;
+}
+
+.dashboard-page-title {
+    font-size: v.$font-size-xl;
+    font-weight: 700;
+    color: var(--color-gray-900);
+    margin: 0;
+    line-height: 1.2;
+    font-family: v.$font-sans;
+}
+
+.dashboard-page-description {
+    font-size: v.$font-size-sm;
+    color: var(--color-gray-500);
+    margin: 2px 0 0;
+    font-family: v.$font-sans;
+}
+
+// ─── Sections ────────────────────────────────────────────────────────────────
+.dashboard-section {
+    display: flex;
+    flex-direction: column;
+    gap: v.$spacing-md;
+}
+
+.dashboard-page-header {
+    margin-bottom: 0;
+}
+
+// ─── Charts 2-column Row ─────────────────────────────────────────────────────
+.dashboard-charts-row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: v.$spacing-md;
+}
+
+.dashboard-chart-primary {
+    flex: 3 1 0;
+    min-width: 0;
+}
+
+.dashboard-chart-secondary,
+.dashboard-chart-tertiary {
+    flex: 2 1 0;
+    min-width: 0;
+}
+
+// ─── Bottom Row: Table + Alerts ───────────────────────────────────────────────
+.dashboard-bottom-row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: v.$spacing-md;
+}
+
+.dashboard-dept-table {
+    flex: 3 1 0;
+    min-width: 0;
+    max-height: 420px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-alerts-col {
+    flex: 1.5 1 0;
+    min-width: 280px;
+    max-height: 420px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+// ─── Screen Reader Only ───────────────────────────────────────────────────────
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────
+@include v.tablet {
+    .dashboard-charts-row {
+        flex-direction: column;
+    }
+
+    .dashboard-bottom-row {
+        flex-direction: column;
+    }
+
+    .dashboard-dept-table,
+    .dashboard-alerts-col {
+        max-height: none;
+        flex: none;
+    }
+}
+
+@include v.mobile {
+    .payroll-dashboard-page {
+        padding: v.$spacing-sm;
+        gap: v.$spacing-md;
+    }
+
+    .dashboard-charts-row,
+    .dashboard-bottom-row {
+        flex-direction: column;
+    }
+
+    .dashboard-chart-primary,
+    .dashboard-chart-secondary,
+    .dashboard-chart-tertiary {
+        flex: none;
+    }
+
+    .dashboard-dept-table,
+    .dashboard-alerts-col {
+        max-height: none;
+        flex: none;
+    }
+}
