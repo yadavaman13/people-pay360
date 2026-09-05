@@ -1,0 +1,110 @@
+@use '@/styles/variables' as variables;
+
+.payrun-warnings-alert {
+    margin-bottom: variables.$spacing-lg;
+
+    &__banner {
+        border-radius: variables.$radius-medium;
+        padding: variables.$spacing-md variables.$spacing-lg;
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        gap: variables.$spacing-md;
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        margin-top: variables.$spacing-xs;
+    }
+
+    &__text {
+        flex: 1 1 auto;
+    }
+
+    &__expand-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+        background: transparent;
+        border: none;
+        font-size: variables.$font-size-xs;
+        font-weight: 600;
+        cursor: pointer;
+        color: inherit;
+        padding: variables.$spacing-xs variables.$spacing-sm;
+        border-radius: variables.$radius-small;
+        flex-shrink: 0;
+
+        @include variables.transition-ease;
+
+        &:hover {
+            opacity: 0.8;
+            background-color: rgb(0 0 0 / 5%);
+        }
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-sm;
+        margin-top: variables.$spacing-md;
+        padding-top: variables.$spacing-md;
+        border-top: 1px solid rgb(0 0 0 / 10%);
+    }
+
+    &__item {
+        background-color: variables.$color-white;
+        border-radius: variables.$radius-small;
+        padding: variables.$spacing-sm variables.$spacing-md;
+        border: 1px solid variables.$color-gray-200;
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-xs;
+
+        &.is-blocker {
+            border-left: 3px solid variables.$color-danger;
+        }
+
+        &.is-warning {
+            border-left: 3px solid variables.$color-warning;
+        }
+    }
+
+    &__item-header {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        flex-wrap: wrap;
+    }
+
+    &__emp-tag {
+        font-size: variables.$font-size-xs;
+        font-weight: 600;
+        color: variables.$color-gray-800;
+    }
+
+    &__type-tag {
+        font-size: variables.$font-size-xxs;
+        color: variables.$color-gray-500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    &__item-message {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-700;
+        line-height: 1.4;
+    }
+
+    @include variables.mobile {
+        &__header {
+            flex-direction: column;
+        }
+
+        &__expand-btn {
+            align-self: flex-start;
+        }
+    }
+}

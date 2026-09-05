@@ -1,0 +1,282 @@
+@use '@/styles/variables' as variables;
+
+.payruns-list-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 56px);
+    max-height: calc(100vh - 56px);
+    padding: variables.$spacing-md variables.$spacing-xl;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+    gap: variables.$spacing-md;
+    font-family: variables.$font-sans;
+
+    @media (width <= 768px) {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        padding: variables.$spacing-sm variables.$spacing-md;
+        gap: variables.$spacing-sm;
+    }
+}
+
+.payruns-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: variables.$spacing-md;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+
+    .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-xs;
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+
+            .header-icon {
+                color: variables.$color-black;
+            }
+
+            .header-title {
+                font-size: variables.$font-size-xxl;
+                font-weight: 700;
+                color: variables.$color-gray-900;
+                margin: 0;
+                letter-spacing: -0.02em;
+            }
+        }
+
+        .header-subtitle {
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-500;
+            margin: 0;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+    }
+
+    @include variables.mobile {
+        .header-info {
+            .title-row {
+                .header-title {
+                    font-size: variables.$font-size-xl;
+                }
+            }
+
+            .header-subtitle {
+                font-size: variables.$font-size-xs;
+            }
+        }
+
+        .header-actions {
+            .create-payrun-btn {
+                height: 36px;
+                padding: 0 variables.$spacing-sm;
+                font-size: variables.$font-size-sm;
+            }
+        }
+    }
+}
+
+// ─── Mobile Search & Filter Toolbar (< 576px) ─────────────────────────────────
+.payruns-list-page__mobile-toolbar {
+    display: none; // Hidden on desktop & tablet
+    flex-direction: column;
+    gap: variables.$spacing-xs;
+    width: 100%;
+    margin-bottom: variables.$spacing-xs;
+
+    .mobile-search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: variables.$color-gray-400;
+            pointer-events: none;
+        }
+
+        .mobile-search-input {
+            width: 100%;
+            height: 38px;
+            padding: 0 34px;
+            border-radius: variables.$radius-small;
+            border: 1px solid variables.$color-gray-200;
+            background-color: variables.$color-white;
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-900;
+            font-family: inherit;
+            box-sizing: border-box;
+
+            @include variables.transition-ease;
+
+            &:focus {
+                outline: none;
+                border-color: variables.$color-primary;
+                box-shadow: 0 0 0 2px color-mix(in srgb, variables.$color-primary 15%, transparent);
+            }
+
+            &::placeholder {
+                color: variables.$color-gray-400;
+            }
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            color: variables.$color-gray-400;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+
+            &:hover {
+                color: variables.$color-gray-700;
+                background-color: variables.$color-gray-100;
+            }
+        }
+    }
+
+    .mobile-filter-pills {
+        display: flex;
+        gap: variables.$spacing-xs;
+        width: 100%;
+
+        .mobile-filter-select {
+            flex: 1;
+            height: 36px;
+            padding: 0 variables.$spacing-sm;
+            border-radius: variables.$radius-small;
+            border: 1px solid variables.$color-gray-200;
+            background-color: variables.$color-white;
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-700;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: 500;
+
+            &:focus {
+                outline: none;
+                border-color: variables.$color-primary;
+            }
+        }
+    }
+}
+
+.payruns-list-page__error-alert {
+    width: 100%;
+    flex-shrink: 0;
+
+    .alert-retry-action {
+        margin-top: variables.$spacing-sm;
+    }
+}
+
+.payruns-list-page__empty {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-xxl;
+    margin-bottom: variables.$spacing-lg;
+}
+
+.payruns-list-page__mobile-empty {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-xl;
+    text-align: center;
+}
+
+// ─── Mobile Card List (< 576px) ──────────────────────────────────────────────
+.payruns-list-page__mobile-card-list {
+    display: none; // Hidden on desktop & tablet
+    flex-direction: column;
+    gap: variables.$spacing-sm;
+}
+
+.payruns-mobile-card-skeletons {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-sm;
+}
+
+.payruns-mobile-card-skeleton {
+    height: 120px;
+    background-color: variables.$color-gray-100;
+    border-radius: variables.$radius-medium;
+    border: 1px solid variables.$color-gray-200;
+    animation: payruns-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes payruns-pulse {
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+// ─── Mobile Compact Pagination (< 576px) ─────────────────────────────────────
+.payruns-list-page__pagination-mobile {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: variables.$spacing-sm;
+    padding: variables.$spacing-sm 0 variables.$spacing-md;
+    width: 100%;
+
+    .pagination-mobile-btn {
+        min-height: 38px;
+        padding: 0 variables.$spacing-md;
+        display: inline-flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+        font-size: variables.$font-size-xs;
+        font-weight: 600;
+    }
+
+    .pagination-mobile-label {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-600;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+}
+
+// ─── Breakpoints ─────────────────────────────────────────────────────────────
+@include variables.mobile {
+    .payruns-list-page__mobile-toolbar {
+        display: flex;
+    }
+
+    .payruns-list-page__mobile-card-list {
+        display: flex;
+    }
+
+    .payruns-list-page__pagination-mobile {
+        display: flex;
+    }
+}

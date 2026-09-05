@@ -5,7 +5,7 @@ import { employees } from '../db/schema/employees.schema.js';
 import { contracts } from '../db/schema/contracts.schema.js';
 import { departments } from '../db/schema/departments.schema.js';
 import { jobPositions } from '../db/schema/job_positions.schema.js';
-import { eq, and, desc, asc, gte, lte, count, sql } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, asc, gte, lte, count, sql } from 'drizzle-orm';
 
 /**
  * Payrun DAO
@@ -16,6 +16,7 @@ import { eq, and, desc, asc, gte, lte, count, sql } from 'drizzle-orm';
  * @param {object} params
  */
 export async function findAllPayruns({
+    search,
     status,
     periodStart,
     periodEnd,
@@ -24,6 +25,21 @@ export async function findAllPayruns({
     limit = 20,
 } = {}) {
     const conditions = [];
+
+    if (search && search.trim() !== '') {
+        const searchPattern = `%${search.trim()}%`;
+        conditions.push(
+            or(
+                ilike(payruns.name, searchPattern),
+                ilike(salaryStructures.name, searchPattern),
+                sql`${payruns.status}::text ILIKE ${searchPattern}`,
+                sql`to_char(${payruns.periodStart}, 'FMMonth') ILIKE ${searchPattern}`,
+                sql`to_char(${payruns.periodStart}, 'Mon') ILIKE ${searchPattern}`,
+                sql`to_char(${payruns.periodEnd}, 'FMMonth') ILIKE ${searchPattern}`,
+                sql`to_char(${payruns.periodEnd}, 'Mon') ILIKE ${searchPattern}`,
+            ),
+        );
+    }
 
     if (status) {
         conditions.push(eq(payruns.status, status.toUpperCase()));
@@ -73,7 +89,11 @@ export async function findAllPayruns({
             .orderBy(desc(payruns.createdAt))
             .limit(limit)
             .offset(offset),
-        db.select({ totalCount: count() }).from(payruns).where(whereClause),
+        db
+            .select({ totalCount: count() })
+            .from(payruns)
+            .leftJoin(salaryStructures, eq(payruns.structureId, salaryStructures.id))
+            .where(whereClause),
     ]);
 
     return {

@@ -1,0 +1,131 @@
+@use '@/styles/variables' as variables;
+
+.payruns-table-wrapper {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .advanced-table-component {
+        flex: 1;
+        min-height: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        .advanced-table-controls,
+        .advanced-table-filter-chips {
+            flex-shrink: 0;
+        }
+
+        .advanced-table-viewport-wrapper {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            .advanced-table-scroll-wrapper {
+                flex: 1;
+                min-height: 0;
+                overflow: auto;
+
+                &.has-vertical-scroll {
+                    max-height: none;
+                }
+            }
+        }
+
+        .advanced-table-footer {
+            flex-shrink: 0;
+        }
+    }
+
+    .payruns-table__name-cell {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-xs;
+        cursor: pointer;
+
+        .payruns-table__payrun-name {
+            font-weight: 600;
+            color: variables.$color-gray-900;
+            font-size: variables.$font-size-sm;
+            line-height: 1.3;
+
+            @include variables.transition-ease;
+        }
+
+        .payruns-table__payrun-period {
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-500;
+            white-space: nowrap;
+        }
+
+        &:hover .payruns-table__payrun-name {
+            color: variables.$color-primary;
+        }
+    }
+
+    .payruns-table__structure-cell {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-700;
+        white-space: nowrap;
+    }
+
+    .payruns-table__headcount-cell {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-700;
+        font-weight: 500;
+        white-space: nowrap;
+
+        .payruns-table__headcount-icon {
+            color: variables.$color-gray-400;
+        }
+    }
+
+    .payruns-table__no-warning {
+        color: variables.$color-gray-400;
+        font-size: variables.$font-size-xs;
+    }
+
+    .payruns-table__actions-cell {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: variables.$spacing-xs;
+
+        .payruns-table__action-btn {
+            padding: variables.$spacing-xs;
+            min-width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: variables.$radius-small;
+            color: variables.$color-gray-500;
+
+            @include variables.transition-ease;
+
+            &.delete-btn:hover {
+                color: variables.$color-danger;
+                background-color: variables.$color-danger-light;
+            }
+
+            &.view-btn:hover {
+                color: variables.$color-primary;
+                background-color: variables.$color-gray-100;
+            }
+        }
+    }
+
+    @include variables.mobile {
+        display: none;
+    }
+}

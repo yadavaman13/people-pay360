@@ -78,6 +78,14 @@ function registerNavEntry(path, label, subTabs = [], isExplicit = false, rolePre
             featureNavRegistry.set(primary, entry);
         }
     }
+
+    if (isExplicit && subTabs && subTabs.length > 0) {
+        subTabs.forEach((sub) => {
+            const subLabel = typeof sub === 'string' ? sub : sub.label || formatSegmentToTitle(sub);
+            const subKey = subLabel.toLowerCase().replace(/\s+/g, '-');
+            featureNavRegistry.set(`${primary}/${subKey}`, entry);
+        });
+    }
 }
 
 // Build navigation registry immediately on module load
@@ -139,11 +147,22 @@ export function resolveNavState(pathname) {
     const roleFullSubPath = role ? `${role}/${fullSubPath}` : null;
     const rolePrimaryPath = role ? `${role}/${primary}` : null;
 
-    const entry =
-        (roleFullSubPath && featureNavRegistry.get(roleFullSubPath)) ||
-        (rolePrimaryPath && featureNavRegistry.get(rolePrimaryPath)) ||
-        featureNavRegistry.get(fullSubPath) ||
-        featureNavRegistry.get(primary);
+    const roleFullEntry = roleFullSubPath ? featureNavRegistry.get(roleFullSubPath) : null;
+    const rolePrimaryEntry = rolePrimaryPath ? featureNavRegistry.get(rolePrimaryPath) : null;
+    const fullEntry = featureNavRegistry.get(fullSubPath);
+    const primaryEntry = featureNavRegistry.get(primary);
+
+    // Prioritize explicit navigation entries: if primary module explicitly declares subTabs,
+    // it handles all sub-routes unless the sub-route itself has an explicit nav item.
+    const entry = roleFullEntry?.isExplicit
+        ? roleFullEntry
+        : fullEntry?.isExplicit
+          ? fullEntry
+          : rolePrimaryEntry?.isExplicit && rolePrimaryEntry?.subTabs?.length > 0
+            ? rolePrimaryEntry
+            : primaryEntry?.isExplicit && primaryEntry?.subTabs?.length > 0
+              ? primaryEntry
+              : roleFullEntry || rolePrimaryEntry || fullEntry || primaryEntry;
 
     if (entry) {
         let activeSubTab = '';

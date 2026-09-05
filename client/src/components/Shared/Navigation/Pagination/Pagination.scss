@@ -42,6 +42,17 @@
             color: variables.$color-black;
             font-weight: 700;
         }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    }
+
+    &.is-disabled {
+        opacity: 0.6;
+        pointer-events: none;
     }
 
     .pagination-ellipsis {

@@ -1,0 +1,123 @@
+@use '@/styles/variables' as variables;
+
+.payslips-table-wrapper {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .advanced-table-component {
+        flex: 1;
+        min-height: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        .advanced-table-controls,
+        .advanced-table-filter-chips {
+            flex-shrink: 0;
+        }
+
+        .advanced-table-viewport-wrapper {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            .advanced-table-scroll-wrapper {
+                flex: 1;
+                min-height: 0;
+                overflow: auto;
+
+                &.has-vertical-scroll {
+                    max-height: none;
+                }
+            }
+        }
+
+        .advanced-table-footer {
+            flex-shrink: 0;
+        }
+    }
+
+    .payslips-table__emp-cell {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-md;
+        cursor: pointer;
+
+        .avatar-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background-color: variables.$color-gray-100;
+            color: variables.$color-gray-700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: variables.$font-size-xs;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .name-details {
+            display: flex;
+            flex-direction: column;
+
+            .payslips-table__emp-name {
+                font-weight: 600;
+                color: variables.$color-gray-900;
+                font-size: variables.$font-size-sm;
+
+                @include variables.transition-ease;
+            }
+
+            .payslips-table__emp-code {
+                font-size: variables.$font-size-xs;
+                color: variables.$color-gray-500;
+            }
+        }
+
+        &:hover .payslips-table__emp-name {
+            color: variables.$color-primary;
+        }
+    }
+
+    .payslips-table__period-cell {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-600;
+        white-space: nowrap;
+    }
+
+    .payslips-table__amount-cell {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-800;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .payslips-table__net-amount {
+        font-size: variables.$font-size-sm;
+        font-weight: 700;
+        color: variables.$color-success;
+        white-space: nowrap;
+    }
+
+    .payslips-table__structure-cell {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-700;
+        white-space: nowrap;
+    }
+
+    .payslips-table__no-warning {
+        color: variables.$color-gray-400;
+    }
+
+    @include variables.mobile {
+        display: none;
+    }
+}

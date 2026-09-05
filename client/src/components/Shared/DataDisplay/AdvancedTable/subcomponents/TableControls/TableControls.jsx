@@ -10,6 +10,7 @@ import TableSortDropdown from '../TableSortDropdown/TableSortDropdown';
 import './TableControls.scss';
 
 function TableControls({
+    controlsLeft = null,
     searchable = false,
     searchTerm,
     onSearchChange,
@@ -80,6 +81,7 @@ function TableControls({
     onSaveEdits,
 }) {
     const hasLeftControls =
+        Boolean(controlsLeft) ||
         searchable ||
         (showFilter && effectiveFilterConfig.length > 0) ||
         (showSortDropdown && effectiveColumns.length > 0) ||
@@ -108,6 +110,7 @@ function TableControls({
                 />
             ) : (
                 <div className="advanced-table-controls-left">
+                    {controlsLeft}
                     {searchable && (
                         <div className="advanced-table-search-box">
                             <SearchBar

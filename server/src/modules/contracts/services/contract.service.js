@@ -14,7 +14,7 @@ import { AppError } from '../../../utils/appError.js';
  */
 export async function createContract(data, user) {
     // 1. Verify employee exists and is active
-    const employee = await employeeDao.findEmployeeById(data.employeeId);
+    const employee = await employeeDao.findEmployeeByNameOrIdentifier(data.employeeId);
     if (!employee) {
         throw new AppError('Employee not found', 404);
     }
@@ -36,7 +36,7 @@ export async function createContract(data, user) {
     // 3. Application-level overlap check for ACTIVE contracts
     if (status === 'ACTIVE') {
         const overlapping = await contractDao.findActiveOverlappingContracts(
-            data.employeeId,
+            employee.id,
             data.startDate,
             data.endDate || null,
         );
@@ -46,7 +46,7 @@ export async function createContract(data, user) {
     }
 
     const contractData = {
-        employeeId: data.employeeId,
+        employeeId: employee.id,
         salaryStructureId: data.salaryStructureId,
         startDate: data.startDate,
         endDate: data.endDate || null,

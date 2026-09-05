@@ -29,28 +29,53 @@ function DatePicker({
     const [popoverPos, setPopoverPos] = useState(null);
 
     const parsedDate = parseStringToDate(value);
-    const [viewDate, setViewDate] = useState(() => parsedDate || new Date());
+    const parsedMin = parseStringToDate(min);
+    const [viewDate, setViewDate] = useState(() => {
+        if (parsedDate) return parsedDate;
+        if (parsedMin && parsedMin > new Date()) return parsedMin;
+        return new Date();
+    });
     const containerRef = useRef(null);
     const popoverRef = useRef(null);
 
     useEffect(() => {
         const d = parseStringToDate(value);
-        if (d) setViewDate(d);
-    }, [value]);
+        if (d) {
+            setViewDate(d);
+        } else if (min) {
+            const m = parseStringToDate(min);
+            if (m) {
+                setViewDate((prev) => (prev < m ? m : prev));
+            }
+        }
+    }, [value, min]);
 
-    // Real-time position updating for portal mode
+    // Real-time position updating for portal mode with auto-flip and boundary clamping
     const updatePosition = useCallback(() => {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
-        const POPOVER_WIDTH = 245;
+        const POPOVER_WIDTH = 308;
+        const POPOVER_HEIGHT = 340;
 
         let leftPos = rect.left;
         if (align === 'right') {
             leftPos = rect.right - POPOVER_WIDTH;
         }
 
+        // Clamp horizontally so popover stays inside viewport
+        if (typeof window !== 'undefined') {
+            leftPos = Math.max(12, Math.min(leftPos, window.innerWidth - POPOVER_WIDTH - 12));
+        }
+
+        // Intelligent vertical auto-flip when space below is constrained
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const shouldFlipTop = spaceBelow < POPOVER_HEIGHT && spaceAbove > spaceBelow;
+
+        const topPos = shouldFlipTop ? Math.max(8, rect.top - POPOVER_HEIGHT - 4) : rect.bottom + 4;
+
         setPopoverPos({
-            top: rect.bottom + 4,
+            top: topPos,
             left: leftPos,
             width: POPOVER_WIDTH,
             zIndex: 99999,

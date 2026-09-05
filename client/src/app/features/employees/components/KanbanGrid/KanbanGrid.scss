@@ -1,0 +1,30 @@
+@use '@/styles/variables' as variables;
+
+.employee-kanban-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
+    width: 100%;
+    margin-top: 16px;
+
+    @media (width <= 768px) {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+}
+
+.employee-kanban-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+    gap: 16px;
+    color: variables.$color-gray-600;
+    font-size: variables.$font-size-md;
+}
+
+.employee-kanban-empty {
+    padding: 32px 0;
+    width: 100%;
+}

@@ -1,0 +1,84 @@
+@use '@/styles/variables' as variables;
+
+.contract-form-fields {
+    width: 100%;
+
+    .form-banner-error {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        padding: variables.$spacing-sm variables.$spacing-md;
+        background-color: variables.$color-danger-light;
+        border: 1px solid variables.$color-danger-border;
+        color: variables.$color-danger;
+        border-radius: variables.$radius-medium;
+        font-family: variables.$font-sans;
+        font-size: variables.$font-size-sm;
+        font-weight: 500;
+        margin-bottom: variables.$spacing-lg;
+
+        .banner-icon {
+            flex-shrink: 0;
+        }
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: variables.$spacing-lg;
+
+        @include variables.mobile {
+            grid-template-columns: 1fr;
+            gap: variables.$spacing-md;
+        }
+
+        .form-grid-item {
+            display: flex;
+            flex-direction: column;
+
+            &.col-span-2 {
+                grid-column: span 2;
+
+                @include variables.mobile {
+                    grid-column: span 1;
+                }
+            }
+        }
+    }
+
+    .locked-field-container {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-xs;
+
+        .locked-field-label {
+            font-family: variables.$font-sans;
+            font-size: variables.$font-size-sm;
+            font-weight: 500;
+            color: variables.$color-gray-700;
+        }
+
+        .locked-field-value {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: variables.$spacing-sm variables.$spacing-md;
+            background-color: variables.$color-gray-100;
+            border: 1px solid variables.$color-gray-300;
+            border-radius: variables.$radius-medium;
+            font-family: variables.$font-sans;
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-900;
+            font-weight: 600;
+
+            .locked-tag {
+                font-size: variables.$font-size-xxs;
+                color: variables.$color-gray-500;
+                font-weight: normal;
+                background-color: variables.$color-gray-200;
+                padding: 2px variables.$spacing-xs;
+                border-radius: variables.$radius-tiny;
+            }
+        }
+    }
+}

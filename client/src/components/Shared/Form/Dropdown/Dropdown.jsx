@@ -64,14 +64,24 @@ function DropdownActions({ clearable, selectedOption, disabled, onClear }) {
     return (
         <div className="shared-dropdown-actions">
             {clearable && selectedOption && !disabled && (
-                <button
-                    type="button"
+                <span
+                    role="button"
+                    tabIndex={0}
                     className="shared-dropdown-clear-btn"
-                    onClick={onClear}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onClear(e);
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.stopPropagation();
+                            onClear(e);
+                        }
+                    }}
                     aria-label="Clear selection"
                 >
                     <CloseIcon size={12} />
-                </button>
+                </span>
             )}
             <ChevronDownIcon size={16} className="shared-dropdown-chevron" />
         </div>

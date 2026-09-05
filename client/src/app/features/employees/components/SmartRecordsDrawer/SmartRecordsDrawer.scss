@@ -1,0 +1,329 @@
+@use '@/styles/variables' as variables;
+
+.smart-records-drawer {
+    &__content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .smart-drawer-spinner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 0;
+        gap: 16px;
+        color: var(--color-text-secondary, #64748b);
+    }
+
+    .section-intro {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: variables.$color-gray-50;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: variables.$font-size-sm;
+        color: var(--color-text-secondary, #475569);
+
+        .intro-icon {
+            color: var(--color-primary, #2563eb);
+            flex-shrink: 0;
+        }
+
+        p {
+            margin: 0;
+        }
+    }
+
+    .empty-hint {
+        padding: 30px;
+        text-align: center;
+        color: var(--color-text-muted, #94a3b8);
+        font-style: italic;
+    }
+
+    .records-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    // Contract Card styling
+    .contract-item-card {
+        border: 1px solid var(--color-border-subtle, #e2e8f0);
+        border-radius: 12px;
+        padding: 16px;
+        background-color: var(--color-surface, #fff);
+
+        &.is-active-contract {
+            border-color: variables.$color-blue-accent;
+            background-color: variables.$color-blue-hover;
+        }
+
+        .contract-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+
+            .wage-amount {
+                font-size: variables.$font-size-xl;
+                font-weight: 700;
+                color: var(--color-text-primary, #0f172a);
+            }
+
+            .wage-period {
+                font-size: variables.$font-size-sm;
+                color: var(--color-text-secondary, #64748b);
+                margin-left: 4px;
+            }
+        }
+
+        .contract-details {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            .detail-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: variables.$font-size-sm;
+
+                .detail-label {
+                    color: var(--color-text-muted, #64748b);
+                    width: 75px;
+                }
+
+                .detail-value {
+                    color: var(--color-text-primary, #1e293b);
+                    font-weight: 500;
+                }
+            }
+        }
+    }
+
+    // Attendance Table styling
+    .records-table-wrapper {
+        border: 1px solid var(--color-border-subtle, #e2e8f0);
+        border-radius: 12px;
+        overflow: hidden;
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: variables.$font-size-sm;
+
+            th {
+                background-color: variables.$color-gray-50;
+                padding: 10px 14px;
+                text-align: left;
+                font-weight: 600;
+                color: var(--color-text-secondary, #475569);
+                border-bottom: 1px solid var(--color-border-subtle, #e2e8f0);
+            }
+
+            td {
+                padding: 10px 14px;
+                border-bottom: 1px solid variables.$color-gray-100;
+                color: var(--color-text-primary, #1e293b);
+            }
+
+            tr:last-child td {
+                border-bottom: none;
+            }
+        }
+    }
+
+    // Time off styling
+    .allocations-summary-block {
+        margin-bottom: 20px;
+
+        .block-title {
+            font-size: variables.$font-size-md;
+            font-weight: 600;
+            margin: 0 0 10px;
+            color: var(--color-text-primary, #1e293b);
+        }
+
+        .allocations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+
+            .allocation-pill-card {
+                background-color: variables.$color-gray-100;
+                border-radius: 10px;
+                padding: 10px 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                .allocation-type {
+                    font-size: variables.$font-size-xs;
+                    font-weight: 600;
+                    color: variables.$color-gray-600;
+                }
+
+                .remaining {
+                    font-size: variables.$font-size-xl;
+                    font-weight: 700;
+                    color: var(--color-primary, #2563eb);
+                }
+
+                .total {
+                    font-size: variables.$font-size-xs;
+                    color: variables.$color-gray-500;
+                    margin-left: 4px;
+                }
+            }
+        }
+    }
+
+    .requests-block {
+        .block-title {
+            font-size: variables.$font-size-md;
+            font-weight: 600;
+            margin: 0 0 10px;
+            color: var(--color-text-primary, #1e293b);
+        }
+
+        .request-card {
+            border: 1px solid var(--color-border-subtle, #e2e8f0);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+
+            .request-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 6px;
+
+                .request-type {
+                    font-weight: 600;
+                    font-size: variables.$font-size-sm;
+                    color: var(--color-text-primary, #1e293b);
+                }
+            }
+
+            .request-period {
+                font-size: variables.$font-size-sm;
+                color: var(--color-text-secondary, #475569);
+            }
+
+            .request-reason {
+                margin: 6px 0 0;
+                font-size: variables.$font-size-xs;
+                color: var(--color-text-muted, #64748b);
+            }
+        }
+    }
+
+    // Bank account styling
+    .bank-actions-top {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .add-bank-inline-form {
+        border: 1px solid variables.$color-blue-accent;
+        background-color: variables.$color-blue-hover;
+        border-radius: 12px;
+        padding: 16px;
+
+        .form-title {
+            margin: 0 0 14px;
+            font-size: variables.$font-size-md;
+            font-weight: 600;
+            color: variables.$color-blue-dark;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 14px;
+        }
+    }
+
+    .bank-warning-box {
+        background-color: variables.$color-warning-light;
+        border: 1px solid variables.$color-warning-border;
+        border-radius: 10px;
+        padding: 16px;
+        color: variables.$color-warning-dark;
+        font-size: variables.$font-size-sm;
+
+        p {
+            margin: 4px 0 0;
+        }
+    }
+
+    .bank-cards-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .bank-card {
+            border: 1px solid var(--color-border-subtle, #e2e8f0);
+            border-radius: 12px;
+            padding: 16px;
+
+            &.is-primary {
+                border-color: variables.$color-success-border;
+                background-color: variables.$color-success-light;
+            }
+
+            .bank-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 10px;
+
+                .bank-title {
+                    font-size: variables.$font-size-md;
+                    color: var(--color-text-primary, #0f172a);
+                }
+
+                .account-type {
+                    font-size: variables.$font-size-sm;
+                    color: var(--color-text-secondary, #64748b);
+                    margin-left: 6px;
+                }
+            }
+
+            .bank-card-body {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                font-size: variables.$font-size-sm;
+
+                .card-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+
+                    .label {
+                        color: var(--color-text-muted, #64748b);
+                        font-size: variables.$font-size-xs;
+                    }
+
+                    .value {
+                        color: var(--color-text-primary, #1e293b);
+                        font-weight: 500;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,167 @@
+@use '@/styles/variables' as variables;
+
+.payrun-mobile-card {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-medium;
+    padding: variables.$spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-sm;
+    cursor: pointer;
+    min-height: 48px;
+    box-sizing: border-box;
+    box-shadow: variables.$shadow-sm;
+
+    @include variables.transition-ease;
+
+    &:hover {
+        border-color: variables.$color-primary;
+        box-shadow: variables.$shadow-md;
+
+        .nav-arrow-icon {
+            color: variables.$color-primary;
+            transform: translate(2px, -2px);
+        }
+    }
+
+    &:active {
+        background-color: variables.$color-gray-50;
+        border-color: variables.$color-primary;
+        transform: scale(0.99);
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: variables.$spacing-sm;
+    }
+
+    &__title {
+        font-size: variables.$font-size-md;
+        font-weight: 700;
+        color: variables.$color-gray-900;
+        line-height: 1.35;
+        margin: 0;
+        overflow-wrap: break-word;
+        flex: 1;
+    }
+
+    &__badge-wrapper {
+        flex-shrink: 0;
+    }
+
+    &__meta-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-500;
+        border-top: 1px dashed variables.$color-gray-200;
+        padding-top: variables.$spacing-xs;
+        gap: variables.$spacing-xs;
+
+        .period-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: variables.$color-gray-600;
+
+            .calendar-icon {
+                color: variables.$color-gray-400;
+                flex-shrink: 0;
+            }
+        }
+
+        .structure-chip {
+            background-color: variables.$color-gray-100;
+            padding: 2px 8px;
+            border-radius: variables.$radius-tiny;
+            color: variables.$color-gray-700;
+            font-size: variables.$font-size-xs;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+    }
+
+    &__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid variables.$color-gray-100;
+        padding-top: variables.$spacing-xs;
+        gap: variables.$spacing-xs;
+    }
+
+    &__info-group {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        flex-wrap: wrap;
+
+        .headcount-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-700;
+            font-weight: 600;
+            background-color: variables.$color-gray-100;
+            padding: 2px 8px;
+            border-radius: variables.$radius-tiny;
+
+            .users-icon {
+                color: variables.$color-gray-500;
+            }
+        }
+
+        .warning-icon {
+            margin-right: 4px;
+        }
+
+        .no-warning-label {
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-400;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+
+        .delete-action-btn {
+            background: none;
+            border: none;
+            padding: variables.$spacing-xs;
+            color: variables.$color-gray-400;
+            border-radius: variables.$radius-small;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            min-height: 32px;
+
+            @include variables.transition-ease;
+
+            &:hover {
+                color: variables.$color-danger;
+                background-color: variables.$color-danger-light;
+            }
+        }
+
+        .nav-arrow-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: variables.$color-gray-400;
+
+            @include variables.transition-ease;
+        }
+    }
+}

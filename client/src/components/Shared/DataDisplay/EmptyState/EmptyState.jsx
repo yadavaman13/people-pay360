@@ -30,7 +30,9 @@ function EmptyState({
     icon: IconComponent = null,
     action = null,
     actionLabel = null,
+    actionText = null,
     onActionClick = null,
+    onAction = null,
     actionIcon: ActionIcon = Plus,
     variant = 'inline',
     size = 'md',
@@ -40,6 +42,8 @@ function EmptyState({
     children = null,
 }) {
     const displayDescription = description || subtitle;
+    const effectiveActionLabel = actionLabel || actionText;
+    const effectiveOnActionClick = onActionClick || onAction;
 
     const renderAction = () => {
         if (action) {
@@ -67,13 +71,17 @@ function EmptyState({
             }
         }
 
-        if (actionLabel && onActionClick) {
+        if (effectiveActionLabel && effectiveOnActionClick) {
             return (
-                <Button variant="primary" onClick={onActionClick} className="empty-action-btn">
+                <Button
+                    variant="primary"
+                    onClick={effectiveOnActionClick}
+                    className="empty-action-btn"
+                >
                     {ActionIcon && (
                         <ActionIcon size={20} strokeWidth={2.2} style={{ marginRight: '6px' }} />
                     )}
-                    {actionLabel}
+                    {effectiveActionLabel}
                 </Button>
             );
         }

@@ -130,7 +130,7 @@ function SidebarNav({
 
                 return (
                     <div
-                        key={item.label}
+                        key={`${item.label}-${item.path || ''}`}
                         className={`sidebar-nav-item-wrapper ${item.subTabs ? 'has-subtabs' : ''} ${isActive ? 'is-active-tab' : ''} ${isPinned ? 'is-pinned-tab' : ''}`}
                     >
                         <Tooltip
