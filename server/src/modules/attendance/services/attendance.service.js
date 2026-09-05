@@ -396,7 +396,13 @@ export async function deleteAttendance(attendanceId) {
 export async function listAttendance(filters, user) {
     const queryFilters = { ...filters };
 
-    if (user.role === 'EMPLOYEE') {
+    // Explicit self-scoping (for HR roles in "My Attendance" mode or EMPLOYEE role)
+    const isSelfMode =
+        queryFilters.scope === 'self' ||
+        queryFilters.employeeId === 'me' ||
+        user.role === 'EMPLOYEE';
+
+    if (isSelfMode) {
         const employee = await employeeDao.findEmployeeByUserId(user.id);
         if (!employee) {
             return {
@@ -409,6 +415,14 @@ export async function listAttendance(filters, user) {
         }
         queryFilters.employeeId = employee.id;
     }
+
+    if (queryFilters.excludeHr === true || queryFilters.excludeHr === 'true') {
+        queryFilters.excludeHr = true;
+    } else {
+        queryFilters.excludeHr = false;
+    }
+
+    delete queryFilters.scope;
 
     return attendanceDao.findAttendanceList(queryFilters);
 }
@@ -441,7 +455,14 @@ export async function getAttendanceForPeriod(employeeId, periodStart, periodEnd)
 
 /**
  * Export for Dev 4: Summary stats
+ * Returns { stats: [{status, count, totalWorkedHours}], missingCheckoutCount: number }
  */
-export async function getAttendanceSummary(filters) {
-    return attendanceDao.getSummaryStats(filters);
+export async function getAttendanceSummary(filters = {}) {
+    const queryFilters = { ...filters };
+    if (queryFilters.excludeHr === true || queryFilters.excludeHr === 'true') {
+        queryFilters.excludeHr = true;
+    } else {
+        queryFilters.excludeHr = false;
+    }
+    return attendanceDao.getSummaryStats(queryFilters);
 }

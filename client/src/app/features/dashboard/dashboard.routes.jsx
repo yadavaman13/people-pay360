@@ -1,7 +1,7 @@
 import PayrollDashboardPage from './pages/PayrollDashboardPage';
 
 export default {
-    userRoutes: [
+    employeeRoutes: [
         {
             path: 'home',
             element: <PayrollDashboardPage />,

@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useMemo, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router';
+import { useParams, useNavigate, useLocation, Link } from 'react-router';
 import { EmployeesContext } from '../../context/employees.context';
 import { useEmployees } from '../../hooks';
 import SmartButtonsBar from '../../components/SmartButtonsBar/SmartButtonsBar';
@@ -15,6 +15,12 @@ import './EmployeeFormPage.scss';
 function EmployeeFormPage({ isNew = false }) {
     const { id: paramId } = useParams();
     const navigate = useNavigate();
+    const { pathname } = useLocation();
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
     const isCreateMode = isNew || paramId === 'new';
 
     // 1. Read Path: Read state directly from EmployeesContext
@@ -173,7 +179,7 @@ function EmployeeFormPage({ isNew = false }) {
                             console.error('Failed to upload avatar for new employee:', err);
                         }
                     }
-                    navigate(`/dashboard/user/employees/${created.id}`);
+                    navigate(`/dashboard/${roleSegment}/employees/${created.id}`);
                     setIsEditing(false);
                 }
             } else {
@@ -187,7 +193,7 @@ function EmployeeFormPage({ isNew = false }) {
 
     const handleDiscard = () => {
         if (isCreateMode) {
-            navigate('/dashboard/user/employees');
+            navigate(`/dashboard/${roleSegment}/employees`);
         } else {
             setIsEditing(false);
             // Reset form from currentEmployee
@@ -208,7 +214,7 @@ function EmployeeFormPage({ isNew = false }) {
         setShowArchiveConfirm(false);
         try {
             await handleArchiveEmployee(paramId);
-            navigate('/dashboard/user/employees');
+            navigate(`/dashboard/${roleSegment}/employees`);
         } catch (err) {
             console.error('Archive employee error:', err);
         }
@@ -295,7 +301,7 @@ function EmployeeFormPage({ isNew = false }) {
 
             {/* Breadcrumb matching Image 3 wireframe */}
             <div className="employee-form-page__breadcrumb">
-                <Link to="/dashboard/user/employees" className="breadcrumb-root">
+                <Link to={`/dashboard/${roleSegment}/employees`} className="breadcrumb-root">
                     Employees
                 </Link>
                 <span className="breadcrumb-separator">/</span>

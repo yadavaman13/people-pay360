@@ -81,6 +81,18 @@
     &__emp-name {
         font-weight: 600;
         color: variables.$color-gray-900;
+
+        .payrun-payslips-table__emp-link {
+            color: variables.$color-gray-900;
+            text-decoration: none;
+
+            @include variables.transition-ease;
+
+            &:hover {
+                color: variables.$color-primary;
+                text-decoration: underline;
+            }
+        }
     }
 
     &__emp-meta {

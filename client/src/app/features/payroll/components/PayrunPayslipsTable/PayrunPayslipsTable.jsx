@@ -1,3 +1,4 @@
+import { Link, useLocation } from 'react-router';
 import { FileDown, AlertTriangle } from 'lucide-react';
 import Badge from '@/components/Shared/DataDisplay/Badge/Badge';
 import Button from '@/components/Shared/Buttons/Button/Button';
@@ -42,6 +43,9 @@ function PayrunPayslipsTable({
     onDownloadPdf,
     downloadingId = null,
 }) {
+    const { pathname } = useLocation();
+    const roleSegment = pathname.includes('/admin/') ? 'admin' : 'user';
+
     if (!payslips || payslips.length === 0) {
         return (
             <div className="payrun-payslips-table__empty">
@@ -97,7 +101,12 @@ function PayrunPayslipsTable({
                                 <tr key={slip.id} className="payrun-payslips-table__row">
                                     <td className="payrun-payslips-table__td-employee">
                                         <div className="payrun-payslips-table__emp-name">
-                                            {fullName}
+                                            <Link
+                                                to={`/dashboard/${roleSegment}/payroll/payslips/${slip.id}`}
+                                                className="payrun-payslips-table__emp-link"
+                                            >
+                                                {fullName}
+                                            </Link>
                                         </div>
                                         <div className="payrun-payslips-table__emp-meta">
                                             {slip.employeeCode}

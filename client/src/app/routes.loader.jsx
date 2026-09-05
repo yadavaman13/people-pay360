@@ -6,7 +6,8 @@ import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
  * Automatically scans all `*.routes.jsx` files in `src/app/features/`
  * using Vite's `import.meta.glob` and aggregates them by target layout:
  *
- * - `userRoutes`: Injected into `/dashboard/user/`
+ * - `employeeRoutes`: Injected into `/dashboard/employee/`
+ * - `hrRoutes`: Injected into `/dashboard/hr/`
  * - `adminRoutes`: Injected into `/dashboard/admin/`
  * - `publicRoutes`: Injected at root level `/`
  * - `featureNavItems`: Aggregated sidebar navigation item metadata
@@ -14,9 +15,9 @@ import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
  * Supported feature export formats:
  * 1. Unified Multi-Role RBAC Format (Recommended):
  *    export default {
- *        allowedRoles: ['admin', 'manager', 'sales_rep'],
- *        navItem: { label: 'Leads', path: '/dashboard/user/leads', icon: 'Users', roles: [...] },
- *        routes: [ { path: 'leads', element: <LeadsPage /> } ]
+ *        allowedRoles: ['ADMIN', 'HR', 'EMPLOYEE'],
+ *        navItem: { label: 'Employees', path: '/dashboard/employee/employees', icon: 'UserCheck', roles: [...] },
+ *        routes: [ { path: 'employees', element: <EmployeesPage /> } ]
  *    }
  *
  * 2. Explicit named route arrays:
@@ -41,23 +42,35 @@ function formatSegmentToTitle(segment) {
 
 function cleanPathSegment(path) {
     if (!path) return '';
-    return path.replace(/^\/?dashboard\/(?:(?:user|admin)\/)?/, '').replace(/^\/+|\/+$/g, '');
+    return path
+        .replace(/^\/?dashboard\/(?:(?:employee|user|admin|hr)\/)?/, '')
+        .replace(/^\/+|\/+$/g, '');
+}
+
+function extractRoleAndPath(path) {
+    if (!path) return { role: null, cleaned: '' };
+    const match = path.match(/^\/?dashboard\/(employee|user|admin|hr)\/(.*)$/);
+    if (match) {
+        return {
+            role: match[1],
+            cleaned: match[2].replace(/^\/+|\/+$/g, ''),
+        };
+    }
+    return {
+        role: null,
+        cleaned: path.replace(/^\/?dashboard\//, '').replace(/^\/+|\/+$/g, ''),
+    };
 }
 
 // Registry mapping path keys to navigation metadata
 const featureNavRegistry = new Map();
 
 function registerNavEntry(path, label, subTabs = [], isExplicit = false) {
-    const cleaned = cleanPathSegment(path);
+    const { role, cleaned } = extractRoleAndPath(path);
     if (!cleaned) return;
 
     const segments = cleaned.split('/').filter(Boolean);
     const primary = segments[0];
-
-    const existingCleaned = featureNavRegistry.get(cleaned);
-    if (existingCleaned?.isExplicit && !isExplicit) {
-        return;
-    }
 
     const entry = {
         label: label || segments.map(formatSegmentToTitle).join(' '),
@@ -67,8 +80,35 @@ function registerNavEntry(path, label, subTabs = [], isExplicit = false) {
         isExplicit,
     };
 
-    featureNavRegistry.set(cleaned, entry);
-    if (primary && (!featureNavRegistry.has(primary) || isExplicit)) {
+    // 1. If role-scoped path, register under role key
+    if (role) {
+        featureNavRegistry.set(`${role}/${cleaned}`, entry);
+        if (primary) {
+            featureNavRegistry.set(`${role}/${primary}`, entry);
+        }
+        if (isExplicit && subTabs && subTabs.length > 0) {
+            subTabs.forEach((sub) => {
+                const subLabel =
+                    typeof sub === 'string' ? sub : sub.label || formatSegmentToTitle(sub);
+                const subKey = subLabel.toLowerCase().replace(/\s+/g, '-');
+                featureNavRegistry.set(`${role}/${primary}/${subKey}`, entry);
+            });
+        }
+    }
+
+    // 2. Generic registration (fallback)
+    const existingCleaned = featureNavRegistry.get(cleaned);
+    if (!existingCleaned?.isExplicit || isExplicit) {
+        featureNavRegistry.set(cleaned, entry);
+    }
+
+    const existingPrimary = featureNavRegistry.get(primary);
+    // Don't overwrite an entry that has subtabs with one that doesn't unless explicit
+    if (
+        !existingPrimary ||
+        (!existingPrimary.subTabs?.length && entry.subTabs?.length) ||
+        isExplicit
+    ) {
         featureNavRegistry.set(primary, entry);
     }
 
@@ -112,7 +152,9 @@ function initFeatureNavRegistry() {
                 });
             };
 
+            scanRoutes(cfg.employeeRoutes);
             scanRoutes(cfg.userRoutes);
+            scanRoutes(cfg.hrRoutes);
             scanRoutes(cfg.adminRoutes);
             scanRoutes(cfg.routes);
         });
@@ -128,29 +170,39 @@ initFeatureNavRegistry();
 export function resolveNavState(pathname) {
     if (!pathname) return DEFAULT_TAB;
 
-    const match = pathname.match(/\/dashboard\/(?:(?:user|admin)\/)?([^/]+)(?:\/([^/]+))?/);
+    const match = pathname.match(
+        /\/dashboard\/(?:(employee|user|admin|hr)\/)?([^/]+)(?:\/([^/]+))?/,
+    );
     if (!match) return DEFAULT_TAB;
 
-    const [, primary, secondary] = match;
+    const [, role, primary, secondary] = match;
+    const roleSubPath =
+        role && secondary ? `${role}/${primary}/${secondary}` : role ? `${role}/${primary}` : null;
     const fullSubPath = secondary ? `${primary}/${secondary}` : primary;
 
+    // Prioritize role-scoped explicit entries first, then generic fallback
+    const roleSubEntry = roleSubPath ? featureNavRegistry.get(roleSubPath) : null;
+    const rolePrimaryEntry = role ? featureNavRegistry.get(`${role}/${primary}`) : null;
     const fullEntry = featureNavRegistry.get(fullSubPath);
     const primaryEntry = featureNavRegistry.get(primary);
 
-    // Prioritize explicit navigation entries: if primary module explicitly declares subTabs,
-    // it handles all sub-routes unless the sub-route itself has an explicit nav item.
-    const entry = fullEntry?.isExplicit
-        ? fullEntry
-        : primaryEntry?.isExplicit && primaryEntry?.subTabs?.length > 0
-          ? primaryEntry
-          : fullEntry || primaryEntry;
+    const entry =
+        (roleSubEntry?.isExplicit && roleSubEntry) ||
+        (rolePrimaryEntry?.isExplicit && rolePrimaryEntry) ||
+        (fullEntry?.isExplicit && fullEntry) ||
+        (primaryEntry?.isExplicit && primaryEntry) ||
+        roleSubEntry ||
+        rolePrimaryEntry ||
+        fullEntry ||
+        primaryEntry;
 
     if (entry) {
         let activeSubTab = '';
         if (entry.subTabs && entry.subTabs.length > 0) {
             if (secondary) {
+                const normalizedSecondary = secondary.toLowerCase().replace(/[-_\s]+/g, '');
                 const found = entry.subTabs.find(
-                    (s) => s.toLowerCase() === secondary.toLowerCase(),
+                    (s) => s.toLowerCase().replace(/[-_\s]+/g, '') === normalizedSecondary,
                 );
                 activeSubTab = found || formatSegmentToTitle(secondary);
             } else {
@@ -170,7 +222,8 @@ export function resolveNavState(pathname) {
 }
 
 export function loadFeatureRoutes() {
-    const userRoutes = [];
+    const employeeRoutes = [];
+    const hrRoutes = [];
     const adminRoutes = [];
     const publicRoutes = [];
     const featureNavItems = [];
@@ -186,10 +239,22 @@ export function loadFeatureRoutes() {
             });
         }
 
-        // Format 1: Explicit target arrays (userRoutes, adminRoutes, publicRoutes)
+        // Format 1: Explicit target arrays (employeeRoutes, userRoutes, hrRoutes, adminRoutes, publicRoutes)
+        if (config.employeeRoutes) {
+            employeeRoutes.push(
+                ...(Array.isArray(config.employeeRoutes)
+                    ? config.employeeRoutes
+                    : [config.employeeRoutes]),
+            );
+        }
         if (config.userRoutes) {
-            userRoutes.push(
+            employeeRoutes.push(
                 ...(Array.isArray(config.userRoutes) ? config.userRoutes : [config.userRoutes]),
+            );
+        }
+        if (config.hrRoutes) {
+            hrRoutes.push(
+                ...(Array.isArray(config.hrRoutes) ? config.hrRoutes : [config.hrRoutes]),
             );
         }
         if (config.adminRoutes) {
@@ -217,7 +282,8 @@ export function loadFeatureRoutes() {
                 ),
             }));
 
-            userRoutes.push(...protectedRoutes);
+            employeeRoutes.push(...protectedRoutes);
+            hrRoutes.push(...protectedRoutes);
             adminRoutes.push(...protectedRoutes);
         }
 
@@ -225,12 +291,15 @@ export function loadFeatureRoutes() {
         if (config.target && config.routes) {
             const routesList = Array.isArray(config.routes) ? config.routes : [config.routes];
 
-            if (config.target === 'user') {
-                userRoutes.push(...routesList);
+            if (config.target === 'employee' || config.target === 'user') {
+                employeeRoutes.push(...routesList);
+            } else if (config.target === 'hr') {
+                hrRoutes.push(...routesList);
             } else if (config.target === 'admin') {
                 adminRoutes.push(...routesList);
             } else if (config.target === 'both' || config.target === 'all') {
-                userRoutes.push(...routesList);
+                employeeRoutes.push(...routesList);
+                hrRoutes.push(...routesList);
                 adminRoutes.push(...routesList);
             } else if (config.target === 'public') {
                 publicRoutes.push(...routesList);
@@ -249,7 +318,9 @@ export function loadFeatureRoutes() {
     });
 
     return {
-        userRoutes,
+        employeeRoutes,
+        userRoutes: employeeRoutes,
+        hrRoutes,
         adminRoutes,
         publicRoutes,
         featureNavItems,

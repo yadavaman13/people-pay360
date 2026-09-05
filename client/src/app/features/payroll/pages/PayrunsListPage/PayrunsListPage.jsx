@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router';
-import { Banknote, Plus, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePayrunsList } from '../../hooks/usePayrunsList';
 import PayrunsTable from '../../components/PayrunsTable/PayrunsTable';
 import PayrunMobileCard from '../../components/PayrunMobileCard/PayrunMobileCard';
@@ -18,8 +18,12 @@ function PayrunsListPage() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
-    // Determine current role context for routing ('user' or 'admin')
-    const roleSegment = pathname.includes('/admin/') ? 'admin' : 'user';
+    // Determine current role context for routing ('admin', 'hr', or 'employee')
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
 
     const {
         payruns,
@@ -73,7 +77,6 @@ function PayrunsListPage() {
             <header className="payruns-list-header">
                 <div className="header-info">
                     <div className="title-row">
-                        <Banknote className="header-icon" size={24} />
                         <h1 className="header-title">Payruns</h1>
                     </div>
                     <p className="header-subtitle">Payrun view for payroll periods</p>

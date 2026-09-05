@@ -6,7 +6,7 @@ import AdvancedTable from '@/components/Shared/DataDisplay/AdvancedTable/Advance
 import Button from '@/components/Shared/Buttons/Button/Button';
 import Badge from '@/components/Shared/DataDisplay/Badge/Badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/Shared/Feedback/Alert/Alert';
-import { UserPlus, Users, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { UserPlus, CheckCircle2, AlertTriangle } from 'lucide-react';
 import './UserManagement.scss';
 
 const ROLE_DISPLAY_MAP = {
@@ -160,7 +160,6 @@ function UserManagement() {
             <header className="user-management-header">
                 <div className="header-info">
                     <div className="title-row">
-                        <Users className="header-icon" size={24} />
                         <h1 className="header-title">User Accounts</h1>
                     </div>
                     <p className="header-subtitle">

@@ -6,7 +6,11 @@ import './GeneralSettings.scss';
 export default function GeneralSettings() {
     const { theme, setTheme, resolvedTheme } = useTheme();
     const { pathname } = useLocation();
-    const roleSegment = pathname.includes('/admin/') ? 'admin' : 'user';
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
 
     return (
         <div className="general-settings-container">

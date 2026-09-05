@@ -72,3 +72,21 @@ export async function downloadPayslipPdf(id, employeeCode = 'EMP', period = '') 
     const filename = `Payslip_${employeeCode}_${cleanPeriod}.pdf`;
     return await downloadPdfFromApi(`/api/payslips/${id}/pdf`, filename);
 }
+
+/**
+ * Recompute a single employee payslip
+ * @param {string} id - Payslip UUID
+ */
+export async function recomputeSinglePayslip(id) {
+    const response = await payslipApiInstance.post(`/${id}/compute`);
+    return response.data;
+}
+
+/**
+ * Returns direct URL for streaming or previewing payslip PDF
+ * @param {string} id - Payslip UUID
+ * @param {boolean} [inline=true] - true opens in browser, false downloads
+ */
+export function getPayslipPdfUrl(id, inline = true) {
+    return `/api/payslips/${id}/pdf?inline=${inline}`;
+}

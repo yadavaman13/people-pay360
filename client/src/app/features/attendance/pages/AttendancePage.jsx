@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from '@/app/features/auth/hooks/useAuth';
 import { useAttendance } from '../hooks/useAttendance';
 import AttendanceHeader from '../components/AttendanceHeader';
@@ -12,10 +12,11 @@ import Badge from '@/components/Shared/DataDisplay/Badge/Badge';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import Tooltip from '@/components/Shared/DataDisplay/Tooltip/Tooltip';
 import { Card, CardContent } from '@/components/Shared/DataDisplay/Card/Card';
-import { Eye, Edit3, LogOut, Clock, Calendar } from 'lucide-react';
+import { Eye, Edit3, LogOut, Clock, Calendar, ShieldCheck } from 'lucide-react';
 import '../Attendance.scss';
 
-const HR_ROLES = ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'];
+// ADMIN is view-only — they cannot punch their own attendance
+const PUNCH_BLOCKED_ROLES = ['ADMIN'];
 
 /**
  * Format time to 12-hour AM/PM string
@@ -67,13 +68,92 @@ function getStatusVariant(status) {
     }
 }
 
-export default function AttendancePage() {
+/**
+ * Admin notice shown in place of the punch widget for ADMIN role.
+ */
+function AdminAttendanceNotice() {
+    return (
+        <Card
+            className="admin-attendance-notice"
+            style={{
+                background:
+                    'linear-gradient(135deg, var(--color-bg-subtle, #f8fafc) 0%, var(--color-bg-card, #fff) 100%)',
+                border: '1px solid var(--color-border-subtle, #e5e7eb)',
+                borderRadius: '12px',
+                marginBottom: '16px',
+            }}
+        >
+            <CardContent
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    padding: '18px 24px',
+                }}
+            >
+                <ShieldCheck
+                    size={28}
+                    style={{ color: 'var(--color-primary, #3b82f6)', flexShrink: 0 }}
+                />
+                <div>
+                    <div
+                        style={{
+                            fontWeight: 700,
+                            fontSize: '14px',
+                            color: 'var(--color-text-primary, #111827)',
+                            marginBottom: '2px',
+                        }}
+                    >
+                        Administrator View
+                    </div>
+                    <div
+                        style={{
+                            fontSize: '13px',
+                            color: 'var(--color-text-secondary, #6b7280)',
+                        }}
+                    >
+                        Attendance check-in/out is managed by employees directly. Use the controls
+                        below to monitor, correct, or manage employee attendance records.
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+export default function AttendancePage({ mode: initialMode }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const { user } = useAuth();
-    const isHR = useMemo(() => {
-        const userRole = (user?.role || '').toUpperCase();
-        return HR_ROLES.includes(userRole);
-    }, [user?.role]);
+
+    const userRole = (user?.role || '').toUpperCase();
+    const isAdmin = useMemo(() => PUNCH_BLOCKED_ROLES.includes(userRole), [userRole]);
+    const isHRRole = useMemo(
+        () => ['HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'].includes(userRole),
+        [userRole],
+    );
+    const canManageEmployees = isHRRole || isAdmin;
+    const canPunch = !isAdmin;
+
+    const roleSegment = useMemo(() => {
+        if (isAdmin) return 'admin';
+        if (isHRRole) return 'hr';
+        return 'employee';
+    }, [isAdmin, isHRRole]);
+
+    // Determine effective mode:
+    // Non-HR/non-admin employees can only view self mode.
+    // For HR/Admin: check URL pathname first (employees-attendance vs my-attendance), then initialMode, then role default.
+    const effectiveMode = useMemo(() => {
+        if (!canManageEmployees) return 'self';
+        if (location.pathname.includes('/employees-attendance')) return 'employees';
+        if (location.pathname.includes('/my-attendance')) return 'self';
+        if (initialMode) return initialMode;
+        return isAdmin ? 'employees' : 'self';
+    }, [canManageEmployees, location.pathname, initialMode, isAdmin]);
+
+    const isSelfView = effectiveMode === 'self';
+    const isEmployeesView = effectiveMode === 'employees';
 
     const {
         attendanceRecords,
@@ -82,6 +162,7 @@ export default function AttendancePage() {
         employeesList,
         selectedMonth,
         employeeMonthlySummary,
+        pagination,
         loading,
         actionLoading,
         loadAttendanceList,
@@ -99,40 +180,128 @@ export default function AttendancePage() {
     const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState(null);
 
-    // Initial data fetch
+    // Track current month range for self-view so refresh uses same window
+    const employeeDateRangeRef = useRef(null);
+    const employeesListRef = useRef(employeesList);
     useEffect(() => {
-        loadTodayStatus();
+        employeesListRef.current = employeesList;
+    }, [employeesList]);
 
-        if (isHR) {
-            loadSummaryMetrics();
-            loadEmployeesList();
-            loadAttendanceList();
-        } else {
+    // Initial and route-change data fetching
+    useEffect(() => {
+        if (isSelfView) {
+            if (canPunch) {
+                loadTodayStatus();
+            }
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth();
             const firstDay = new Date(year, month, 1).toISOString().split('T')[0];
             const lastDay = new Date(year, month + 1, 0).toISOString().split('T')[0];
-            loadAttendanceList({ dateFrom: firstDay, dateTo: lastDay });
+            employeeDateRangeRef.current = { dateFrom: firstDay, dateTo: lastDay };
+            loadAttendanceList({
+                scope: 'self',
+                excludeHr: false,
+                dateFrom: firstDay,
+                dateTo: lastDay,
+                page: 1,
+            });
+        } else if (isEmployeesView) {
+            loadSummaryMetrics({ excludeHr: true });
+            loadEmployeesList();
+            loadAttendanceList({ excludeHr: true, scope: undefined, page: 1 });
         }
-    }, [isHR, loadTodayStatus, loadSummaryMetrics, loadEmployeesList, loadAttendanceList]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [effectiveMode]);
 
-    // Refresh all data
+    // AdvancedTable → server-side re-fetch handler
+    const initializedRef = useRef(false);
+    const handleTableChange = useCallback(
+        ({ activeTab, page, rowsPerPage, columnFilters, searchTerm }) => {
+            if (!initializedRef.current) {
+                initializedRef.current = true;
+                return;
+            }
+
+            const params = {
+                page: page || 1,
+                limit: rowsPerPage || 10,
+                search: typeof searchTerm === 'string' ? searchTerm.trim() : '',
+            };
+
+            if (isSelfView) {
+                params.scope = 'self';
+                params.excludeHr = false;
+                if (columnFilters?.attendanceDate) {
+                    params.dateFrom = columnFilters.attendanceDate;
+                    params.dateTo = columnFilters.attendanceDate;
+                } else if (employeeDateRangeRef.current) {
+                    params.dateFrom = employeeDateRangeRef.current.dateFrom;
+                    params.dateTo = employeeDateRangeRef.current.dateTo;
+                }
+            } else {
+                params.excludeHr = true;
+                params.scope = undefined;
+                if (columnFilters?.attendanceDate) {
+                    params.dateFrom = columnFilters.attendanceDate;
+                    params.dateTo = columnFilters.attendanceDate;
+                }
+                const currentEmployees = employeesListRef.current;
+                if (
+                    columnFilters?.employeeName &&
+                    Array.isArray(currentEmployees) &&
+                    currentEmployees.length > 0
+                ) {
+                    const nameFilter = Array.isArray(columnFilters.employeeName)
+                        ? columnFilters.employeeName[0]
+                        : columnFilters.employeeName;
+                    const match = currentEmployees.find(
+                        (e) => `${e.firstName || ''} ${e.lastName || ''}`.trim() === nameFilter,
+                    );
+                    if (match) params.employeeId = match.id;
+                }
+            }
+
+            // Map tab id → status API param
+            if (activeTab && activeTab !== 'all') {
+                params.status = activeTab;
+            } else {
+                params.status = 'ALL';
+            }
+
+            loadAttendanceList(params);
+        },
+        [isSelfView, loadAttendanceList],
+    );
+
+    // Refresh data handler
     const handleRefresh = useCallback(async () => {
-        await Promise.all([
-            loadTodayStatus(),
-            loadAttendanceList(),
-            isHR ? loadSummaryMetrics() : Promise.resolve(),
-        ]);
-    }, [isHR, loadTodayStatus, loadAttendanceList, loadSummaryMetrics]);
+        if (isSelfView) {
+            const refreshParams = {
+                page: 1,
+                scope: 'self',
+                ...(employeeDateRangeRef.current || {}),
+            };
+            await Promise.all([
+                canPunch ? loadTodayStatus() : Promise.resolve(),
+                loadAttendanceList(refreshParams),
+            ]);
+        } else {
+            await Promise.all([
+                loadAttendanceList({ page: 1, excludeHr: true }),
+                loadSummaryMetrics({ excludeHr: true }),
+            ]);
+        }
+    }, [isSelfView, canPunch, loadTodayStatus, loadAttendanceList, loadSummaryMetrics]);
 
     // Row Actions
     const handleViewRecord = useCallback(
         (record) => {
             const id = record.rawRecord?.id || record.id;
-            navigate(`/dashboard/user/attendance/${id}`);
+            const subSegment = isEmployeesView ? 'employees-attendance' : 'my-attendance';
+            navigate(`/dashboard/${roleSegment}/attendance/${subSegment}/${id}`);
         },
-        [navigate],
+        [navigate, roleSegment, isEmployeesView],
     );
 
     const handleOpenEdit = useCallback((record) => {
@@ -152,7 +321,7 @@ export default function AttendancePage() {
     const handleForceCheckOutAction = useCallback(
         async (record) => {
             const target = record.rawRecord || record;
-            if (window.confirm(`Are you sure you want to force check out this session?`)) {
+            if (window.confirm('Are you sure you want to force check out this session?')) {
                 await handleForceCheckOut(target.id);
             }
         },
@@ -179,13 +348,35 @@ export default function AttendancePage() {
     // Status filter tabs for AdvancedTable
     const tabs = useMemo(
         () => [
-            { id: 'all', label: 'All Records' },
-            { id: 'PRESENT', label: 'Present' },
-            { id: 'LATE', label: 'Late' },
-            { id: 'ABSENT', label: 'Absent' },
-            { id: 'HALF_DAY', label: 'Half Day' },
+            {
+                id: 'all',
+                label: 'All Records',
+                count: isEmployeesView
+                    ? (summaryMetrics?.totalRecords ?? pagination?.total)
+                    : pagination?.total,
+            },
+            {
+                id: 'PRESENT',
+                label: 'Present',
+                count: isEmployeesView ? summaryMetrics?.presentCount : undefined,
+            },
+            {
+                id: 'LATE',
+                label: 'Late',
+                count: isEmployeesView ? summaryMetrics?.lateCount : undefined,
+            },
+            {
+                id: 'ABSENT',
+                label: 'Absent',
+                count: isEmployeesView ? summaryMetrics?.absentCount : undefined,
+            },
+            {
+                id: 'HALF_DAY',
+                label: 'Half Day',
+                count: isEmployeesView ? summaryMetrics?.halfDayCount : undefined,
+            },
         ],
-        [],
+        [isEmployeesView, summaryMetrics, pagination?.total],
     );
 
     // Filter configuration for AdvancedTable filter panel
@@ -204,7 +395,7 @@ export default function AttendancePage() {
             },
         ];
 
-        if (isHR && employeesList && employeesList.length > 0) {
+        if (isEmployeesView && employeesList && employeesList.length > 0) {
             const safeEmps = Array.isArray(employeesList)
                 ? employeesList
                 : Array.isArray(employeesList.employees)
@@ -228,17 +419,18 @@ export default function AttendancePage() {
         }
 
         return configs;
-    }, [isHR, employeesList]);
+    }, [isEmployeesView, employeesList]);
 
     // Columns specification for AdvancedTable
     const columns = useMemo(() => {
         const cols = [];
 
-        // 1. Employee Profile Column (HR view)
-        if (isHR) {
+        // 1. Employee Profile Column (shown only in Employees Attendance management view)
+        if (isEmployeesView) {
             cols.push({
                 key: 'employeeName',
                 label: 'Employee',
+                searchable: true,
                 sortable: true,
                 render: (_val, row) => {
                     return (
@@ -430,7 +622,7 @@ export default function AttendancePage() {
                             <Eye size={15} />
                         </Button>
 
-                        {isHR && (
+                        {isEmployeesView && canManageEmployees && (
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -442,7 +634,7 @@ export default function AttendancePage() {
                             </Button>
                         )}
 
-                        {isHR && hasOpenPunch && (
+                        {isEmployeesView && canManageEmployees && hasOpenPunch && (
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -460,7 +652,13 @@ export default function AttendancePage() {
         });
 
         return cols;
-    }, [isHR, handleViewRecord, handleOpenEdit, handleForceCheckOutAction]);
+    }, [
+        isEmployeesView,
+        canManageEmployees,
+        handleViewRecord,
+        handleOpenEdit,
+        handleForceCheckOutAction,
+    ]);
 
     // Custom Grid Card Renderer for AdvancedTable's Grid Mode
     const renderGridCard = useCallback(
@@ -496,11 +694,13 @@ export default function AttendancePage() {
                             }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <CircularAvatar
-                                    src={row.profileImage}
-                                    name={row.employeeName}
-                                    size="md"
-                                />
+                                {isEmployeesView && (
+                                    <CircularAvatar
+                                        src={row.profileImage}
+                                        name={row.employeeName}
+                                        size="md"
+                                    />
+                                )}
                                 <div>
                                     <h4
                                         style={{
@@ -510,16 +710,20 @@ export default function AttendancePage() {
                                             color: 'var(--color-text-primary, #111827)',
                                         }}
                                     >
-                                        {row.employeeName}
+                                        {isEmployeesView
+                                            ? row.employeeName
+                                            : formatDate(row.attendanceDate)}
                                     </h4>
-                                    <span
-                                        style={{
-                                            fontSize: '11px',
-                                            color: 'var(--color-text-secondary, #6b7280)',
-                                        }}
-                                    >
-                                        {row.employeeCode}
-                                    </span>
+                                    {isEmployeesView && (
+                                        <span
+                                            style={{
+                                                fontSize: '11px',
+                                                color: 'var(--color-text-secondary, #6b7280)',
+                                            }}
+                                        >
+                                            {row.employeeCode}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
@@ -632,13 +836,13 @@ export default function AttendancePage() {
                             <Eye size={14} style={{ marginRight: '4px' }} />
                             View
                         </Button>
-                        {isHR && (
+                        {isEmployeesView && canManageEmployees && (
                             <Button variant="ghost" size="sm" onClick={() => handleOpenEdit(row)}>
                                 <Edit3 size={14} style={{ marginRight: '4px' }} />
                                 Edit
                             </Button>
                         )}
-                        {isHR && hasOpenPunch && (
+                        {isEmployeesView && canManageEmployees && hasOpenPunch && (
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -653,33 +857,54 @@ export default function AttendancePage() {
                 </Card>
             );
         },
-        [isHR, handleViewRecord, handleOpenEdit, handleForceCheckOutAction],
+        [
+            isEmployeesView,
+            canManageEmployees,
+            handleViewRecord,
+            handleOpenEdit,
+            handleForceCheckOutAction,
+        ],
     );
 
     return (
         <div className="attendance-page-container">
             {/* Contextual Header */}
-            <AttendanceHeader isHR={isHR} onRefresh={handleRefresh} isRefreshing={loading} />
-
-            {/* Quick Punch Widget */}
-            <AttendanceQuickWidget
-                todayStatus={todayStatus}
-                onCheckIn={handleCheckIn}
-                onCheckOut={handleCheckOut}
-                isActionLoading={actionLoading}
+            <AttendanceHeader
+                title={isEmployeesView ? 'Employees Attendance' : 'My Attendance'}
+                subtitle={
+                    isEmployeesView
+                        ? 'Company-wide attendance monitoring, shift compliance, and employee punch records'
+                        : 'View and track your daily work hours, punch history, and monthly shift records'
+                }
+                isHR={isEmployeesView}
+                onRefresh={handleRefresh}
+                isRefreshing={loading}
             />
 
-            {/* Role-Aware Metric Summary Cards */}
+            {/* Quick Punch Widget — shown in My Attendance view for roles that can punch */}
+            {isSelfView && canPunch && (
+                <AttendanceQuickWidget
+                    todayStatus={todayStatus}
+                    onCheckIn={handleCheckIn}
+                    onCheckOut={handleCheckOut}
+                    isActionLoading={actionLoading}
+                />
+            )}
+
+            {/* Admin notice shown in place of punch widget for pure ADMIN role */}
+            {isEmployeesView && isAdmin && <AdminAttendanceNotice />}
+
+            {/* Summary Cards: Team summary for Employees Attendance; Personal Monthly stats for My Attendance */}
             <AttendanceSummaryCards
-                isHR={isHR}
+                isHR={isEmployeesView}
                 summaryMetrics={summaryMetrics}
                 employeeMonthlySummary={employeeMonthlySummary}
                 selectedMonth={selectedMonth}
-                onMonthChange={changeMonth}
+                onMonthChange={(offsetOrDate) => changeMonth(offsetOrDate, { scope: 'self' })}
             />
 
-            {/* AdvancedTable — directly embedded with full feature flags */}
-            <div className="attendance-advanced-table-section">
+            {/* AdvancedTable — server-side driven with API filter wiring */}
+            <div className="attendance-table-card attendance-advanced-table-section">
                 <AdvancedTable
                     columns={columns}
                     data={tableData}
@@ -690,9 +915,9 @@ export default function AttendancePage() {
                     showFilter={true}
                     searchable={true}
                     searchPlaceholder={
-                        isHR
+                        isEmployeesView
                             ? 'Search employee name, code, date, notes...'
-                            : 'Search records, date, notes...'
+                            : 'Search date, notes...'
                     }
                     showSortDropdown={true}
                     showColumnSorting={true}
@@ -708,11 +933,14 @@ export default function AttendancePage() {
                     showResultsCount={true}
                     showPagination={true}
                     initialRowsPerPage={10}
+                    serverSide={true}
+                    totalCount={pagination?.total ?? tableData.length}
+                    onTableChange={handleTableChange}
                 />
             </div>
 
-            {/* HR Manual Correction Dialog */}
-            {isHR && (
+            {/* HR Manual Correction Dialog (only available in Employees Attendance view) */}
+            {isEmployeesView && canManageEmployees && (
                 <AttendanceCorrectionModal
                     isOpen={isCorrectionModalOpen}
                     onClose={() => {

@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { ChevronRight, ExternalLink } from 'lucide-react';
 import AdvancedTable from '@/components/Shared/DataDisplay/AdvancedTable/AdvancedTable';
 import ContractStatusBadge from '../ContractStatusBadge/ContractStatusBadge';
@@ -41,16 +41,22 @@ function ContractTable({
     onCancel,
 }) {
     const navigate = useNavigate();
+    const { pathname } = useLocation();
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
 
     const handleRowSelect = useCallback(
         (contract) => {
             if (onRowClick) {
                 onRowClick(contract);
             } else {
-                navigate(`/dashboard/user/contracts/${contract.id}`);
+                navigate(`/dashboard/${roleSegment}/contracts/${contract.id}`);
             }
         },
-        [onRowClick, navigate],
+        [onRowClick, navigate, roleSegment],
     );
 
     const tableData = useMemo(() => {

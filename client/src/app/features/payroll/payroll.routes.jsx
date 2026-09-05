@@ -5,6 +5,7 @@ import PayrollDashboardPage from '../dashboard/pages/PayrollDashboardPage';
 import PayrunsListPage from './pages/PayrunsListPage/PayrunsListPage';
 import PayrunDetailPage from './pages/PayrunDetailPage/PayrunDetailPage';
 import PayslipsListPage from './pages/PayslipsListPage/PayslipsListPage';
+import PayslipDetailPage from './pages/PayslipDetailPage/PayslipDetailPage';
 
 export default {
     // Multi-Role RBAC: roles authorized to access Payroll feature
@@ -50,6 +51,14 @@ export default {
             element: (
                 <PayrollProvider>
                     <PayslipsListPage />
+                </PayrollProvider>
+            ),
+        },
+        {
+            path: 'payroll/payslips/:id',
+            element: (
+                <PayrollProvider>
+                    <PayslipDetailPage />
                 </PayrollProvider>
             ),
         },
