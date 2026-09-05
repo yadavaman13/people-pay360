@@ -280,7 +280,16 @@ export async function getTodayStatus(user, explicitEmployeeId) {
     const today = getTodayDateString();
     const maxPunches = await resolveMaxDailyPunches(employee.id, today);
 
+    const employeeInfo = {
+        id: employee.id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        employeeCode: employee.employeeCode,
+        profileImage: user.profileImage,
+    };
+
     const record = await attendanceDao.findAttendanceByDate(employee.id, today);
+
     if (!record) {
         return {
             hasAttendanceToday: false,
@@ -295,6 +304,7 @@ export async function getTodayStatus(user, explicitEmployeeId) {
             currentSessionMinutes: 0,
             punches: [],
             record: null,
+            employee: employeeInfo,
         };
     }
 
@@ -324,6 +334,7 @@ export async function getTodayStatus(user, explicitEmployeeId) {
         currentSessionMinutes,
         punches: record.punches,
         record,
+        employee: employeeInfo,
     };
 }
 
