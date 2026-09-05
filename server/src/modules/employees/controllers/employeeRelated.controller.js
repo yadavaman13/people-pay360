@@ -1,5 +1,8 @@
 import * as contractDao from '../../../dao/contract.dao.js';
 import * as employeeDao from '../../../dao/employee.dao.js';
+import * as attendanceDao from '../../../dao/attendance.dao.js';
+import * as timeOffRequestDao from '../../../dao/timeOffRequest.dao.js';
+import * as allocationDao from '../../../dao/allocation.dao.js';
 import { sendResponse } from '../../../utils/response.utlis.js';
 import { AppError } from '../../../utils/appError.js';
 
@@ -111,6 +114,124 @@ export async function getApplicableContract(req, res, next) {
             success: true,
             message: 'Applicable contract fetched successfully',
             data: contract,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Get paginated attendance records for a specific employee
+ * GET /api/employees/:id/attendance
+ */
+export async function getEmployeeAttendance(req, res, next) {
+    try {
+        const employee = await employeeDao.findEmployeeById(req.params.id);
+        if (!employee) {
+            throw new AppError('Employee not found', 404);
+        }
+        checkEmployeeAccess(employee, req.user);
+
+        const { dateFrom, dateTo, status, page, limit } = req.query;
+        const result = await attendanceDao.findAttendanceList({
+            employeeId: req.params.id,
+            dateFrom: dateFrom || null,
+            dateTo: dateTo || null,
+            status: status || null,
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 50,
+        });
+
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Employee attendance fetched successfully',
+            data: result.records,
+            pagination: {
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
+                totalPages: result.totalPages,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Get paginated time-off requests for a specific employee
+ * GET /api/employees/:id/time-off
+ */
+export async function getEmployeeTimeOff(req, res, next) {
+    try {
+        const employee = await employeeDao.findEmployeeById(req.params.id);
+        if (!employee) {
+            throw new AppError('Employee not found', 404);
+        }
+        checkEmployeeAccess(employee, req.user);
+
+        const { status, startDate, endDate, page, limit } = req.query;
+        const result = await timeOffRequestDao.findAllRequests({
+            employeeId: req.params.id,
+            status: status || null,
+            startDate: startDate || null,
+            endDate: endDate || null,
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 50,
+        });
+
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Employee time off requests fetched successfully',
+            data: result.requests,
+            pagination: {
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
+                totalPages: result.totalPages,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Get paginated leave allocations for a specific employee
+ * GET /api/employees/:id/allocations
+ */
+export async function getEmployeeAllocations(req, res, next) {
+    try {
+        const employee = await employeeDao.findEmployeeById(req.params.id);
+        if (!employee) {
+            throw new AppError('Employee not found', 404);
+        }
+        checkEmployeeAccess(employee, req.user);
+
+        const { status, page, limit } = req.query;
+        const result = await allocationDao.findAllAllocations({
+            employeeId: req.params.id,
+            status: status || null,
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 50,
+        });
+
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Employee allocations fetched successfully',
+            data: result.allocations,
+            pagination: {
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
+                totalPages: result.totalPages,
+            },
         });
     } catch (error) {
         next(error);

@@ -5,6 +5,8 @@ import {
     findConflictingPayslips,
     getSalaryRulesCount,
     updatePayrunToValidated,
+    getPendingLeaveRequestsInPeriod,
+    getOpenAttendanceRecordsInPeriod,
 } from '../../../dao/payrollValidation.dao.js';
 import { sendResponse } from '../../../utils/response.utlis.js';
 
@@ -148,6 +150,71 @@ async function auditPayrunWarnings(payrunId) {
                 otherPayrunId: conf.otherPayrunId,
                 message: `Employee already has an existing payslip in payrun "${conf.otherPayrunName}" covering an overlapping period (${conf.periodStart} to ${conf.periodEnd}).`,
             });
+        }
+    }
+
+    // 5. Pending leave requests overlapping this payrun period (WARNING)
+    if (employeeIds.length > 0) {
+        const pendingLeave = await getPendingLeaveRequestsInPeriod(
+            employeeIds,
+            payrun.periodStart,
+            payrun.periodEnd,
+        );
+
+        const pendingByEmp = new Map();
+        for (const r of pendingLeave) {
+            if (!pendingByEmp.has(r.employeeId)) pendingByEmp.set(r.employeeId, []);
+            pendingByEmp.get(r.employeeId).push(r);
+        }
+
+        for (const emp of roster) {
+            if (emp.selectionStatus === 'EXCLUDED') continue;
+            const pending = pendingByEmp.get(emp.employeeId);
+            if (pending && pending.length > 0) {
+                const fullName = `${emp.firstName} ${emp.lastName}`.trim();
+                alerts.push({
+                    type: 'PENDING_LEAVE_IN_PERIOD',
+                    severity: 'WARNING',
+                    employeeId: emp.employeeId,
+                    employeeCode: emp.employeeCode,
+                    employeeName: fullName,
+                    count: pending.length,
+                    message: `${fullName} (${emp.employeeCode}) has ${pending.length} pending unapproved leave request(s) overlapping this payroll period. These may affect net pay.`,
+                });
+            }
+        }
+    }
+
+    // 6. Open attendance records (missing checkout) in this payrun period (WARNING)
+    if (employeeIds.length > 0) {
+        const openRecords = await getOpenAttendanceRecordsInPeriod(
+            employeeIds,
+            payrun.periodStart,
+            payrun.periodEnd,
+        );
+
+        const openByEmp = new Map();
+        for (const rec of openRecords) {
+            if (!openByEmp.has(rec.employeeId)) openByEmp.set(rec.employeeId, []);
+            openByEmp.get(rec.employeeId).push(rec);
+        }
+
+        for (const emp of roster) {
+            if (emp.selectionStatus === 'EXCLUDED') continue;
+            const open = openByEmp.get(emp.employeeId);
+            if (open && open.length > 0) {
+                const fullName = `${emp.firstName} ${emp.lastName}`.trim();
+                alerts.push({
+                    type: 'OPEN_ATTENDANCE_RECORD',
+                    severity: 'WARNING',
+                    employeeId: emp.employeeId,
+                    employeeCode: emp.employeeCode,
+                    employeeName: fullName,
+                    count: open.length,
+                    dates: open.map((r) => r.attendanceDate),
+                    message: `${fullName} (${emp.employeeCode}) has ${open.length} attendance record(s) without checkout in this period. Worked hours may be inaccurate.`,
+                });
+            }
         }
     }
 
