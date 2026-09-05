@@ -197,13 +197,16 @@ export function useDashboardData() {
     // ── ECharts Dataset: Department Salary ───────────────────────────────────
     const departmentSalaryChartData = useMemo(() => {
         if (!departmentSalaryData || departmentSalaryData.length === 0) return null;
+        const hasAnyNet = departmentSalaryData.some((d) => Number(d.totalNet) > 0);
         return departmentSalaryData.map((d) => ({
             name: d.name,
-            value: Number(d.totalNet || 0),
+            value: hasAnyNet ? Number(d.totalNet || 0) : Number(d.totalBudgetedWage || 0),
+            net: Number(d.totalNet || 0),
             budget: Number(d.totalBudgetedWage || 0),
             employeeCount: d.employeeCount,
             percentage: d.percentage,
             id: d.departmentId,
+            hasRealSpend: hasAnyNet,
         }));
     }, [departmentSalaryData]);
 

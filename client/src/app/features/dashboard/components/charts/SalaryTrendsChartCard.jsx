@@ -79,7 +79,7 @@ function SalaryTrendsChartCard({ chartData, loading = false, getCsvData }) {
             animation: true,
             animationDuration: 600,
             animationEasing: 'cubicOut',
-            grid: { left: 10, right: 16, bottom: 50, top: 20, containLabel: true },
+            grid: { left: 14, right: 30, bottom: 45, top: 24, containLabel: true },
             legend: {
                 bottom: 0,
                 itemGap: 20,
@@ -120,10 +120,11 @@ function SalaryTrendsChartCard({ chartData, loading = false, getCsvData }) {
                 axisLabel: {
                     color: axisLabelColor,
                     fontSize: 11,
-                    rotate: labels.length > 6 ? 25 : 0,
+                    rotate: labels.length > 7 ? 20 : 0,
+                    showMaxLabel: true,
                 },
                 splitLine: { show: false },
-                boundaryGap: false,
+                boundaryGap: ['2%', '2%'],
             },
             yAxis: {
                 type: 'value',

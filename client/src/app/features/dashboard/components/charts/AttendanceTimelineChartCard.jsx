@@ -50,10 +50,10 @@ function AttendanceTimelineChartCard({
             animation: true,
             animationDuration: 600,
             animationEasing: 'cubicOut',
-            grid: { left: 10, right: 10, bottom: 50, top: 10, containLabel: true },
+            grid: { left: 12, right: 20, bottom: 45, top: 16, containLabel: true },
             legend: {
                 bottom: 0,
-                itemGap: 20,
+                itemGap: 24,
                 textStyle: { color: legendTextColor, fontSize: 12 },
                 icon: 'circle',
                 itemWidth: 8,
@@ -159,7 +159,7 @@ function AttendanceTimelineChartCard({
             isEmpty={isEmpty}
             emptyTitle="No attendance data"
             emptyDescription="Attendance records will appear here once employees are checked in."
-            height="300px"
+            height="320px"
             theme={echartsTheme}
             getCsvData={getCsvData}
         />

@@ -15,14 +15,9 @@ import { DashboardContext } from './DashboardContext';
 export function DashboardProvider({ children }) {
     const debounceRef = useRef(null);
 
-    const [datePreset, setDatePreset] = useState('THIS_MONTH');
-    const [periodStart, setPeriodStart] = useState(() => {
-        const now = new Date();
-        return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-    });
-    const [periodEnd, setPeriodEnd] = useState(() => {
-        return new Date().toISOString().slice(0, 10);
-    });
+    const [datePreset, setDatePreset] = useState('ALL_TIME');
+    const [periodStart, setPeriodStart] = useState('');
+    const [periodEnd, setPeriodEnd] = useState('');
     const [departmentId, setDepartmentId] = useState('');
     const [employeeType, setEmployeeType] = useState('');
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -95,14 +90,14 @@ export function DashboardProvider({ children }) {
      * Reset all filters to defaults
      */
     const resetFilters = useCallback(() => {
-        applyDatePreset('THIS_MONTH');
+        applyDatePreset('ALL_TIME');
         setDepartmentId('');
         setEmployeeType('');
     }, [applyDatePreset]);
 
     const activeFilterCount = useMemo(() => {
         let count = 0;
-        if (datePreset !== 'THIS_MONTH') count++;
+        if (datePreset !== 'ALL_TIME') count++;
         if (departmentId) count++;
         if (employeeType) count++;
         return count;

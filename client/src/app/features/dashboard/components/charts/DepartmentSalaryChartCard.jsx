@@ -33,6 +33,7 @@ function DepartmentSalaryChartCard({ chartData, loading = false, getCsvData }) {
         if (!chartData || chartData.length === 0) return {};
 
         const total = chartData.reduce((acc, d) => acc + d.value, 0);
+        const hasRealSpend = chartData.some((d) => d.hasRealSpend);
 
         if (isDonut && viewMode === 0) {
             return {
@@ -51,49 +52,72 @@ function DepartmentSalaryChartCard({ chartData, loading = false, getCsvData }) {
                         const d = params.data;
                         return `<div>
                             <div style="font-weight:600;margin-bottom:4px;color:${tooltipTextColor}">${d.name}</div>
-                            <div style="color:${tooltipSubTextColor}">Net Pay: <strong style="color:${tooltipTextColor}">${formatINR(d.value)}</strong></div>
+                            <div style="color:${tooltipSubTextColor}">Amount: <strong style="color:${tooltipTextColor}">${formatINR(d.value)}</strong></div>
                             <div style="color:${tooltipSubTextColor}">Share: <strong style="color:${palette[params.dataIndex % palette.length]}">${d.percentage || params.percent?.toFixed(1)}%</strong></div>
                             <div style="color:${tooltipSubTextColor}">Employees: <strong style="color:${tooltipTextColor}">${d.employeeCount || '—'}</strong></div>
                         </div>`;
                     },
                 },
                 legend: {
+                    type: 'scroll',
                     orient: 'vertical',
-                    right: 10,
+                    right: 14,
                     top: 'middle',
-                    textStyle: { color: legendTextColor, fontSize: 12 },
+                    itemWidth: 8,
+                    itemHeight: 8,
+                    itemGap: 10,
+                    textStyle: {
+                        color: legendTextColor,
+                        fontSize: 11,
+                        rich: {
+                            name: {
+                                width: 130,
+                                overflow: 'truncate',
+                                color: legendTextColor,
+                            },
+                            pct: {
+                                width: 45,
+                                align: 'right',
+                                fontWeight: 600,
+                                color: tooltipTextColor,
+                            },
+                        },
+                    },
                     formatter: (name) => {
                         const d = chartData.find((i) => i.name === name);
-                        return `${name} (${d?.percentage || ''}%)`;
+                        const pct = d?.percentage || '';
+                        return `{name|${name}} {pct|${pct}}`;
                     },
-                    itemWidth: 10,
-                    itemHeight: 10,
                 },
                 series: [
                     {
                         type: 'pie',
-                        radius: ['45%', '75%'],
-                        center: ['38%', '50%'],
+                        radius: ['48%', '68%'],
+                        center: ['28%', '50%'],
                         avoidLabelOverlap: true,
                         padAngle: 3,
-                        itemStyle: { borderRadius: 6, borderColor: tooltipBg, borderWidth: 2 },
+                        itemStyle: { borderRadius: 5, borderColor: tooltipBg, borderWidth: 2 },
                         label: {
                             show: true,
                             position: 'center',
-                            formatter: `{totalLabel|Total}\n{totalValue|${formatINRCompact(total)}}`,
+                            formatter: `{totalVal|${formatINRCompact(total)}}\n{totalLbl|${hasRealSpend ? 'Total Net' : 'Total Budget'}}`,
                             rich: {
-                                totalLabel: { color: axisLabelColor, fontSize: 12, lineHeight: 22 },
-                                totalValue: {
+                                totalVal: {
                                     color: tooltipTextColor,
                                     fontSize: 16,
                                     fontWeight: 700,
-                                    lineHeight: 24,
+                                    lineHeight: 22,
+                                },
+                                totalLbl: {
+                                    color: axisLabelColor,
+                                    fontSize: 11,
+                                    lineHeight: 16,
                                 },
                             },
                         },
+                        labelLine: { show: false },
                         emphasis: {
-                            label: { show: true },
-                            scaleSize: 6,
+                            scaleSize: 5,
                         },
                         data: chartData.map((d, i) => ({
                             ...d,

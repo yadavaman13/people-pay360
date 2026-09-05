@@ -57,40 +57,59 @@ function TimeOffDistributionChartCard({ chartData, timeOffSummary, loading = fal
                 },
             },
             legend: {
+                type: 'scroll',
                 orient: 'vertical',
-                right: 8,
+                right: 10,
                 top: 'middle',
-                textStyle: { color: legendTextColor, fontSize: 11 },
-                itemWidth: 10,
-                itemHeight: 10,
+                itemWidth: 8,
+                itemHeight: 8,
+                itemGap: 10,
+                textStyle: {
+                    color: legendTextColor,
+                    fontSize: 11,
+                    rich: {
+                        name: {
+                            width: 110,
+                            overflow: 'truncate',
+                            color: legendTextColor,
+                        },
+                        val: {
+                            width: 40,
+                            align: 'right',
+                            fontWeight: 600,
+                            color: tooltipTextColor,
+                        },
+                    },
+                },
                 formatter: (name) => {
                     const d = chartData.find((i) => i.name === name);
-                    return `${name} (${d?.value || 0}d)`;
+                    return `{name|${name}} {val|${d?.value || 0}d}`;
                 },
             },
             series: [
                 {
                     type: 'pie',
-                    radius: ['42%', '70%'],
-                    center: ['38%', '50%'],
+                    radius: ['50%', '70%'],
+                    center: ['30%', '50%'],
                     avoidLabelOverlap: true,
                     padAngle: 4,
                     itemStyle: { borderRadius: 5, borderColor: tooltipBg, borderWidth: 2 },
                     label: {
                         show: true,
                         position: 'center',
-                        formatter: `{totalLabel|Approved Days}\n{totalValue|${totalDays.toFixed(0)}}`,
+                        formatter: `{totalVal|${totalDays.toFixed(0)}}\n{totalLabel|Approved Days}`,
                         rich: {
-                            totalLabel: { color: axisLabelColor, fontSize: 11, lineHeight: 20 },
+                            totalLabel: { color: axisLabelColor, fontSize: 11, lineHeight: 16 },
                             totalValue: {
                                 color: tooltipTextColor,
-                                fontSize: 22,
+                                fontSize: 18,
                                 fontWeight: 700,
-                                lineHeight: 28,
+                                lineHeight: 24,
                             },
                         },
                     },
-                    emphasis: { label: { show: true }, scaleSize: 5 },
+                    labelLine: { show: false },
+                    emphasis: { scaleSize: 5 },
                     selectedMode: 'single',
                     data: chartData.map((d, i) => ({
                         ...d,
@@ -125,7 +144,7 @@ function TimeOffDistributionChartCard({ chartData, timeOffSummary, loading = fal
             isEmpty={isEmpty}
             emptyTitle="No approved leave this period"
             emptyDescription="Approved leave requests will appear here."
-            height="280px"
+            height="320px"
             theme={echartsTheme}
             getCsvData={getCsvData}
         />
