@@ -34,7 +34,11 @@ function SidebarNav({
 
     // Resolve the role segment from the current URL
     const segments = pathname.split('/').filter(Boolean);
-    const roleSegment = segments.includes('admin') ? 'admin' : 'user';
+    const roleSegment = segments.includes('admin')
+        ? 'admin'
+        : segments.includes('hr')
+          ? 'hr'
+          : 'user';
 
     const handlePinToggle = (label) => {
         let nextPinned;
@@ -78,6 +82,15 @@ function SidebarNav({
                 break;
             case 'Users':
                 navigate('/dashboard/admin/users');
+                break;
+            case 'Attendance':
+                if (roleSegment === 'admin') {
+                    navigate('/dashboard/admin/attendance/employees-attendance');
+                } else if (roleSegment === 'hr') {
+                    navigate('/dashboard/hr/attendance/my-attendance');
+                } else {
+                    navigate('/dashboard/user/attendance');
+                }
                 break;
             default:
                 navigate(`/dashboard/${roleSegment}`);

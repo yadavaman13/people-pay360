@@ -2,7 +2,7 @@ import { db } from '../config/database.config.js';
 import { attendanceRecords, attendancePunches } from '../db/schema/attendance.schema.js';
 import { employees } from '../db/schema/employees.schema.js';
 import { users } from '../db/schema/users.schema.js';
-import { eq, and, gte, lte, desc, sql, count, inArray } from 'drizzle-orm';
+import { eq, and, gte, lte, desc, sql, count, inArray, or, ilike } from 'drizzle-orm';
 
 /**
  * Attendance DAO
@@ -17,6 +17,8 @@ export async function findAttendanceList({
     dateFrom,
     dateTo,
     status,
+    excludeHr = false,
+    search,
     page = 1,
     limit = 50,
 } = {}) {
@@ -34,10 +36,39 @@ export async function findAttendanceList({
     if (status) {
         conditions.push(eq(attendanceRecords.status, status));
     }
+    if (excludeHr) {
+        conditions.push(eq(users.role, 'EMPLOYEE'));
+    }
+    if (search && search.trim()) {
+        const term = `%${search.trim()}%`;
+        conditions.push(
+            or(
+                ilike(employees.firstName, term),
+                ilike(employees.lastName, term),
+                ilike(employees.employeeCode, term),
+                sql`concat(${employees.firstName}, ' ', ${employees.lastName}) ILIKE ${term}`,
+                sql`CAST(${attendanceRecords.attendanceDate} AS TEXT) ILIKE ${term}`,
+                ilike(attendanceRecords.notes, term),
+            ),
+        );
+    }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const offset = (Math.max(1, page) - 1) * limit;
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 50);
+    const offset = (pageNum - 1) * limitNum;
+
+    const needsJoin = excludeHr || Boolean(search && search.trim());
+
+    const countQuery = needsJoin
+        ? db
+              .select({ totalCount: count() })
+              .from(attendanceRecords)
+              .leftJoin(employees, eq(attendanceRecords.employeeId, employees.id))
+              .leftJoin(users, eq(employees.userId, users.id))
+              .where(whereClause)
+        : db.select({ totalCount: count() }).from(attendanceRecords).where(whereClause);
 
     const [records, [{ totalCount }]] = await Promise.all([
         db
@@ -69,10 +100,10 @@ export async function findAttendanceList({
             .leftJoin(users, eq(employees.userId, users.id))
             .where(whereClause)
             .orderBy(desc(attendanceRecords.attendanceDate), desc(attendanceRecords.checkInTime))
-            .limit(limit)
+            .limit(limitNum)
             .offset(offset),
 
-        db.select({ totalCount: count() }).from(attendanceRecords).where(whereClause),
+        countQuery,
     ]);
 
     let enrichedRecords = records;
@@ -107,9 +138,9 @@ export async function findAttendanceList({
     return {
         records: enrichedRecords,
         total: Number(totalCount),
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(Number(totalCount) / limit),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(Number(totalCount) / limitNum),
     };
 }
 
@@ -435,23 +466,53 @@ export async function getAttendanceForPeriod(employeeId, periodStart, periodEnd)
  * Export for Dev 4 (Dashboard summary metrics)
  * @param {object} [filter={}]
  */
-export async function getSummaryStats({ dateFrom, dateTo, employeeId } = {}) {
+export async function getSummaryStats({ dateFrom, dateTo, employeeId, excludeHr = false } = {}) {
     const conditions = [];
     if (employeeId) conditions.push(eq(attendanceRecords.employeeId, employeeId));
     if (dateFrom) conditions.push(gte(attendanceRecords.attendanceDate, dateFrom));
     if (dateTo) conditions.push(lte(attendanceRecords.attendanceDate, dateTo));
+    if (excludeHr) conditions.push(eq(users.role, 'EMPLOYEE'));
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const stats = await db
+    // Status breakdown grouped by status
+    const statsQuery = db
         .select({
             status: attendanceRecords.status,
             count: count(),
             totalWorkedHours: sql`COALESCE(SUM(CAST(${attendanceRecords.workedHours} AS NUMERIC)), 0)`,
         })
-        .from(attendanceRecords)
-        .where(whereClause)
-        .groupBy(attendanceRecords.status);
+        .from(attendanceRecords);
 
-    return stats;
+    if (excludeHr) {
+        statsQuery
+            .leftJoin(employees, eq(attendanceRecords.employeeId, employees.id))
+            .leftJoin(users, eq(employees.userId, users.id));
+    }
+
+    const stats = await statsQuery.where(whereClause).groupBy(attendanceRecords.status);
+
+    const missingCheckoutConditions = [
+        sql`${attendanceRecords.checkOutTime} IS NULL`,
+        sql`${attendanceRecords.checkInTime} IS NOT NULL`,
+    ];
+    if (excludeHr) {
+        missingCheckoutConditions.push(eq(users.role, 'EMPLOYEE'));
+    }
+
+    const missingCheckoutQuery = db.select({ count: count() }).from(attendanceRecords);
+
+    if (excludeHr) {
+        missingCheckoutQuery
+            .leftJoin(employees, eq(attendanceRecords.employeeId, employees.id))
+            .leftJoin(users, eq(employees.userId, users.id));
+    }
+
+    const [missingCheckoutRow] = await missingCheckoutQuery.where(
+        and(...missingCheckoutConditions),
+    );
+
+    const missingCheckoutCount = Number(missingCheckoutRow?.count ?? 0);
+
+    return { stats, missingCheckoutCount };
 }

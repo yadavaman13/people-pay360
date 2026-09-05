@@ -139,18 +139,27 @@ export const updateEmployeeValidator = [
  * Validator for employee list filtering & pagination
  */
 export const listEmployeesValidator = [
-    query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+    query('page')
+        .optional({ checkFalsy: true })
+        .isInt({ min: 1 })
+        .withMessage('Page must be a positive integer'),
     query('limit')
-        .optional()
+        .optional({ checkFalsy: true })
         .isInt({ min: 1, max: 100 })
         .withMessage('Limit must be between 1 and 100'),
     query('status')
-        .optional()
+        .optional({ checkFalsy: true })
         .toUpperCase()
         .isIn(['DRAFT', 'ACTIVE', 'SUSPENDED', 'ARCHIVED'])
         .withMessage('Status must be one of DRAFT, ACTIVE, SUSPENDED, ARCHIVED'),
-    query('departmentId').optional().isUUID().withMessage('departmentId must be a valid UUID'),
-    query('isActive').optional().isBoolean().withMessage('isActive must be a boolean'),
+    query('departmentId')
+        .optional({ checkFalsy: true })
+        .isUUID()
+        .withMessage('departmentId must be a valid UUID'),
+    query('isActive')
+        .optional({ checkFalsy: true })
+        .isBoolean()
+        .withMessage('isActive must be a boolean'),
     validateRequest,
 ];
 

@@ -34,14 +34,25 @@ function DashboardLayout({ onLogout }) {
     const isVisuallyCollapsed =
         windowWidth <= 600 ? false : windowWidth <= 900 ? true : isSidebarCollapsed;
 
-    const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
+    const HR_ROLES = ['HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'];
+    const userRoleUpper = user?.role?.toUpperCase() || '';
+    const isAdmin = userRoleUpper === 'ADMIN';
+    const isHR = HR_ROLES.includes(userRoleUpper);
+    const roleSegment = isAdmin ? 'admin' : isHR ? 'hr' : 'user';
+
+    const attendancePath = isAdmin
+        ? '/dashboard/admin/attendance/employees-attendance'
+        : isHR
+          ? '/dashboard/hr/attendance/my-attendance'
+          : '/dashboard/user/attendance';
 
     const sidebarNavItems = [
         {
             label: 'Home',
             icon: <HomeIcon />,
+            path: `/dashboard/${roleSegment}/home`,
         },
-        ...(roleSegment === 'admin'
+        ...(isAdmin
             ? [
                   {
                       label: 'Users',
@@ -54,7 +65,12 @@ function DashboardLayout({ onLogout }) {
         {
             label: 'Attendance',
             icon: <ClockIcon />,
-            path: `/dashboard/user/attendance`,
+            path: attendancePath,
+            subTabs: isHR
+                ? ['My Attendance', 'Employees Attendance']
+                : isAdmin
+                  ? ['Employees Attendance']
+                  : undefined,
             roles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER', 'EMPLOYEE'],
         },
     ];

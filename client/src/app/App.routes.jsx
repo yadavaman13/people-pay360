@@ -6,7 +6,7 @@ import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
 import { loadFeatureRoutes } from './routes.loader';
 
 // Auto-discover all *.routes.jsx across all feature modules
-const { userRoutes, adminRoutes, publicRoutes } = loadFeatureRoutes();
+const { userRoutes, hrRoutes, adminRoutes, publicRoutes } = loadFeatureRoutes();
 
 export const router = createBrowserRouter([
     {
@@ -43,6 +43,33 @@ export const router = createBrowserRouter([
                             {
                                 path: '*',
                                 element: <Navigate to="home" replace />,
+                            },
+                        ],
+                    },
+                    {
+                        path: 'hr',
+                        element: (
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    'HR_MANAGER',
+                                    'HR_PAYROLL_MANAGER',
+                                    'HR_PAYROLL_USER',
+                                    'ADMIN',
+                                ]}
+                            >
+                                <Outlet />
+                            </ProtectedRoute>
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <Navigate to="attendance" replace />,
+                            },
+                            // Auto-discovered hr feature routes
+                            ...hrRoutes,
+                            {
+                                path: '*',
+                                element: <Navigate to="attendance" replace />,
                             },
                         ],
                     },

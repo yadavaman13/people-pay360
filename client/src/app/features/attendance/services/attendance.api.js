@@ -14,7 +14,13 @@ export const attendanceApi = axios.create({
  * @param {Object} params - { page, limit, employeeId, dateFrom, dateTo, status }
  */
 export const fetchAttendanceList = async (params = {}) => {
-    const response = await attendanceApi.get('/', { params });
+    const cleanParams = Object.entries(params).reduce((acc, [k, v]) => {
+        if (v !== '' && v !== null && v !== undefined) {
+            acc[k] = v;
+        }
+        return acc;
+    }, {});
+    const response = await attendanceApi.get('/', { params: cleanParams });
     return response.data;
 };
 
@@ -28,9 +34,10 @@ export const fetchTodayStatus = async () => {
 
 /**
  * Fetch HR summary metrics (Present, Late, Absent, Missing Checkout, etc.)
+ * @param {Object} [params={}] - Optional query params like { excludeHr }
  */
-export const fetchAttendanceSummary = async () => {
-    const response = await attendanceApi.get('/summary');
+export const fetchAttendanceSummary = async (params = {}) => {
+    const response = await attendanceApi.get('/summary', { params });
     return response.data;
 };
 
@@ -96,14 +103,18 @@ export const deleteAttendance = async (id) => {
 export const fetchEmployeesList = async () => {
     try {
         const response = await axios.get('/api/employees', {
-            params: { limit: 100 },
+            params: { limit: 100, page: 1 },
             withCredentials: true,
         });
-        const list = Array.isArray(response.data?.data)
-            ? response.data.data
-            : Array.isArray(response.data?.data?.employees)
-              ? response.data.data.employees
-              : [];
+        const raw = response.data?.data;
+        // Handle all common response shapes
+        const list = Array.isArray(raw)
+            ? raw
+            : Array.isArray(raw?.employees)
+              ? raw.employees
+              : Array.isArray(raw?.data)
+                ? raw.data
+                : [];
         return { data: list };
     } catch {
         return { data: [] };

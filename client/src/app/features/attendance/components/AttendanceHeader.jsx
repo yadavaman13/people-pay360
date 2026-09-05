@@ -3,21 +3,22 @@ import { RotateCw, Download } from 'lucide-react';
 
 export default function AttendanceHeader({
     isHR = false,
+    title,
+    subtitle,
     onRefresh,
     onExport,
     isRefreshing = false,
 }) {
+    const defaultTitle = isHR ? 'Attendance & Time Tracking' : 'My Attendance';
+    const defaultSubtitle = isHR
+        ? 'Company-wide attendance monitoring, shift compliance, and employee punch records'
+        : 'View and track your daily work hours, punch history, and monthly shift records';
+
     return (
         <header className="attendance-header">
             <div className="header-text">
-                <h1 className="page-title">
-                    {isHR ? 'Attendance & Time Tracking' : 'My Attendance'}
-                </h1>
-                <p className="page-subtitle">
-                    {isHR
-                        ? 'Company-wide attendance monitoring, shift compliance, and employee punch records'
-                        : 'View and track your daily work hours, punch history, and monthly shift records'}
-                </p>
+                <h1 className="page-title">{title || defaultTitle}</h1>
+                <p className="page-subtitle">{subtitle || defaultSubtitle}</p>
             </div>
 
             <div className="header-actions">

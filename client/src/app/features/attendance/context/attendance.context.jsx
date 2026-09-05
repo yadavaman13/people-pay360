@@ -41,8 +41,8 @@ export function AttendanceProvider({ children }) {
     // ── 2. Filters & Pagination State ───────────────────────────────────────
     const [filters, setFilters] = useState({
         search: '',
-        dateFrom: getTodayDateString(),
-        dateTo: getTodayDateString(),
+        dateFrom: '',
+        dateTo: '',
         status: 'ALL',
         employeeId: '',
     });
