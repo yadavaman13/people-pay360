@@ -1,0 +1,77 @@
+@use '@/styles/variables' as variables;
+
+.payrun-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: variables.$spacing-md;
+    margin-bottom: variables.$spacing-lg;
+    flex-wrap: wrap;
+
+    &__left {
+        display: flex;
+        align-items: center;
+    }
+
+    &__new-btn {
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    &__center {
+        flex: 1 1 320px;
+        max-width: 480px;
+    }
+
+    &__search {
+        width: 100%;
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        flex-wrap: wrap;
+    }
+
+    &__dropdown-wrapper {
+        min-width: 130px;
+    }
+
+    @include variables.tablet {
+        &__center {
+            order: 3;
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+
+        &__right {
+            margin-left: auto;
+        }
+    }
+
+    @include variables.mobile {
+        flex-direction: column;
+        align-items: stretch;
+        gap: variables.$spacing-sm;
+
+        &__left,
+        &__center,
+        &__right {
+            width: 100%;
+        }
+
+        &__new-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        &__right {
+            flex-direction: column;
+        }
+
+        &__dropdown-wrapper {
+            width: 100%;
+        }
+    }
+}

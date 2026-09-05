@@ -1,0 +1,240 @@
+@use '@/styles/variables' as variables;
+
+.payrun-wizard-modal {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-md;
+
+    &__progress-container {
+        padding: variables.$spacing-xs 0 variables.$spacing-md;
+        border-bottom: 1px solid variables.$color-gray-100;
+        margin-bottom: variables.$spacing-sm;
+    }
+
+    &__footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: variables.$spacing-sm;
+        margin-top: variables.$spacing-lg;
+        padding-top: variables.$spacing-md;
+        border-top: 1px solid variables.$color-gray-100;
+    }
+}
+
+// ─── Step 1 Scope Styles ───────────────────────────────────────────────────────
+.payrun-wizard-step1 {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-md;
+
+    &__intro {
+        margin-bottom: variables.$spacing-xs;
+    }
+
+    &__desc {
+        margin: 0;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-600;
+        line-height: 1.5;
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-md;
+    }
+
+    &__field {
+        width: 100%;
+    }
+
+    &__date-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: variables.$spacing-md;
+
+        @include variables.mobile {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+// ─── Step 2 Employees Styles ───────────────────────────────────────────────────
+.payrun-wizard-step2 {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-md;
+
+    &__toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: variables.$spacing-md;
+        flex-wrap: wrap;
+    }
+
+    &__search-box {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+        background-color: variables.$color-gray-50;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-small;
+        padding: variables.$spacing-xs variables.$spacing-sm;
+        flex: 1 1 300px;
+
+        @include variables.transition-ease;
+
+        &:focus-within {
+            border-color: variables.$color-blue-accent;
+            background-color: variables.$color-white;
+            box-shadow: 0 0 0 1px variables.$color-blue-accent;
+        }
+    }
+
+    &__search-icon {
+        color: variables.$color-gray-400;
+        flex-shrink: 0;
+    }
+
+    &__search-input {
+        border: none;
+        background: transparent;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-800;
+        width: 100%;
+        outline: none;
+
+        &::placeholder {
+            color: variables.$color-gray-400;
+        }
+    }
+
+    &__counter-badge {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-600;
+        font-weight: 500;
+        background-color: variables.$color-gray-100;
+        padding: variables.$spacing-xs variables.$spacing-sm;
+        border-radius: variables.$radius-tiny;
+    }
+
+    &__notice {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-warning;
+        background-color: variables.$color-warning-light;
+        border: 1px solid variables.$color-warning-border;
+        padding: variables.$spacing-xs variables.$spacing-sm;
+        border-radius: variables.$radius-small;
+    }
+
+    &__table-container {
+        max-height: 380px;
+        overflow-y: auto;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-small;
+    }
+
+    &__table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: variables.$font-size-sm;
+
+        thead {
+            position: sticky;
+            top: 0;
+            background-color: variables.$color-gray-50;
+            z-index: variables.$z-raised;
+            border-bottom: 1px solid variables.$color-gray-200;
+
+            th {
+                padding: variables.$spacing-sm variables.$spacing-md;
+                color: variables.$color-gray-600;
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+        }
+
+        tbody {
+            tr {
+                border-bottom: 1px solid variables.$color-gray-100;
+                cursor: pointer;
+
+                @include variables.transition-ease;
+
+                &:hover {
+                    background-color: variables.$color-gray-50;
+                }
+
+                &.is-selected {
+                    background-color: variables.$color-info-light;
+
+                    &:hover {
+                        background-color: color-mix(
+                            in srgb,
+                            variables.$color-info-light 90%,
+                            variables.$color-gray-200
+                        );
+                    }
+                }
+
+                &:last-child {
+                    border-bottom: none;
+                }
+            }
+
+            td {
+                padding: variables.$spacing-sm variables.$spacing-md;
+                color: variables.$color-gray-800;
+                vertical-align: middle;
+            }
+        }
+    }
+
+    &__th-checkbox,
+    &__td-checkbox {
+        width: 40px;
+        text-align: center;
+    }
+
+    &__emp-name {
+        font-weight: 600;
+        color: variables.$color-gray-900;
+    }
+
+    &__emp-code {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-500;
+    }
+
+    &__emp-dept {
+        color: variables.$color-gray-700;
+    }
+
+    &__emp-title {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-500;
+    }
+
+    &__th-wage,
+    &__td-wage {
+        text-align: right;
+        font-weight: 600;
+        color: variables.$color-gray-900;
+    }
+
+    @include variables.mobile {
+        &__toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__counter {
+            text-align: right;
+        }
+    }
+}

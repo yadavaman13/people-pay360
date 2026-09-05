@@ -8,7 +8,10 @@ import { Drawer, NotificationFeed } from '@/components/Shared/Feedback/Drawer';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
 import { Home as HomeIcon, Users as UsersIcon } from 'lucide-react';
+import { loadFeatureRoutes } from '@/app/routes.loader';
 import './DashboardLayout.scss';
+
+const { featureNavItems } = loadFeatureRoutes();
 
 function DashboardLayout({ onLogout }) {
     const navigate = useNavigate();
@@ -36,6 +39,16 @@ function DashboardLayout({ onLogout }) {
 
     const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
 
+    const dynamicNavItems = (featureNavItems || [])
+        .filter((item) => {
+            if (!item.roles || item.roles.length === 0) return true;
+            return item.roles.some((r) => r.toUpperCase() === user?.role?.toUpperCase());
+        })
+        .map((item) => ({
+            ...item,
+            path: item.path.replace(/\/dashboard\/(?:user|admin)\//, `/dashboard/${roleSegment}/`),
+        }));
+
     const sidebarNavItems = [
         {
             label: 'Home',
@@ -51,6 +64,7 @@ function DashboardLayout({ onLogout }) {
                   },
               ]
             : []),
+        ...dynamicNavItems.filter((item) => item.label !== 'Users'),
     ];
 
     const handleToggleSidebar = () => {

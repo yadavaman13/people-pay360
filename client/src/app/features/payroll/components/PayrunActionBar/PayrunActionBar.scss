@@ -1,0 +1,80 @@
+@use '@/styles/variables' as variables;
+
+.payrun-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: variables.$spacing-md;
+    padding: variables.$spacing-md 0;
+    margin-bottom: variables.$spacing-md;
+    flex-wrap: wrap;
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        flex-wrap: wrap;
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+    }
+
+    &__btn {
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
+
+    &__send-btn {
+        font-weight: 600;
+    }
+
+    &__tooltip-trigger {
+        display: inline-flex;
+    }
+
+    &__paid-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-success;
+        font-weight: 600;
+        background-color: variables.$color-success-light;
+        padding: variables.$spacing-xs variables.$spacing-md;
+        border-radius: variables.$radius-small;
+        border: 1px solid variables.$color-success-border;
+    }
+
+    &__paid-icon {
+        color: variables.$color-success;
+    }
+
+    @include variables.mobile {
+        flex-direction: column;
+        align-items: stretch;
+        gap: variables.$spacing-sm;
+
+        &__left,
+        &__right {
+            width: 100%;
+            justify-content: stretch;
+        }
+
+        &__btn,
+        &__send-btn {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+
+        &__tooltip-trigger {
+            flex: 1 1 auto;
+
+            .payrun-action-bar__btn {
+                width: 100%;
+            }
+        }
+    }
+}

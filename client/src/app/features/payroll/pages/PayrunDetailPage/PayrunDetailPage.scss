@@ -1,0 +1,107 @@
+@use '@/styles/variables' as variables;
+
+.payrun-detail-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: variables.$spacing-lg 0 variables.$spacing-xxl;
+
+    &__back-nav {
+        margin-bottom: variables.$spacing-md;
+    }
+
+    &__back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+        background: transparent;
+        border: none;
+        color: variables.$color-gray-600;
+        font-size: variables.$font-size-sm;
+        font-weight: 500;
+        cursor: pointer;
+        padding: variables.$spacing-xs 0;
+
+        @include variables.transition-ease;
+
+        &:hover {
+            color: variables.$color-blue-accent;
+            transform: translateX(-2px);
+        }
+    }
+
+    &__header {
+        margin-bottom: variables.$spacing-md;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: variables.$font-size-xxl;
+        font-weight: 700;
+        color: variables.$color-gray-900;
+        letter-spacing: -0.02em;
+    }
+
+    &__subtitle {
+        margin: variables.$spacing-xs 0 0;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-500;
+    }
+
+    &__loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: variables.$spacing-xxl 0;
+        min-height: 400px;
+    }
+
+    &__retry-action {
+        display: flex;
+        gap: variables.$spacing-sm;
+        margin-top: variables.$spacing-sm;
+    }
+
+    &__note {
+        background-color: variables.$color-gray-50;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-medium;
+        padding: variables.$spacing-md variables.$spacing-lg;
+        margin-bottom: variables.$spacing-xl;
+
+        p {
+            margin: 0;
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-600;
+            line-height: 1.5;
+
+            strong {
+                color: variables.$color-gray-800;
+            }
+        }
+    }
+
+    &__mark-paid-dialog,
+    &__override-dialog {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-md;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-700;
+        line-height: 1.5;
+
+        p {
+            margin: 0;
+        }
+    }
+
+    &__date-field {
+        margin-top: variables.$spacing-xs;
+    }
+
+    @include variables.mobile {
+        padding: variables.$spacing-md 0 variables.$spacing-xl;
+    }
+}
