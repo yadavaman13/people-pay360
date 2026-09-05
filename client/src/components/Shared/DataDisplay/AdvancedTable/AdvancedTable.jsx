@@ -641,7 +641,9 @@ function AdvancedTable({
     const tabCounts = useMemo(() => {
         const counts = {};
         effectiveTabs.forEach((tab) => {
-            if (tab.id === 'all') counts[tab.id] = internalData.length;
+            if (tab.count !== undefined) counts[tab.id] = tab.count;
+            else if (tab.id === 'all')
+                counts[tab.id] = totalCount !== null ? totalCount : internalData.length;
             else if (tab.filterFn) counts[tab.id] = internalData.filter(tab.filterFn).length;
             else if (tabFilterKey)
                 counts[tab.id] = internalData.filter(
@@ -650,7 +652,7 @@ function AdvancedTable({
             else counts[tab.id] = internalData.length;
         });
         return counts;
-    }, [effectiveTabs, internalData, tabFilterKey]);
+    }, [effectiveTabs, internalData, tabFilterKey, totalCount]);
 
     const tabsWithCounts = useMemo(
         () =>

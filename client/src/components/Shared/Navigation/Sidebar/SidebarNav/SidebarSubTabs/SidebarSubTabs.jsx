@@ -9,7 +9,11 @@ function SidebarSubTabs({ subTabs, parentLabel, onSubTabClick }) {
 
     // Resolve the role segment from the current URL
     const segments = pathname.split('/').filter(Boolean);
-    const roleSegment = segments.includes('admin') ? 'admin' : 'user';
+    const roleSegment = segments.includes('admin')
+        ? 'admin'
+        : segments.includes('hr')
+          ? 'hr'
+          : 'user';
 
     const handleSubTabClick = (sub, e) => {
         e.stopPropagation();
@@ -18,11 +22,15 @@ function SidebarSubTabs({ subTabs, parentLabel, onSubTabClick }) {
             return;
         }
 
-        const segment = sub.toLowerCase();
+        const segment = sub.toLowerCase().replace(/\s+/g, '-');
         if (parentLabel === 'Settings') {
             navigate(`/dashboard/${roleSegment}/settings/${segment}`);
+        } else if (parentLabel === 'Attendance') {
+            navigate(`/dashboard/${roleSegment}/attendance/${segment}`);
         } else if (parentLabel === 'Payroll') {
             navigate(`/dashboard/${roleSegment}/payroll/${segment}`);
+        } else {
+            navigate(`/dashboard/${roleSegment}/${parentLabel.toLowerCase()}/${segment}`);
         }
     };
 

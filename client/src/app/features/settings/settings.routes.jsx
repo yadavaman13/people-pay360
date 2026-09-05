@@ -41,4 +41,23 @@ export default {
             ],
         },
     ],
+    hrRoutes: [
+        {
+            path: 'settings',
+            children: [
+                {
+                    index: true,
+                    element: <Navigate to="general" replace />,
+                },
+                {
+                    path: 'general',
+                    element: <GeneralSettings />,
+                },
+                {
+                    path: 'account',
+                    element: <AccountSettings />,
+                },
+            ],
+        },
+    ],
 };

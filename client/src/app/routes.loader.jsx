@@ -41,23 +41,18 @@ function formatSegmentToTitle(segment) {
 
 function cleanPathSegment(path) {
     if (!path) return '';
-    return path.replace(/^\/?dashboard\/(?:(?:user|admin)\/)?/, '').replace(/^\/+|\/+$/g, '');
+    return path.replace(/^\/?dashboard\/(?:(?:user|admin|hr)\/)?/, '').replace(/^\/+|\/+$/g, '');
 }
 
 // Registry mapping path keys to navigation metadata
 const featureNavRegistry = new Map();
 
-function registerNavEntry(path, label, subTabs = [], isExplicit = false) {
+function registerNavEntry(path, label, subTabs = [], isExplicit = false, rolePrefix = null) {
     const cleaned = cleanPathSegment(path);
     if (!cleaned) return;
 
     const segments = cleaned.split('/').filter(Boolean);
     const primary = segments[0];
-
-    const existingCleaned = featureNavRegistry.get(cleaned);
-    if (existingCleaned?.isExplicit && !isExplicit) {
-        return;
-    }
 
     const entry = {
         label: label || segments.map(formatSegmentToTitle).join(' '),
@@ -67,9 +62,21 @@ function registerNavEntry(path, label, subTabs = [], isExplicit = false) {
         isExplicit,
     };
 
-    featureNavRegistry.set(cleaned, entry);
-    if (primary && (!featureNavRegistry.has(primary) || isExplicit)) {
-        featureNavRegistry.set(primary, entry);
+    // If role prefix is provided or in path (e.g. /dashboard/hr/attendance -> hr/attendance)
+    const extractedRole = rolePrefix || path.match(/\/dashboard\/(user|admin|hr)\//)?.[1] || null;
+    if (extractedRole) {
+        featureNavRegistry.set(`${extractedRole}/${cleaned}`, entry);
+        if (primary) {
+            featureNavRegistry.set(`${extractedRole}/${primary}`, entry);
+        }
+    }
+
+    const existingCleaned = featureNavRegistry.get(cleaned);
+    if (!existingCleaned?.isExplicit || isExplicit) {
+        featureNavRegistry.set(cleaned, entry);
+        if (primary && (!featureNavRegistry.has(primary) || isExplicit)) {
+            featureNavRegistry.set(primary, entry);
+        }
     }
 
     if (isExplicit && subTabs && subTabs.length > 0) {
@@ -94,12 +101,15 @@ function initFeatureNavRegistry() {
             if (cfg.navItem) {
                 const items = Array.isArray(cfg.navItem) ? cfg.navItem : [cfg.navItem];
                 items.forEach((item) => {
-                    registerNavEntry(item.path, item.label, item.subTabs, true);
+                    const role = (item.roles || [])[0]?.toLowerCase();
+                    const rolePrefix =
+                        role === 'admin' ? 'admin' : role && role.startsWith('hr') ? 'hr' : 'user';
+                    registerNavEntry(item.path, item.label, item.subTabs, true, rolePrefix);
                 });
             }
 
             // 2. Scan route definitions for paths and children
-            const scanRoutes = (routesList) => {
+            const scanRoutes = (routesList, rolePrefix = null) => {
                 if (!routesList) return;
                 const list = Array.isArray(routesList) ? routesList : [routesList];
                 list.forEach((route) => {
@@ -108,13 +118,14 @@ function initFeatureNavRegistry() {
                         .map((c) => c.path)
                         .filter((p) => p && p !== '*' && !p.includes(':'))
                         .map(formatSegmentToTitle);
-                    registerNavEntry(route.path, null, childSubTabs, false);
+                    registerNavEntry(route.path, null, childSubTabs, false, rolePrefix);
                 });
             };
 
-            scanRoutes(cfg.userRoutes);
-            scanRoutes(cfg.adminRoutes);
-            scanRoutes(cfg.routes);
+            scanRoutes(cfg.userRoutes, 'user');
+            scanRoutes(cfg.hrRoutes, 'hr');
+            scanRoutes(cfg.adminRoutes, 'admin');
+            scanRoutes(cfg.routes, null);
         });
     });
 }
@@ -128,31 +139,43 @@ initFeatureNavRegistry();
 export function resolveNavState(pathname) {
     if (!pathname) return DEFAULT_TAB;
 
-    const match = pathname.match(/\/dashboard\/(?:(?:user|admin)\/)?([^/]+)(?:\/([^/]+))?/);
+    const match = pathname.match(/\/dashboard\/(?:(user|admin|hr)\/)?([^/]+)(?:\/([^/]+))?/);
     if (!match) return DEFAULT_TAB;
 
-    const [, primary, secondary] = match;
+    const [, role, primary, secondary] = match;
     const fullSubPath = secondary ? `${primary}/${secondary}` : primary;
+    const roleFullSubPath = role ? `${role}/${fullSubPath}` : null;
+    const rolePrimaryPath = role ? `${role}/${primary}` : null;
 
+    const roleFullEntry = roleFullSubPath ? featureNavRegistry.get(roleFullSubPath) : null;
+    const rolePrimaryEntry = rolePrimaryPath ? featureNavRegistry.get(rolePrimaryPath) : null;
     const fullEntry = featureNavRegistry.get(fullSubPath);
     const primaryEntry = featureNavRegistry.get(primary);
 
     // Prioritize explicit navigation entries: if primary module explicitly declares subTabs,
     // it handles all sub-routes unless the sub-route itself has an explicit nav item.
-    const entry = fullEntry?.isExplicit
-        ? fullEntry
-        : primaryEntry?.isExplicit && primaryEntry?.subTabs?.length > 0
-          ? primaryEntry
-          : fullEntry || primaryEntry;
+    const entry = roleFullEntry?.isExplicit
+        ? roleFullEntry
+        : fullEntry?.isExplicit
+          ? fullEntry
+          : rolePrimaryEntry?.isExplicit && rolePrimaryEntry?.subTabs?.length > 0
+            ? rolePrimaryEntry
+            : primaryEntry?.isExplicit && primaryEntry?.subTabs?.length > 0
+              ? primaryEntry
+              : roleFullEntry || rolePrimaryEntry || fullEntry || primaryEntry;
 
     if (entry) {
         let activeSubTab = '';
         if (entry.subTabs && entry.subTabs.length > 0) {
             if (secondary) {
                 const found = entry.subTabs.find(
-                    (s) => s.toLowerCase() === secondary.toLowerCase(),
+                    (s) =>
+                        s.toLowerCase().replace(/[\s-_]+/g, '') ===
+                        secondary.toLowerCase().replace(/[\s-_]+/g, ''),
                 );
-                activeSubTab = found || formatSegmentToTitle(secondary);
+                const isParamOrUuid = /^[0-9a-f]{8}-[0-9a-f]{4}|^[0-9]+$/i.test(secondary);
+                activeSubTab =
+                    found || (isParamOrUuid ? entry.subTabs[0] : formatSegmentToTitle(secondary));
             } else {
                 activeSubTab = entry.subTabs[0];
             }
@@ -171,6 +194,7 @@ export function resolveNavState(pathname) {
 
 export function loadFeatureRoutes() {
     const userRoutes = [];
+    const hrRoutes = [];
     const adminRoutes = [];
     const publicRoutes = [];
     const featureNavItems = [];
@@ -186,10 +210,15 @@ export function loadFeatureRoutes() {
             });
         }
 
-        // Format 1: Explicit target arrays (userRoutes, adminRoutes, publicRoutes)
+        // Format 1: Explicit target arrays (userRoutes, hrRoutes, adminRoutes, publicRoutes)
         if (config.userRoutes) {
             userRoutes.push(
                 ...(Array.isArray(config.userRoutes) ? config.userRoutes : [config.userRoutes]),
+            );
+        }
+        if (config.hrRoutes) {
+            hrRoutes.push(
+                ...(Array.isArray(config.hrRoutes) ? config.hrRoutes : [config.hrRoutes]),
             );
         }
         if (config.adminRoutes) {
@@ -250,6 +279,7 @@ export function loadFeatureRoutes() {
 
     return {
         userRoutes,
+        hrRoutes,
         adminRoutes,
         publicRoutes,
         featureNavItems,

@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Dialog from '@/components/Shared/Feedback/Dialog';
+import Calendar from '@/components/Shared/Form/Calendar/Calendar';
 import InputField from '@/components/Shared/Form/InputField/InputField';
 import Textarea from '@/components/Shared/Form/Textarea/Textarea';
 import Dropdown from '@/components/Shared/Form/Dropdown/Dropdown';
 import CircularAvatar from '@/components/Shared/DataDisplay/CircularAvatar/CircularAvatar';
+import Badge from '@/components/Shared/DataDisplay/Badge/Badge';
+import { Calendar as CalendarIcon } from 'lucide-react';
 
 const STATUS_OPTIONS = [
     { value: 'PRESENT', label: 'Present' },
@@ -13,22 +16,41 @@ const STATUS_OPTIONS = [
     { value: 'MANUAL_CORRECTION', label: 'Manual Correction' },
 ];
 
-const toDatetimeLocal = (isoString) => {
+/**
+ * Extracts 24h 'HH:mm' time string from ISO timestamp
+ */
+const toTimeString = (isoString) => {
     if (!isoString) return '';
     try {
         const d = new Date(isoString);
         if (isNaN(d.getTime())) return '';
-        const offset = d.getTimezoneOffset() * 60000;
-        return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
     } catch {
         return '';
     }
 };
 
 function AttendanceCorrectionFormContent({ record, onSave, isSubmitting, onClose }) {
+    // Determine initial date from attendanceDate or checkInTime
+    const [selectedDate, setSelectedDate] = useState(() => {
+        if (record?.attendanceDate) {
+            const parts = String(record.attendanceDate).split('-');
+            if (parts.length === 3) {
+                return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            }
+        }
+        if (record?.checkInTime) {
+            const d = new Date(record.checkInTime);
+            if (!isNaN(d.getTime())) return d;
+        }
+        return new Date();
+    });
+
     const [formData, setFormData] = useState(() => ({
-        checkInTime: toDatetimeLocal(record?.checkInTime),
-        checkOutTime: toDatetimeLocal(record?.checkOutTime),
+        checkInTime: toTimeString(record?.checkInTime),
+        checkOutTime: toTimeString(record?.checkOutTime),
         status: record?.status || 'PRESENT',
         workedHours: record?.workedHours ? String(record.workedHours) : '',
         correctionReason: record?.correctionReason || '',
@@ -37,27 +59,50 @@ function AttendanceCorrectionFormContent({ record, onSave, isSubmitting, onClose
 
     const [errors, setErrors] = useState({});
 
-    const handleChange = (field, value) => {
-        setFormData((prev) => {
-            const next = { ...prev, [field]: value };
+    const formattedDateDisplay = useMemo(() => {
+        return selectedDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
+    }, [selectedDate]);
 
-            // Auto-calculate worked hours if both in and out exist
-            if (
-                (field === 'checkInTime' || field === 'checkOutTime') &&
-                next.checkInTime &&
-                next.checkOutTime
-            ) {
-                const inTime = new Date(next.checkInTime).getTime();
-                const outTime = new Date(next.checkOutTime).getTime();
-                if (outTime > inTime) {
-                    const diffHours = (outTime - inTime) / (1000 * 60 * 60);
-                    next.workedHours = diffHours.toFixed(2);
+    const dateIsoString = useMemo(() => {
+        const y = selectedDate.getFullYear();
+        const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const d = String(selectedDate.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }, [selectedDate]);
+
+    const handleDateSelect = (date) => {
+        setSelectedDate(date);
+    };
+
+    const handleTimeChange = (field, timeVal) => {
+        setFormData((prev) => {
+            const next = { ...prev, [field]: timeVal };
+            const inTime = field === 'checkInTime' ? timeVal : next.checkInTime;
+            const outTime = field === 'checkOutTime' ? timeVal : next.checkOutTime;
+
+            if (inTime && outTime) {
+                const [inH, inM] = inTime.split(':').map(Number);
+                const [outH, outM] = outTime.split(':').map(Number);
+                const diffMins = outH * 60 + outM - (inH * 60 + inM);
+                if (diffMins > 0) {
+                    next.workedHours = (diffMins / 60).toFixed(2);
                 }
             }
             return next;
         });
 
-        // Clear error for edited field
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: null }));
+        }
+    };
+
+    const handleChange = (field, value) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: null }));
         }
@@ -71,9 +116,9 @@ function AttendanceCorrectionFormContent({ record, onSave, isSubmitting, onClose
         }
 
         if (formData.checkInTime && formData.checkOutTime) {
-            const inTime = new Date(formData.checkInTime).getTime();
-            const outTime = new Date(formData.checkOutTime).getTime();
-            if (outTime <= inTime) {
+            const [inH, inM] = formData.checkInTime.split(':').map(Number);
+            const [outH, outM] = formData.checkOutTime.split(':').map(Number);
+            if (outH * 60 + outM <= inH * 60 + inM) {
                 errs.checkOutTime = 'Check-out time must be chronologically after check-in time';
             }
         }
@@ -92,16 +137,20 @@ function AttendanceCorrectionFormContent({ record, onSave, isSubmitting, onClose
     const handleConfirm = async () => {
         if (!validate()) return;
 
+        const buildIso = (baseDate, timeStr) => {
+            if (!timeStr) return undefined;
+            const [hh, mm] = timeStr.split(':').map(Number);
+            const d = new Date(baseDate);
+            d.setHours(hh, mm, 0, 0);
+            return d.toISOString();
+        };
+
         const payload = {
             correctionReason: formData.correctionReason.trim(),
             status: formData.status,
             notes: formData.notes?.trim() || undefined,
-            checkInTime: formData.checkInTime
-                ? new Date(formData.checkInTime).toISOString()
-                : undefined,
-            checkOutTime: formData.checkOutTime
-                ? new Date(formData.checkOutTime).toISOString()
-                : undefined,
+            checkInTime: buildIso(selectedDate, formData.checkInTime),
+            checkOutTime: buildIso(selectedDate, formData.checkOutTime),
             workedHours: formData.workedHours !== '' ? parseFloat(formData.workedHours) : undefined,
         };
 
@@ -126,18 +175,7 @@ function AttendanceCorrectionFormContent({ record, onSave, isSubmitting, onClose
         >
             <div className="attendance-correction-form">
                 {/* Read-only metadata banner */}
-                <div
-                    className="modal-read-only-banner"
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '10px 14px',
-                        background: 'var(--color-bg-subtle, #f9fafb)',
-                        borderRadius: '8px',
-                        marginBottom: '16px',
-                    }}
-                >
+                <div className="modal-read-only-banner">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <CircularAvatar src={emp.profileImage} name={empName} size="md" />
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -160,91 +198,124 @@ function AttendanceCorrectionFormContent({ record, onSave, isSubmitting, onClose
                             </span>
                         </div>
                     </div>
-                    <div
-                        style={{ fontSize: '12px', color: 'var(--color-text-secondary, #4b5563)' }}
-                    >
-                        Date: <strong>{record.attendanceDate}</strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                            style={{
+                                fontSize: '12px',
+                                color: 'var(--color-text-secondary, #4b5563)',
+                            }}
+                        >
+                            Record Date:
+                        </span>
+                        <Badge variant="neutral" size="sm">
+                            {dateIsoString}
+                        </Badge>
                     </div>
                 </div>
 
-                {/* Date-time inputs row */}
-                <div className="form-inputs-row">
-                    <div>
-                        <span className="field-label">Check-In Time</span>
-                        <input
-                            type="datetime-local"
-                            className="form-input"
-                            value={formData.checkInTime}
-                            onChange={(e) => handleChange('checkInTime', e.target.value)}
-                        />
-                        {errors.checkInTime && (
-                            <div className="field-error-msg">{errors.checkInTime}</div>
-                        )}
+                {/* Main Content: Calendar Widget on Left, Form Inputs on Right */}
+                <div className="modal-content-grid">
+                    {/* Left Column: Pre-Built Calendar Component */}
+                    <div className="modal-calendar-panel">
+                        <div className="calendar-panel-header">
+                            <div className="calendar-panel-title">
+                                <CalendarIcon
+                                    size={15}
+                                    style={{ color: 'var(--color-primary, #3b82f6)' }}
+                                />
+                                <span>Attendance Date</span>
+                            </div>
+                            <Badge variant="primary" size="sm">
+                                {formattedDateDisplay}
+                            </Badge>
+                        </div>
+
+                        <div className="calendar-widget-container">
+                            <Calendar
+                                selectedDate={selectedDate}
+                                onSelectDate={handleDateSelect}
+                                showCard={false}
+                                maxDate={new Date()}
+                                eventDates={[]}
+                            />
+                        </div>
+
+                        <div className="calendar-panel-hint">
+                            Selected: <strong>{formattedDateDisplay}</strong>
+                        </div>
                     </div>
 
-                    <div>
-                        <span className="field-label">Check-Out Time</span>
-                        <input
-                            type="datetime-local"
-                            className="form-input"
-                            value={formData.checkOutTime}
-                            onChange={(e) => handleChange('checkOutTime', e.target.value)}
-                        />
-                        {errors.checkOutTime && (
-                            <div className="field-error-msg">{errors.checkOutTime}</div>
-                        )}
-                    </div>
-                </div>
+                    {/* Right Column: Time, Status, Hours, Audit Reason */}
+                    <div className="modal-fields-panel">
+                        {/* Check-In & Check-Out Time */}
+                        <div className="form-inputs-row">
+                            <InputField
+                                id="checkInTime"
+                                name="checkInTime"
+                                label="Check-In Time"
+                                type="time"
+                                value={formData.checkInTime}
+                                onChange={(e) => handleTimeChange('checkInTime', e.target.value)}
+                                error={errors.checkInTime}
+                            />
 
-                {/* Status & Worked Hours */}
-                <div className="form-inputs-row">
-                    <div>
-                        <span className="field-label">Attendance Status</span>
-                        <Dropdown
-                            options={STATUS_OPTIONS}
-                            value={formData.status}
-                            onChange={(val) => handleChange('status', val)}
-                        />
-                    </div>
+                            <InputField
+                                id="checkOutTime"
+                                name="checkOutTime"
+                                label="Check-Out Time"
+                                type="time"
+                                value={formData.checkOutTime}
+                                onChange={(e) => handleTimeChange('checkOutTime', e.target.value)}
+                                error={errors.checkOutTime}
+                            />
+                        </div>
 
-                    <div>
+                        {/* Status & Worked Hours */}
+                        <div className="form-inputs-row">
+                            <div>
+                                <label className="field-label">Attendance Status</label>
+                                <Dropdown
+                                    options={STATUS_OPTIONS}
+                                    value={formData.status}
+                                    onChange={(val) => handleChange('status', val)}
+                                />
+                            </div>
+
+                            <InputField
+                                id="workedHours"
+                                name="workedHours"
+                                label="Worked Hours (hrs)"
+                                type="number"
+                                step="0.25"
+                                placeholder="e.g. 8.5"
+                                value={formData.workedHours}
+                                onChange={(e) => handleChange('workedHours', e.target.value)}
+                                error={errors.workedHours}
+                            />
+                        </div>
+
+                        {/* Mandatory Audit Reason */}
+                        <Textarea
+                            id="correctionReason"
+                            label="Correction Reason (Mandatory Audit Trail) *"
+                            placeholder="Explain why this record is being manually adjusted (e.g. Biometric device offline, supervisor approved)..."
+                            value={formData.correctionReason}
+                            onChange={(e) => handleChange('correctionReason', e.target.value)}
+                            required
+                            error={errors.correctionReason}
+                            rows={3}
+                        />
+
+                        {/* Optional Notes */}
                         <InputField
-                            id="workedHours"
-                            name="workedHours"
-                            label="Worked Hours (hrs)"
-                            type="number"
-                            placeholder="e.g. 8.5"
-                            value={formData.workedHours}
-                            onChange={(e) => handleChange('workedHours', e.target.value)}
-                            error={errors.workedHours}
+                            id="notes"
+                            name="notes"
+                            label="Supervisor Notes (Optional)"
+                            placeholder="Additional notes or references..."
+                            value={formData.notes}
+                            onChange={(e) => handleChange('notes', e.target.value)}
                         />
                     </div>
-                </div>
-
-                {/* Mandatory Audit Reason */}
-                <div>
-                    <Textarea
-                        id="correctionReason"
-                        label="Correction Reason (Mandatory Audit Trail)"
-                        placeholder="Explain why this record is being manually adjusted (e.g. Biometric device offline, supervisor approved)..."
-                        value={formData.correctionReason}
-                        onChange={(e) => handleChange('correctionReason', e.target.value)}
-                        required
-                        error={errors.correctionReason}
-                        rows={3}
-                    />
-                </div>
-
-                {/* Optional Notes */}
-                <div>
-                    <InputField
-                        id="notes"
-                        name="notes"
-                        label="Supervisor Notes (Optional)"
-                        placeholder="Additional notes or references..."
-                        value={formData.notes}
-                        onChange={(e) => handleChange('notes', e.target.value)}
-                    />
                 </div>
             </div>
         </Dialog>

@@ -41,7 +41,17 @@ function DashboardLayout({ onLogout }) {
     const isVisuallyCollapsed =
         windowWidth <= 600 ? false : windowWidth <= 900 ? true : isSidebarCollapsed;
 
-    const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
+    const HR_ROLES = ['HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'];
+    const userRoleUpper = user?.role?.toUpperCase() || '';
+    const isAdmin = userRoleUpper === 'ADMIN';
+    const isHR = HR_ROLES.includes(userRoleUpper);
+    const roleSegment = isAdmin ? 'admin' : isHR ? 'hr' : 'user';
+
+    const attendancePath = isAdmin
+        ? '/dashboard/admin/attendance/employees-attendance'
+        : isHR
+          ? '/dashboard/hr/attendance/my-attendance'
+          : '/dashboard/user/attendance';
 
     const { featureNavItems } = useMemo(() => loadFeatureRoutes(), []);
 
@@ -71,9 +81,15 @@ function DashboardLayout({ onLogout }) {
             if (items.some((i) => i.label === item.label)) return;
 
             // Dynamic route path replacement
-            const dynamicPath = item.path
-                ? item.path.replace(/\/dashboard\/(?:user|admin)\//, `/dashboard/${roleSegment}/`)
-                : item.path;
+            const dynamicPath =
+                item.label === 'Attendance' && attendancePath
+                    ? attendancePath
+                    : item.path
+                      ? item.path.replace(
+                            /\/dashboard\/(?:user|admin|hr)\//,
+                            `/dashboard/${roleSegment}/`,
+                        )
+                      : item.path;
 
             let itemIcon = item.icon;
             if (itemIcon && typeof itemIcon === 'object') {
@@ -105,7 +121,7 @@ function DashboardLayout({ onLogout }) {
         });
 
         return items;
-    }, [featureNavItems, roleSegment, user?.role]);
+    }, [featureNavItems, roleSegment, user, attendancePath]);
 
     const handleToggleSidebar = () => {
         setIsSidebarCollapsed((prev) => {
