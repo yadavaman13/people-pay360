@@ -1,0 +1,41 @@
+@use '@/styles/variables' as variables;
+
+.payslip-actions-bar {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: variables.$spacing-sm;
+    width: auto;
+
+    .payslip-action-tooltip-wrapper {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .payslip-action-btn {
+        width: auto;
+        white-space: nowrap;
+    }
+}
+
+.payslip-settlement-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-md;
+    font-size: variables.$font-size-sm;
+    color: variables.$color-gray-700;
+    line-height: 1.5;
+
+    p {
+        margin: 0;
+    }
+
+    .payslip-settlement-modal-highlight {
+        background-color: variables.$color-gray-50;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-small;
+        padding: variables.$spacing-sm variables.$spacing-md;
+        color: variables.$color-gray-900;
+    }
+}
