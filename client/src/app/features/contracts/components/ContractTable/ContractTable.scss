@@ -1,0 +1,130 @@
+@use '@/styles/variables' as variables;
+
+.contract-table-container {
+    width: 100%;
+
+    .contract-employee-cell {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        cursor: pointer;
+        padding: variables.$spacing-xs 0;
+
+        .employee-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: variables.$color-blue-accent;
+            color: variables.$color-white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: variables.$font-size-xs;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .employee-full-name {
+                font-weight: 600;
+                color: variables.$color-gray-900;
+                font-size: variables.$font-size-sm;
+
+                @include variables.transition-ease;
+            }
+
+            .employee-code {
+                font-size: variables.$font-size-xxs;
+                color: variables.$color-gray-500;
+            }
+        }
+
+        &:hover .employee-full-name {
+            color: variables.$color-blue-accent;
+        }
+    }
+
+    .contract-name-btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+        color: variables.$color-gray-900;
+        font-weight: 500;
+        font-size: variables.$font-size-sm;
+        cursor: pointer;
+        text-align: left;
+
+        @include variables.transition-ease;
+
+        .name-link-icon {
+            opacity: 0;
+            color: variables.$color-blue-accent;
+
+            @include variables.transition-ease;
+        }
+
+        &:hover {
+            color: variables.$color-blue-accent;
+
+            .name-link-icon {
+                opacity: 1;
+            }
+        }
+    }
+
+    .contract-period-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: variables.$spacing-xs;
+
+        .period-text {
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-700;
+        }
+    }
+
+    .contract-wage-cell {
+        font-weight: 600;
+        color: variables.$color-gray-900;
+        font-size: variables.$font-size-sm;
+    }
+
+    .contract-structure-cell {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-700;
+    }
+
+    .contract-row-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: variables.$spacing-xs;
+
+        .view-details-arrow-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: variables.$color-gray-400;
+            padding: variables.$spacing-xs;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: variables.$radius-small;
+
+            @include variables.transition-ease;
+
+            &:hover {
+                color: variables.$color-blue-accent;
+                background-color: variables.$color-gray-100;
+            }
+        }
+    }
+}

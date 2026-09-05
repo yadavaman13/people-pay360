@@ -1,0 +1,262 @@
+@use '@/styles/variables' as variables;
+
+.contract-detail-page {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-lg;
+    padding: variables.$spacing-lg;
+    width: 100%;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md;
+        gap: variables.$spacing-md;
+    }
+
+    .detail-top-bar {
+        display: flex;
+        align-items: center;
+
+        .back-btn {
+            background: transparent;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: variables.$spacing-xs;
+            color: variables.$color-gray-600;
+            font-family: variables.$font-sans;
+            font-size: variables.$font-size-sm;
+            font-weight: 500;
+            cursor: pointer;
+            padding: variables.$spacing-xs 0;
+
+            @include variables.transition-ease;
+
+            &:hover {
+                color: variables.$color-blue-accent;
+            }
+        }
+    }
+
+    .contract-not-found-card {
+        max-width: 600px;
+        margin: variables.$spacing-xl auto;
+
+        .not-found-back-btn {
+            margin-top: variables.$spacing-md;
+        }
+    }
+
+    .contract-header-card {
+        background-color: variables.$color-white;
+        border-radius: variables.$radius-large;
+        border: 1px solid variables.$color-gray-200;
+        padding: variables.$spacing-xl;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: variables.$spacing-lg;
+
+        @include variables.mobile {
+            padding: variables.$spacing-md;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-sm;
+
+            .title-and-badges {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-md;
+                flex-wrap: wrap;
+
+                .contract-detail-title {
+                    margin: 0;
+                    font-size: variables.$font-size-xxl;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    font-family: variables.$font-sans;
+                }
+
+                .badges-group {
+                    display: flex;
+                    align-items: center;
+                    gap: variables.$spacing-xs;
+                }
+            }
+
+            .employee-headline {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+                font-family: variables.$font-sans;
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-700;
+
+                .headline-icon {
+                    color: variables.$color-gray-500;
+                }
+
+                .employee-code-tag {
+                    margin-left: variables.$spacing-xs;
+                    padding: 2px variables.$spacing-xs;
+                    background-color: variables.$color-gray-100;
+                    border: 1px solid variables.$color-gray-300;
+                    border-radius: variables.$radius-tiny;
+                    font-size: variables.$font-size-xxs;
+                    color: variables.$color-gray-600;
+                }
+            }
+        }
+
+        .header-actions-area {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+        }
+    }
+
+    .payroll-impact-notice {
+        .notice-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: variables.$spacing-sm;
+
+            .notice-icon {
+                color: variables.$color-warning;
+                flex-shrink: 0;
+                margin-top: 2px;
+            }
+
+            .notice-content {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+        }
+    }
+
+    .contract-info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: variables.$spacing-lg;
+
+        @include variables.tablet {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @include variables.mobile {
+            grid-template-columns: 1fr;
+            gap: variables.$spacing-md;
+        }
+
+        .info-card {
+            background-color: variables.$color-white;
+            border-radius: variables.$radius-large;
+            border: 1px solid variables.$color-gray-200;
+            padding: variables.$spacing-lg;
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-md;
+
+            &.col-span-full {
+                grid-column: 1 / -1;
+            }
+
+            .card-header {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+                border-bottom: 1px solid variables.$color-gray-100;
+                padding-bottom: variables.$spacing-xs;
+
+                .card-icon {
+                    color: variables.$color-blue-accent;
+                }
+
+                .card-title {
+                    margin: 0;
+                    font-size: variables.$font-size-md;
+                    font-weight: 600;
+                    color: variables.$color-gray-800;
+                    font-family: variables.$font-sans;
+                }
+            }
+
+            .card-body {
+                display: flex;
+                flex-direction: column;
+                gap: variables.$spacing-sm;
+
+                .info-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-family: variables.$font-sans;
+                    font-size: variables.$font-size-sm;
+
+                    .info-label {
+                        color: variables.$color-gray-600;
+                    }
+
+                    .info-value {
+                        color: variables.$color-gray-900;
+                        font-weight: 500;
+
+                        .sub-code {
+                            color: variables.$color-gray-500;
+                            font-size: variables.$font-size-xs;
+                        }
+                    }
+
+                    &.highlight-row {
+                        padding: variables.$spacing-xs 0;
+                        border-bottom: 1px dashed variables.$color-gray-200;
+                        margin-bottom: variables.$spacing-xs;
+
+                        .wage-value {
+                            font-size: variables.$font-size-lg;
+                            font-weight: 700;
+                            color: variables.$color-gray-900;
+
+                            .wage-frequency {
+                                font-size: variables.$font-size-xs;
+                                font-weight: normal;
+                                color: variables.$color-gray-500;
+                            }
+                        }
+                    }
+                }
+
+                .contract-notes-text {
+                    margin: 0;
+                    font-family: variables.$font-sans;
+                    font-size: variables.$font-size-sm;
+                    color: variables.$color-gray-700;
+                    line-height: 1.6;
+                    white-space: pre-wrap;
+                }
+
+                .empty-notes-text {
+                    margin: 0;
+                    font-family: variables.$font-sans;
+                    font-size: variables.$font-size-sm;
+                    color: variables.$color-gray-400;
+                    font-style: italic;
+                }
+            }
+        }
+    }
+}
+
+.contract-detail-loading {
+    padding: variables.$spacing-xxl;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}

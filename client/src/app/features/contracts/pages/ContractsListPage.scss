@@ -1,0 +1,156 @@
+@use '@/styles/variables' as variables;
+
+.contracts-list-page {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-lg;
+    padding: variables.$spacing-lg;
+    width: 100%;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md;
+        gap: variables.$spacing-md;
+    }
+
+    .contracts-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: variables.$spacing-md;
+
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-xs;
+
+            .title-row {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-sm;
+
+                .header-icon {
+                    color: variables.$color-blue-accent;
+                }
+
+                .header-title {
+                    margin: 0;
+                    font-size: variables.$font-size-xxl;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    font-family: variables.$font-sans;
+                }
+            }
+
+            .header-subtitle {
+                margin: 0;
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-600;
+                font-family: variables.$font-sans;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+
+            .create-contract-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+            }
+        }
+    }
+
+    .error-alert-wrapper {
+        margin-bottom: variables.$spacing-xs;
+
+        .retry-btn {
+            margin-top: variables.$spacing-sm;
+        }
+    }
+
+    .contracts-filter-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: variables.$spacing-md;
+        background-color: variables.$color-white;
+        padding: variables.$spacing-md;
+        border-radius: variables.$radius-large;
+        border: 1px solid variables.$color-gray-200;
+
+        @include variables.mobile {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-filter-col {
+            flex: 1;
+            min-width: 280px;
+
+            .contract-search-bar {
+                width: 100%;
+            }
+        }
+
+        .dropdown-filter-col {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+
+            .status-dropdown {
+                min-width: 170px;
+            }
+
+            .clear-filters-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+                color: variables.$color-gray-600;
+
+                &:hover {
+                    color: variables.$color-danger;
+                }
+            }
+        }
+    }
+
+    .contracts-table-card {
+        background-color: variables.$color-white;
+        border-radius: variables.$radius-large;
+        border: 1px solid variables.$color-gray-200;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+
+        .contracts-loading-state {
+            padding: variables.$spacing-xxl;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contracts-empty-state {
+            padding: variables.$spacing-xxl;
+        }
+
+        .contracts-pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: variables.$spacing-md variables.$spacing-lg;
+            border-top: 1px solid variables.$color-gray-200;
+            flex-wrap: wrap;
+            gap: variables.$spacing-md;
+
+            .pagination-count-text {
+                font-family: variables.$font-sans;
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-600;
+            }
+        }
+    }
+}

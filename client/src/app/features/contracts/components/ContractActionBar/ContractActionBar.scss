@@ -1,0 +1,41 @@
+@use '@/styles/variables' as variables;
+
+.contract-action-bar {
+    display: flex;
+    align-items: center;
+    gap: variables.$spacing-sm;
+    flex-wrap: wrap;
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+    }
+
+    .activate-btn {
+        background-color: variables.$color-success;
+        border-color: variables.$color-success;
+        color: variables.$color-white;
+
+        &:hover:not(:disabled) {
+            background-color: variables.$color-success-border;
+        }
+    }
+
+    .cancel-btn {
+        color: variables.$color-warning-dark;
+        border-color: variables.$color-warning-border;
+
+        &:hover:not(:disabled) {
+            background-color: variables.$color-warning-light;
+        }
+    }
+
+    .dialog-action-message {
+        font-family: variables.$font-sans;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-700;
+        line-height: 1.5;
+        margin: 0;
+    }
+}
