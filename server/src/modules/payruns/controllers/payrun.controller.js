@@ -33,8 +33,9 @@ export async function createPayrun(req, res, next) {
 
 export async function getAllPayruns(req, res, next) {
     try {
-        const { status, periodStart, periodEnd, structureId, page, limit } = req.query;
+        const { search, status, periodStart, periodEnd, structureId, page, limit } = req.query;
         const result = await payrunService.listPayruns({
+            search,
             status,
             periodStart,
             periodEnd,

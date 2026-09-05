@@ -10,6 +10,7 @@ import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
 import {
     Home as HomeIcon,
     Users as UsersIcon,
+    UserCheck as EmployeesIcon,
     Clock as ClockIcon,
     FileText as FileTextIcon,
 } from 'lucide-react';
@@ -40,7 +41,11 @@ function DashboardLayout({ onLogout }) {
     const isVisuallyCollapsed =
         windowWidth <= 600 ? false : windowWidth <= 900 ? true : isSidebarCollapsed;
 
-    const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
+    const HR_ROLES = ['HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'];
+    const userRoleUpper = user?.role?.toUpperCase() || '';
+    const isAdmin = userRoleUpper === 'ADMIN';
+    const isHR = HR_ROLES.includes(userRoleUpper);
+    const roleSegment = isAdmin ? 'admin' : isHR ? 'hr' : 'employee';
 
     const { featureNavItems } = useMemo(() => loadFeatureRoutes(), []);
 
@@ -58,27 +63,56 @@ function DashboardLayout({ onLogout }) {
             // Skip Home (handled as primary) and Settings (handled in footer profile card)
             if (item.label === 'Home' || item.label === 'Settings') return;
 
+            // Role-based authorization filter
+            if (item.roles && item.roles.length > 0) {
+                if (!user?.role) return;
+                const userRole = user.role.toUpperCase();
+                const hasRole = item.roles.some((r) => r.toUpperCase() === userRole);
+                if (!hasRole) return;
+            }
+
             // Avoid duplicates
             if (items.some((i) => i.label === item.label)) return;
 
+            // Dynamic route path replacement
+            const dynamicPath = item.path
+                ? item.path.replace(
+                      /\/dashboard\/(?:user|employee|admin|hr)\//,
+                      `/dashboard/${roleSegment}/`,
+                  )
+                : item.path;
+
             let itemIcon = item.icon;
-            if (!itemIcon || typeof itemIcon === 'string') {
+            if (itemIcon && typeof itemIcon === 'object') {
+                // Already a React element (e.g. <Banknote size={18} />)
+            } else if (typeof itemIcon === 'function') {
+                const IconComponent = itemIcon;
+                itemIcon = <IconComponent size={18} />;
+            } else if (!itemIcon || typeof itemIcon === 'string') {
                 if (item.label === 'Users' || item.icon === 'Users')
                     itemIcon = <UsersIcon size={18} />;
+                else if (
+                    item.label === 'Employees' ||
+                    item.icon === 'UserCheck' ||
+                    item.icon === 'Employees'
+                )
+                    itemIcon = <EmployeesIcon size={18} />;
                 else if (item.label === 'Contracts' || item.icon === 'FileText')
                     itemIcon = <FileTextIcon size={18} />;
                 else if (item.label === 'Attendance' || item.icon === 'Clock')
                     itemIcon = <ClockIcon size={18} />;
+                else itemIcon = <UsersIcon size={18} />;
             }
 
             items.push({
                 ...item,
+                path: dynamicPath,
                 icon: itemIcon,
             });
         });
 
         return items;
-    }, [featureNavItems, roleSegment]);
+    }, [featureNavItems, roleSegment, user]);
 
     const handleToggleSidebar = () => {
         setIsSidebarCollapsed((prev) => {

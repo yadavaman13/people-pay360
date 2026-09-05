@@ -62,30 +62,84 @@ export function useAttendance() {
             try {
                 const currentFilters = filtersRef.current;
                 const currentPagination = paginationRef.current;
-                const queryParams = {
-                    page: customParams.page || currentPagination.page || 1,
-                    limit: customParams.limit || currentPagination.limit || 10,
-                    status:
-                        customParams.status !== undefined
-                            ? customParams.status === 'ALL'
-                                ? undefined
-                                : customParams.status
-                            : currentFilters.status === 'ALL'
-                              ? undefined
-                              : currentFilters.status,
-                    dateFrom:
-                        customParams.dateFrom !== undefined
-                            ? customParams.dateFrom
-                            : currentFilters.dateFrom,
-                    dateTo:
-                        customParams.dateTo !== undefined
-                            ? customParams.dateTo
-                            : currentFilters.dateTo,
-                    employeeId:
-                        customParams.employeeId !== undefined
-                            ? customParams.employeeId || undefined
-                            : currentFilters.employeeId || undefined,
-                };
+
+                const page = customParams.page || currentPagination.page || 1;
+                const limit = customParams.limit || currentPagination.limit || 10;
+
+                const rawStatus =
+                    customParams.status !== undefined ? customParams.status : currentFilters.status;
+                const status =
+                    rawStatus && rawStatus !== 'ALL' && rawStatus !== 'all' ? rawStatus : undefined;
+
+                const rawDateFrom =
+                    customParams.dateFrom !== undefined
+                        ? customParams.dateFrom
+                        : currentFilters.dateFrom;
+                const dateFrom = rawDateFrom ? rawDateFrom : undefined;
+
+                const rawDateTo =
+                    customParams.dateTo !== undefined ? customParams.dateTo : currentFilters.dateTo;
+                const dateTo = rawDateTo ? rawDateTo : undefined;
+
+                const rawEmployeeId =
+                    customParams.employeeId !== undefined
+                        ? customParams.employeeId
+                        : currentFilters.employeeId;
+                const employeeId = rawEmployeeId ? rawEmployeeId : undefined;
+
+                let scope;
+                let excludeHr;
+
+                if (customParams.excludeHr) {
+                    // Employee management view: never send scope
+                    excludeHr = true;
+                    scope = undefined;
+                } else if (customParams.scope) {
+                    // Self attendance view: never exclude HR
+                    scope = customParams.scope;
+                    excludeHr = false;
+                } else {
+                    // Fallback to persisted filters
+                    scope = currentFilters.scope || undefined;
+                    excludeHr =
+                        currentFilters.excludeHr !== undefined
+                            ? currentFilters.excludeHr
+                            : undefined;
+                }
+
+                const rawSearch =
+                    customParams.search !== undefined
+                        ? customParams.search
+                        : customParams.searchTerm !== undefined
+                          ? customParams.searchTerm
+                          : currentFilters.search;
+                const search =
+                    rawSearch && typeof rawSearch === 'string' && rawSearch.trim()
+                        ? rawSearch.trim()
+                        : undefined;
+
+                const queryParams = { page, limit };
+                if (status) queryParams.status = status;
+                if (dateFrom) queryParams.dateFrom = dateFrom;
+                if (dateTo) queryParams.dateTo = dateTo;
+                if (employeeId) queryParams.employeeId = employeeId;
+                if (scope) queryParams.scope = scope;
+                if (excludeHr !== undefined) queryParams.excludeHr = excludeHr;
+                if (search) queryParams.search = search;
+
+                if (
+                    customParams.scope !== undefined ||
+                    customParams.excludeHr !== undefined ||
+                    customParams.search !== undefined ||
+                    customParams.searchTerm !== undefined
+                ) {
+                    setFilters((prev) => ({
+                        ...prev,
+                        scope: scope || '',
+                        excludeHr: Boolean(excludeHr),
+                        search: search || '',
+                    }));
+                }
 
                 const res = await attendanceApi.fetchAttendanceList(queryParams);
                 const records = res.data || [];
@@ -93,7 +147,7 @@ export function useAttendance() {
 
                 if (res.pagination) {
                     setPagination({
-                        total: res.pagination.total || records.length,
+                        total: res.pagination.total ?? records.length,
                         page: res.pagination.page || 1,
                         limit: res.pagination.limit || 10,
                         totalPages: res.pagination.totalPages || 1,
@@ -111,7 +165,7 @@ export function useAttendance() {
                 setLoading(false);
             }
         },
-        [setAttendanceRecords, setPagination, setLoading, setError],
+        [setAttendanceRecords, setPagination, setLoading, setError, setFilters],
     );
 
     // ── 2. Fetch Current Day Status ─────────────────────────────────────────
@@ -128,39 +182,47 @@ export function useAttendance() {
     }, [setTodayStatus]);
 
     // ── 3. Fetch HR Summary KPI Stats ───────────────────────────────────────
-    const loadSummaryMetrics = useCallback(async () => {
-        try {
-            const res = await attendanceApi.fetchAttendanceSummary();
-            if (res.data) {
-                // API returns an array: [{ status, count, totalWorkedHours }]
-                // Normalize into a flat object for AttendanceSummaryCards
-                const rawArray = Array.isArray(res.data) ? res.data : [];
-                const normalized = {
-                    presentCount: 0,
-                    lateCount: 0,
-                    absentCount: 0,
-                    halfDayCount: 0,
-                    missingCheckoutCount: 0,
-                    totalRecords: 0,
-                    totalHours: 0,
-                };
-                rawArray.forEach(({ status, count, totalWorkedHours }) => {
-                    const n = Number(count) || 0;
-                    normalized.totalRecords += n;
-                    normalized.totalHours += Number(totalWorkedHours) || 0;
-                    if (status === 'PRESENT') normalized.presentCount = n;
-                    else if (status === 'LATE') normalized.lateCount = n;
-                    else if (status === 'ABSENT') normalized.absentCount = n;
-                    else if (status === 'HALF_DAY') normalized.halfDayCount = n;
-                    else if (status === 'MANUAL_CORRECTION') normalized.missingCheckoutCount += n;
-                });
-                setSummaryMetrics(normalized);
-                return normalized;
+    const loadSummaryMetrics = useCallback(
+        async (params = {}) => {
+            try {
+                const res = await attendanceApi.fetchAttendanceSummary(params);
+                if (res.data) {
+                    // API returns { stats: [{ status, count, totalWorkedHours }], missingCheckoutCount }
+                    const rawData = res.data;
+                    const rawArray = Array.isArray(rawData)
+                        ? rawData
+                        : Array.isArray(rawData?.stats)
+                          ? rawData.stats
+                          : [];
+                    const serverMissingCheckout = rawData?.missingCheckoutCount ?? 0;
+
+                    const normalized = {
+                        presentCount: 0,
+                        lateCount: 0,
+                        absentCount: 0,
+                        halfDayCount: 0,
+                        missingCheckoutCount: Number(serverMissingCheckout),
+                        totalRecords: 0,
+                        totalHours: 0,
+                    };
+                    rawArray.forEach(({ status, count, totalWorkedHours }) => {
+                        const n = Number(count) || 0;
+                        normalized.totalRecords += n;
+                        normalized.totalHours += Number(totalWorkedHours) || 0;
+                        if (status === 'PRESENT') normalized.presentCount = n;
+                        else if (status === 'LATE') normalized.lateCount = n;
+                        else if (status === 'ABSENT') normalized.absentCount = n;
+                        else if (status === 'HALF_DAY') normalized.halfDayCount = n;
+                    });
+                    setSummaryMetrics(normalized);
+                    return normalized;
+                }
+            } catch (err) {
+                console.warn('Could not load summary metrics:', err.message);
             }
-        } catch (err) {
-            console.warn('Could not load summary metrics:', err.message);
-        }
-    }, [setSummaryMetrics]);
+        },
+        [setSummaryMetrics],
+    );
 
     // ── 4. Fetch Record Detail by ID ────────────────────────────────────────
     const loadAttendanceById = useCallback(
@@ -371,7 +433,7 @@ export function useAttendance() {
     );
 
     const changeMonth = useCallback(
-        (offsetOrDate) => {
+        (offsetOrDate, extraParams = {}) => {
             let nextDate;
             if (typeof offsetOrDate === 'number') {
                 nextDate = new Date(selectedMonthRef.current);
@@ -396,7 +458,7 @@ export function useAttendance() {
                 dateTo: lastDay,
             }));
 
-            loadAttendanceList({ dateFrom: firstDay, dateTo: lastDay, page: 1 });
+            loadAttendanceList({ dateFrom: firstDay, dateTo: lastDay, page: 1, ...extraParams });
         },
         [setSelectedMonth, setFilters, loadAttendanceList],
     );

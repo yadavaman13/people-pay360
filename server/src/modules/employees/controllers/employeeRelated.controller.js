@@ -3,6 +3,7 @@ import * as employeeDao from '../../../dao/employee.dao.js';
 import * as attendanceDao from '../../../dao/attendance.dao.js';
 import * as timeOffRequestDao from '../../../dao/timeOffRequest.dao.js';
 import * as allocationDao from '../../../dao/allocation.dao.js';
+import * as bankAccountDao from '../../../dao/bankAccount.dao.js';
 import { sendResponse } from '../../../utils/response.utlis.js';
 import { AppError } from '../../../utils/appError.js';
 
@@ -232,6 +233,139 @@ export async function getEmployeeAllocations(req, res, next) {
                 limit: result.limit,
                 totalPages: result.totalPages,
             },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Get all active bank accounts for an employee
+ * GET /api/employees/:id/bank-accounts
+ */
+export async function getEmployeeBankAccounts(req, res, next) {
+    try {
+        const employee = await employeeDao.findEmployeeById(req.params.id);
+        if (!employee) {
+            throw new AppError('Employee not found', 404);
+        }
+        checkEmployeeAccess(employee, req.user);
+
+        const accounts = await bankAccountDao.findBankAccountsByEmployeeId(req.params.id);
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Employee bank accounts fetched successfully',
+            data: accounts,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Add a bank account for an employee
+ * POST /api/employees/:id/bank-accounts
+ */
+export async function createEmployeeBankAccount(req, res, next) {
+    try {
+        const employee = await employeeDao.findEmployeeById(req.params.id);
+        if (!employee) {
+            throw new AppError('Employee not found', 404);
+        }
+        checkEmployeeAccess(employee, req.user);
+
+        const { bankName, accountNumber, accountHolderName, ifscCode, accountType, isPrimary } =
+            req.body;
+
+        if (!bankName || !accountNumber || !accountHolderName || !ifscCode) {
+            throw new AppError(
+                'Bank name, account number, account holder name, and IFSC code are required',
+                400,
+            );
+        }
+
+        const newAccount = await bankAccountDao.createBankAccount({
+            employeeId: req.params.id,
+            bankName,
+            accountNumber,
+            accountHolderName,
+            ifscCode: String(ifscCode).toUpperCase(),
+            accountType: accountType ? String(accountType).toUpperCase() : 'SAVINGS',
+            isPrimary: Boolean(isPrimary),
+            isActive: true,
+        });
+
+        return sendResponse({
+            res,
+            statusCode: 201,
+            success: true,
+            message: 'Bank account added successfully',
+            data: newAccount,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Set an account as the primary bank account
+ * PATCH /api/employees/:id/bank-accounts/:accountId/primary
+ */
+export async function setPrimaryBankAccount(req, res, next) {
+    try {
+        const employee = await employeeDao.findEmployeeById(req.params.id);
+        if (!employee) {
+            throw new AppError('Employee not found', 404);
+        }
+        checkEmployeeAccess(employee, req.user);
+
+        const updated = await bankAccountDao.setPrimaryBankAccount(
+            req.params.id,
+            req.params.accountId,
+        );
+
+        if (!updated) {
+            throw new AppError('Bank account not found for this employee', 404);
+        }
+
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Primary bank account updated successfully',
+            data: updated,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Delete bank account
+ * DELETE /api/employees/:id/bank-accounts/:accountId
+ */
+export async function deleteBankAccount(req, res, next) {
+    try {
+        const employee = await employeeDao.findEmployeeById(req.params.id);
+        if (!employee) {
+            throw new AppError('Employee not found', 404);
+        }
+        checkEmployeeAccess(employee, req.user);
+
+        const deleted = await bankAccountDao.deleteBankAccount(req.params.id, req.params.accountId);
+
+        if (!deleted) {
+            throw new AppError('Bank account not found for this employee', 404);
+        }
+
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Bank account deleted successfully',
+            data: deleted,
         });
     } catch (error) {
         next(error);

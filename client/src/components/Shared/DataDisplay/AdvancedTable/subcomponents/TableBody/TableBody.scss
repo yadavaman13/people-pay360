@@ -16,6 +16,10 @@
             background-color: variables.$color-gray-50;
         }
 
+        &.is-row-clickable {
+            cursor: pointer;
+        }
+
         &.row-selected {
             background-color: rgb(47 84 235 / 2%);
 

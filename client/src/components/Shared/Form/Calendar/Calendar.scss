@@ -17,17 +17,23 @@
 
 .calendar-body-content {
     width: 100%;
+    box-sizing: border-box;
 
     .calendar-card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 18px;
+        margin-bottom: 14px;
+        width: 100%;
+        box-sizing: border-box;
+        gap: 6px;
 
         .calendar-header-selectors {
             display: flex;
             align-items: center;
             gap: 4px;
+            min-width: 0;
+            flex-shrink: 1;
 
             .calendar-selector-btn {
                 display: inline-flex;
@@ -67,7 +73,8 @@
             }
 
             .calendar-header-year-dropdown {
-                width: 78px;
+                width: 76px;
+                flex-shrink: 0;
 
                 .shared-dropdown {
                     position: relative;
@@ -164,7 +171,9 @@
 
         .calendar-nav-actions {
             display: flex;
-            gap: 6px;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
 
             .nav-arrow-btn {
                 display: flex;

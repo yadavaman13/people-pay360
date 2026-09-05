@@ -84,6 +84,7 @@ function AdvancedTable({
     showTabs = null, // auto-detected from tabs.length if null
     onTabChange = null,
     searchable = false,
+    searchTerm: controlledSearchTerm = null,
     searchPlaceholder = 'Search records...',
     searchPlaceholderPrefix = 'Search by ',
     searchOptions = null,
@@ -142,6 +143,7 @@ function AdvancedTable({
     cardBodyKeys = [],
     statusVariantMap = {},
     onCardClick,
+    onRowClick = null,
     renderCard,
     gridSkeletonCount = 8,
 }) {
@@ -156,7 +158,16 @@ function AdvancedTable({
 
     const effectiveItemsPerPageLabel =
         itemsPerPageLabel || (activeView === 'grid' ? 'Cards per page' : 'Rows per page');
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState(
+        typeof controlledSearchTerm === 'string' ? controlledSearchTerm : '',
+    );
+
+    useEffect(() => {
+        if (typeof controlledSearchTerm === 'string' && controlledSearchTerm !== searchTerm) {
+            setSearchTerm(controlledSearchTerm);
+        }
+    }, [controlledSearchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const [internalActiveTab, setInternalActiveTab] = useState('all');
     const activeTab = controlledActiveTab !== null ? controlledActiveTab : internalActiveTab;
     const [sortConfig, setSortConfig] = useState(defaultSort || { key: null, direction: null });
@@ -680,7 +691,9 @@ function AdvancedTable({
     const tabCounts = useMemo(() => {
         const counts = {};
         effectiveTabs.forEach((tab) => {
-            if (tab.id === 'all') counts[tab.id] = internalData.length;
+            if (tab.count !== undefined) counts[tab.id] = tab.count;
+            else if (tab.id === 'all')
+                counts[tab.id] = totalCount !== null ? totalCount : internalData.length;
             else if (tab.filterFn) counts[tab.id] = internalData.filter(tab.filterFn).length;
             else if (tabFilterKey)
                 counts[tab.id] = internalData.filter(
@@ -689,7 +702,7 @@ function AdvancedTable({
             else counts[tab.id] = internalData.length;
         });
         return counts;
-    }, [effectiveTabs, internalData, tabFilterKey]);
+    }, [effectiveTabs, internalData, tabFilterKey, totalCount]);
 
     const tabsWithCounts = useMemo(
         () =>
@@ -1002,6 +1015,7 @@ function AdvancedTable({
                                 searchTerm={searchTerm}
                                 onRowFieldChange={handleRowFieldChange}
                                 onCellContextMenu={handleCellContextMenu}
+                                onRowClick={onRowClick}
                             />
                         </table>
                     </div>

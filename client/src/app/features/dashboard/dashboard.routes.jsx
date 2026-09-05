@@ -1,12 +1,14 @@
 export default {
-    navItem: {
-        label: 'Home',
-        path: '/dashboard/user/home',
-    },
-    userRoutes: [
+    employeeRoutes: [
         {
             path: 'home',
-            element: <div className="main-dashboard-placeholder">This is main dashboard</div>,
+            element: <div className="main-dashboard-placeholder">This is employee dashboard</div>,
+        },
+    ],
+    hrRoutes: [
+        {
+            path: 'home',
+            element: <div className="main-dashboard-placeholder">This is HR dashboard</div>,
         },
     ],
     adminRoutes: [

@@ -59,15 +59,17 @@ export function useTablePagination({
 
     const showRowsPerPage = useMemo(() => {
         if (totalRows <= 1) return false;
+        if (serverSide) return true;
         return rowsOptions.filter((opt) => !opt.disabled && opt.value < totalRows).length >= 1;
-    }, [rowsOptions, totalRows]);
+    }, [rowsOptions, totalRows, serverSide]);
 
     const totalPages = Math.max(Math.ceil(totalRows / rowsPerPage), 1);
 
     useEffect(() => {
+        if (totalRows === 0) return;
         if (currentPage > totalPages) setCurrentPage(totalPages);
         if (currentPage < 1) setCurrentPage(1);
-    }, [totalPages, currentPage]);
+    }, [totalPages, currentPage, totalRows]);
 
     const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
 

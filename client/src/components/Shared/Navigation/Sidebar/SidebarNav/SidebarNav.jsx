@@ -34,7 +34,11 @@ function SidebarNav({
 
     // Resolve the role segment from the current URL
     const segments = pathname.split('/').filter(Boolean);
-    const roleSegment = segments.includes('admin') ? 'admin' : 'user';
+    const roleSegment = segments.includes('admin')
+        ? 'admin'
+        : segments.includes('hr')
+          ? 'hr'
+          : 'employee';
 
     const handlePinToggle = (label) => {
         let nextPinned;
@@ -79,6 +83,15 @@ function SidebarNav({
             case 'Users':
                 navigate('/dashboard/admin/users');
                 break;
+            case 'Attendance':
+                if (roleSegment === 'admin') {
+                    navigate('/dashboard/admin/attendance/employees-attendance');
+                } else if (roleSegment === 'hr') {
+                    navigate('/dashboard/hr/attendance/my-attendance');
+                } else {
+                    navigate('/dashboard/employee/attendance');
+                }
+                break;
             default:
                 navigate(`/dashboard/${roleSegment}`);
         }
@@ -117,7 +130,7 @@ function SidebarNav({
 
                 return (
                     <div
-                        key={item.label}
+                        key={`${item.label}-${item.path || ''}`}
                         className={`sidebar-nav-item-wrapper ${item.subTabs ? 'has-subtabs' : ''} ${isActive ? 'is-active-tab' : ''} ${isPinned ? 'is-pinned-tab' : ''}`}
                     >
                         <Tooltip

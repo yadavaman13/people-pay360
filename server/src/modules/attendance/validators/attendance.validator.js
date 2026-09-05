@@ -75,21 +75,34 @@ export const attendanceIdParamValidator = [
 ];
 
 export const listAttendanceValidator = [
-    query('employeeId').optional().isUUID().withMessage('employeeId must be a valid UUID'),
+    query('employeeId')
+        .optional({ checkFalsy: true })
+        .custom((val) => {
+            if (val === 'me') return true;
+            const uuidRegex =
+                /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            if (!uuidRegex.test(val)) {
+                throw new Error('employeeId must be a valid UUID or "me"');
+            }
+            return true;
+        }),
+    query('scope').optional({ checkFalsy: true }).isString().withMessage('scope must be a string'),
+    query('excludeHr').optional().toBoolean(),
+    query('search').optional({ checkFalsy: true }).isString().trim(),
     query('dateFrom')
-        .optional()
+        .optional({ checkFalsy: true })
         .isDate({ format: 'YYYY-MM-DD' })
         .withMessage('dateFrom must be in YYYY-MM-DD format'),
     query('dateTo')
-        .optional()
+        .optional({ checkFalsy: true })
         .isDate({ format: 'YYYY-MM-DD' })
         .withMessage('dateTo must be in YYYY-MM-DD format'),
     query('status')
-        .optional()
+        .optional({ checkFalsy: true })
         .toUpperCase()
         .isIn(['PRESENT', 'LATE', 'ABSENT', 'HALF_DAY', 'MANUAL_CORRECTION'])
         .withMessage('status must be one of PRESENT, LATE, ABSENT, HALF_DAY, MANUAL_CORRECTION'),
-    query('page').optional().isInt({ min: 1 }).toInt(),
-    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('page').optional({ checkFalsy: true }).isInt({ min: 1 }).toInt(),
+    query('limit').optional({ checkFalsy: true }).isInt({ min: 1, max: 100 }).toInt(),
     validateRequest,
 ];

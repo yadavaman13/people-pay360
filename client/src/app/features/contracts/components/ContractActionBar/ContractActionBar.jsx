@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { Edit3, CheckCircle2, Ban, Trash2 } from 'lucide-react';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import Dialog from '@/components/Shared/Feedback/Dialog';
@@ -14,6 +14,12 @@ function ContractActionBar({
     actionLoading = false,
 }) {
     const navigate = useNavigate();
+    const { pathname } = useLocation();
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
     const [dialogState, setDialogState] = useState({
         isOpen: false,
         type: null,
@@ -87,7 +93,7 @@ function ContractActionBar({
         } else if (type === 'delete' && onDelete) {
             const res = await onDelete(contract.id);
             if (res?.success) {
-                navigate('/dashboard/user/contracts');
+                navigate(`/dashboard/${roleSegment}/contracts`);
             }
         }
     };
@@ -102,7 +108,9 @@ function ContractActionBar({
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate(`/dashboard/user/contracts/${contract.id}/edit`)}
+                    onClick={() =>
+                        navigate(`/dashboard/${roleSegment}/contracts/${contract.id}/edit`)
+                    }
                     disabled={actionLoading}
                     className="action-btn"
                 >

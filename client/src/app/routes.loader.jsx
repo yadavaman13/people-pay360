@@ -6,7 +6,8 @@ import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
  * Automatically scans all `*.routes.jsx` files in `src/app/features/`
  * using Vite's `import.meta.glob` and aggregates them by target layout:
  *
- * - `userRoutes`: Injected into `/dashboard/user/`
+ * - `employeeRoutes`: Injected into `/dashboard/employee/`
+ * - `hrRoutes`: Injected into `/dashboard/hr/`
  * - `adminRoutes`: Injected into `/dashboard/admin/`
  * - `publicRoutes`: Injected at root level `/`
  * - `featureNavItems`: Aggregated sidebar navigation item metadata
@@ -14,9 +15,9 @@ import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
  * Supported feature export formats:
  * 1. Unified Multi-Role RBAC Format (Recommended):
  *    export default {
- *        allowedRoles: ['admin', 'manager', 'sales_rep'],
- *        navItem: { label: 'Leads', path: '/dashboard/user/leads', icon: 'Users', roles: [...] },
- *        routes: [ { path: 'leads', element: <LeadsPage /> } ]
+ *        allowedRoles: ['ADMIN', 'HR', 'EMPLOYEE'],
+ *        navItem: { label: 'Employees', path: '/dashboard/employee/employees', icon: 'UserCheck', roles: [...] },
+ *        routes: [ { path: 'employees', element: <EmployeesPage /> } ]
  *    }
  *
  * 2. Explicit named route arrays:
@@ -41,7 +42,9 @@ function formatSegmentToTitle(segment) {
 
 function cleanPathSegment(path) {
     if (!path) return '';
-    return path.replace(/^\/?dashboard\/(?:(?:user|admin)\/)?/, '').replace(/^\/+|\/+$/g, '');
+    return path
+        .replace(/^\/?dashboard\/(?:(?:employee|user|admin|hr)\/)?/, '')
+        .replace(/^\/+|\/+$/g, '');
 }
 
 // Registry mapping path keys to navigation metadata
@@ -70,6 +73,14 @@ function registerNavEntry(path, label, subTabs = [], isExplicit = false) {
     featureNavRegistry.set(cleaned, entry);
     if (primary && (!featureNavRegistry.has(primary) || isExplicit)) {
         featureNavRegistry.set(primary, entry);
+    }
+
+    if (isExplicit && subTabs && subTabs.length > 0) {
+        subTabs.forEach((sub) => {
+            const subLabel = typeof sub === 'string' ? sub : sub.label || formatSegmentToTitle(sub);
+            const subKey = subLabel.toLowerCase().replace(/\s+/g, '-');
+            featureNavRegistry.set(`${primary}/${subKey}`, entry);
+        });
     }
 }
 
@@ -104,7 +115,9 @@ function initFeatureNavRegistry() {
                 });
             };
 
+            scanRoutes(cfg.employeeRoutes);
             scanRoutes(cfg.userRoutes);
+            scanRoutes(cfg.hrRoutes);
             scanRoutes(cfg.adminRoutes);
             scanRoutes(cfg.routes);
         });
@@ -120,13 +133,24 @@ initFeatureNavRegistry();
 export function resolveNavState(pathname) {
     if (!pathname) return DEFAULT_TAB;
 
-    const match = pathname.match(/\/dashboard\/(?:(?:user|admin)\/)?([^/]+)(?:\/([^/]+))?/);
+    const match = pathname.match(
+        /\/dashboard\/(?:(?:employee|user|admin|hr)\/)?([^/]+)(?:\/([^/]+))?/,
+    );
     if (!match) return DEFAULT_TAB;
 
     const [, primary, secondary] = match;
     const fullSubPath = secondary ? `${primary}/${secondary}` : primary;
 
-    const entry = featureNavRegistry.get(fullSubPath) || featureNavRegistry.get(primary);
+    const fullEntry = featureNavRegistry.get(fullSubPath);
+    const primaryEntry = featureNavRegistry.get(primary);
+
+    // Prioritize explicit navigation entries: if primary module explicitly declares subTabs,
+    // it handles all sub-routes unless the sub-route itself has an explicit nav item.
+    const entry = fullEntry?.isExplicit
+        ? fullEntry
+        : primaryEntry?.isExplicit && primaryEntry?.subTabs?.length > 0
+          ? primaryEntry
+          : fullEntry || primaryEntry;
 
     if (entry) {
         let activeSubTab = '';
@@ -153,7 +177,8 @@ export function resolveNavState(pathname) {
 }
 
 export function loadFeatureRoutes() {
-    const userRoutes = [];
+    const employeeRoutes = [];
+    const hrRoutes = [];
     const adminRoutes = [];
     const publicRoutes = [];
     const featureNavItems = [];
@@ -169,10 +194,22 @@ export function loadFeatureRoutes() {
             });
         }
 
-        // Format 1: Explicit target arrays (userRoutes, adminRoutes, publicRoutes)
+        // Format 1: Explicit target arrays (employeeRoutes, userRoutes, hrRoutes, adminRoutes, publicRoutes)
+        if (config.employeeRoutes) {
+            employeeRoutes.push(
+                ...(Array.isArray(config.employeeRoutes)
+                    ? config.employeeRoutes
+                    : [config.employeeRoutes]),
+            );
+        }
         if (config.userRoutes) {
-            userRoutes.push(
+            employeeRoutes.push(
                 ...(Array.isArray(config.userRoutes) ? config.userRoutes : [config.userRoutes]),
+            );
+        }
+        if (config.hrRoutes) {
+            hrRoutes.push(
+                ...(Array.isArray(config.hrRoutes) ? config.hrRoutes : [config.hrRoutes]),
             );
         }
         if (config.adminRoutes) {
@@ -200,7 +237,8 @@ export function loadFeatureRoutes() {
                 ),
             }));
 
-            userRoutes.push(...protectedRoutes);
+            employeeRoutes.push(...protectedRoutes);
+            hrRoutes.push(...protectedRoutes);
             adminRoutes.push(...protectedRoutes);
         }
 
@@ -208,12 +246,15 @@ export function loadFeatureRoutes() {
         if (config.target && config.routes) {
             const routesList = Array.isArray(config.routes) ? config.routes : [config.routes];
 
-            if (config.target === 'user') {
-                userRoutes.push(...routesList);
+            if (config.target === 'employee' || config.target === 'user') {
+                employeeRoutes.push(...routesList);
+            } else if (config.target === 'hr') {
+                hrRoutes.push(...routesList);
             } else if (config.target === 'admin') {
                 adminRoutes.push(...routesList);
             } else if (config.target === 'both' || config.target === 'all') {
-                userRoutes.push(...routesList);
+                employeeRoutes.push(...routesList);
+                hrRoutes.push(...routesList);
                 adminRoutes.push(...routesList);
             } else if (config.target === 'public') {
                 publicRoutes.push(...routesList);
@@ -232,7 +273,9 @@ export function loadFeatureRoutes() {
     });
 
     return {
-        userRoutes,
+        employeeRoutes,
+        userRoutes: employeeRoutes,
+        hrRoutes,
         adminRoutes,
         publicRoutes,
         featureNavItems,

@@ -114,13 +114,19 @@ export async function deleteAttendance(req, res, next) {
 
 export async function getSummaryStats(req, res, next) {
     try {
-        const stats = await attendanceService.getAttendanceSummary(req.query);
+        const result = await attendanceService.getAttendanceSummary(req.query);
+        // result = { stats: [{status, count, totalWorkedHours}], missingCheckoutCount }
+        const stats = result?.stats ?? result ?? [];
+        const missingCheckoutCount = result?.missingCheckoutCount ?? 0;
         return sendResponse({
             res,
             statusCode: 200,
             success: true,
             message: 'Attendance summary stats fetched successfully',
-            data: stats,
+            data: {
+                stats,
+                missingCheckoutCount,
+            },
         });
     } catch (error) {
         next(error);
