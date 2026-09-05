@@ -7,7 +7,12 @@ import Dialog from '@/components/Shared/Feedback/Dialog';
 import { Drawer, NotificationFeed } from '@/components/Shared/Feedback/Drawer';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
-import { Home as HomeIcon, Users as UsersIcon, FileText as FileTextIcon } from 'lucide-react';
+import {
+    Home as HomeIcon,
+    Users as UsersIcon,
+    Clock as ClockIcon,
+    FileText as FileTextIcon,
+} from 'lucide-react';
 import { loadFeatureRoutes } from '@/app/routes.loader';
 import './DashboardLayout.scss';
 
@@ -57,9 +62,13 @@ function DashboardLayout({ onLogout }) {
             if (items.some((i) => i.label === item.label)) return;
 
             let itemIcon = item.icon;
-            if (!itemIcon) {
-                if (item.label === 'Users') itemIcon = <UsersIcon size={18} />;
-                else if (item.label === 'Contracts') itemIcon = <FileTextIcon size={18} />;
+            if (!itemIcon || typeof itemIcon === 'string') {
+                if (item.label === 'Users' || item.icon === 'Users')
+                    itemIcon = <UsersIcon size={18} />;
+                else if (item.label === 'Contracts' || item.icon === 'FileText')
+                    itemIcon = <FileTextIcon size={18} />;
+                else if (item.label === 'Attendance' || item.icon === 'Clock')
+                    itemIcon = <ClockIcon size={18} />;
             }
 
             items.push({
