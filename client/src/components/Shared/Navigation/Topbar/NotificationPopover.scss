@@ -1,0 +1,197 @@
+@use '../../../../styles/variables';
+
+.notif-popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 360px;
+    background: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    box-shadow:
+        0 4px 6px -1px rgb(0 0 0 / 7%),
+        0 10px 24px -4px rgb(0 0 0 / 10%);
+    z-index: variables.$z-dropdown;
+    animation: popover-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+
+    // ── Header ──────────────────────────────────────────────
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px 10px;
+        border-bottom: 1px solid variables.$color-gray-100;
+    }
+
+    &__title {
+        font-family: variables.$font-sans;
+        font-size: variables.$font-size-sm;
+        font-weight: 700;
+        color: variables.$color-gray-900;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__unread-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+        color: variables.$color-white;
+        font-size: variables.$font-size-xxs;
+        font-weight: 700;
+        border-radius: 9999px;
+        letter-spacing: 0.3px;
+    }
+
+    // ── Body ────────────────────────────────────────────────
+    &__body {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    &__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    &__item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 16px;
+        border-bottom: 1px solid variables.$color-gray-50;
+        cursor: default;
+
+        @include variables.transition-ease;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:hover {
+            background: variables.$color-gray-50;
+        }
+
+        &.is-unread {
+            background: rgb(99 102 241 / 3%);
+
+            .notif-popover__item-dot {
+                background: variables.$color-primary;
+            }
+        }
+    }
+
+    &__item-dot {
+        flex-shrink: 0;
+        width: 8px;
+        height: 8px;
+        margin-top: 5px;
+        border-radius: 50%;
+        background: transparent;
+        border: 1.5px solid variables.$color-gray-300;
+    }
+
+    &__item-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__item-text {
+        margin: 0 0 3px;
+        font-family: variables.$font-sans;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-800;
+        line-height: 1.45;
+
+        strong {
+            color: variables.$color-gray-900;
+            font-weight: 600;
+        }
+
+        em {
+            font-style: normal;
+            color: variables.$color-primary;
+        }
+    }
+
+    &__item-time {
+        font-family: variables.$font-sans;
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-400;
+    }
+
+    // ── Empty state ──────────────────────────────────────────
+    &__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 28px 20px 24px;
+        gap: 6px;
+    }
+
+    &__empty-icon {
+        color: variables.$color-gray-300;
+        margin-bottom: 4px;
+    }
+
+    &__empty-title {
+        margin: 0;
+        font-family: variables.$font-sans;
+        font-size: variables.$font-size-sm;
+        font-weight: 700;
+        color: variables.$color-gray-700;
+    }
+
+    &__empty-desc {
+        margin: 0;
+        font-family: variables.$font-sans;
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-400;
+        line-height: 1.55;
+    }
+
+    // ── Footer ──────────────────────────────────────────────
+    &__footer {
+        border-top: 1px solid variables.$color-gray-100;
+        padding: 0;
+    }
+
+    &__view-all {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        padding: 11px 16px;
+        font-family: variables.$font-sans;
+        font-size: variables.$font-size-sm;
+        font-weight: 600;
+        color: variables.$color-primary;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+
+        @include variables.transition-ease;
+
+        &:hover {
+            background: rgb(99 102 241 / 5%);
+        }
+    }
+}
+
+@keyframes popover-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
