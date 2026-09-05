@@ -19,6 +19,7 @@ function TableBody({
     searchTerm = '',
     onRowFieldChange,
     onCellContextMenu,
+    onRowClick,
 }) {
     const colSpan = effectiveColumns.length + (selectable ? 1 : 0) + (showSerialNumber ? 1 : 0) + 1;
 
@@ -54,6 +55,7 @@ function TableBody({
                             searchTerm={searchTerm}
                             onRowFieldChange={onRowFieldChange}
                             onCellContextMenu={onCellContextMenu}
+                            onRowClick={onRowClick}
                         />
                     );
                 })

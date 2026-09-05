@@ -1,6 +1,9 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { protect, restrictTo } from '../../auth/middleware/auth.middleware.js';
 import * as employeeController from '../controllers/employee.controller.js';
+
+const upload = multer({ storage: multer.memoryStorage() });
 import * as employeeRelatedController from '../controllers/employeeRelated.controller.js';
 import {
     createEmployeeProfileValidator,
@@ -43,11 +46,15 @@ router.get(
 router
     .route('/')
     .get(
-        restrictTo('HR_MANAGER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
+        restrictTo('HR_MANAGER', 'HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
         listEmployeesValidator,
         employeeController.listEmployees,
     )
-    .post(createEmployeeProfileValidator, employeeController.createEmployeeProfile);
+    .post(
+        restrictTo('HR_MANAGER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
+        createEmployeeProfileValidator,
+        employeeController.createEmployeeProfile,
+    );
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EMPLOYEE RELATED SUB-RESOURCES
@@ -75,15 +82,33 @@ router.get(
     listEmployeeAllocationsValidator,
     employeeRelatedController.getEmployeeAllocations,
 );
+router.get('/:id/bank-accounts', employeeRelatedController.getEmployeeBankAccounts);
+router.post('/:id/bank-accounts', employeeRelatedController.createEmployeeBankAccount);
+router.patch(
+    '/:id/bank-accounts/:accountId/primary',
+    employeeRelatedController.setPrimaryBankAccount,
+);
+router.delete('/:id/bank-accounts/:accountId', employeeRelatedController.deleteBankAccount);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PARAMETERIZED /:id ROUTES
 // ─────────────────────────────────────────────────────────────────────────────
 
+router.patch(
+    '/:id/avatar',
+    restrictTo('HR_MANAGER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
+    upload.single('avatar'),
+    employeeController.uploadEmployeeAvatar,
+);
+
 router
     .route('/:id')
     .get(employeeController.getEmployee)
-    .patch(updateEmployeeValidator, employeeController.updateEmployee)
+    .patch(
+        restrictTo('HR_MANAGER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
+        updateEmployeeValidator,
+        employeeController.updateEmployee,
+    )
     .delete(restrictTo('ADMIN', 'HR_MANAGER'), employeeController.deleteEmployee);
 
 export default router;

@@ -17,17 +17,25 @@ function TableRow({
     searchTerm = '',
     onRowFieldChange,
     onCellContextMenu,
+    onRowClick,
 }) {
     const handleRowClick = (e) => {
         // If user clicked an interactive control (input, button, link, checkbox container), let control handle it
-        const isInteractive = e.target.closest(
-            'button, input, a, select, textarea, label.checkbox-custom-container',
-        );
+        const isInteractive = e?.target?.closest
+            ? e.target.closest(
+                  'button, input, a, select, textarea, label.checkbox-custom-container',
+              )
+            : false;
         if (isInteractive) return;
 
         // Once user clicks at least 1 checkbox (selectedCount > 0), clicking anywhere on any row selects/deselects it
         if (selectedCount > 0 && selectable) {
             handleSelectRow(row.id);
+            return;
+        }
+
+        if (onRowClick) {
+            onRowClick(row, rowIndex, e);
         }
     };
 
@@ -42,7 +50,7 @@ function TableRow({
     return (
         <tr
             key={row.id || rowIndex}
-            className={`advanced-table-row ${isChecked ? 'row-selected' : ''} ${isEditing ? 'row-editing' : ''} ${selectedCount > 0 ? 'is-row-clickable' : ''}`}
+            className={`advanced-table-row ${isChecked ? 'row-selected' : ''} ${isEditing ? 'row-editing' : ''} ${selectedCount > 0 || onRowClick ? 'is-row-clickable' : ''}`}
             onClick={handleRowClick}
             onContextMenu={(e) => handleCellContextMenu(e, null)}
         >

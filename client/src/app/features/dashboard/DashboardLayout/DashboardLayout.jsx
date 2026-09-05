@@ -10,6 +10,7 @@ import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
 import {
     Home as HomeIcon,
     Users as UsersIcon,
+    UserCheck as EmployeesIcon,
     Clock as ClockIcon,
     FileText as FileTextIcon,
 } from 'lucide-react';
@@ -65,10 +66,17 @@ function DashboardLayout({ onLogout }) {
             if (!itemIcon || typeof itemIcon === 'string') {
                 if (item.label === 'Users' || item.icon === 'Users')
                     itemIcon = <UsersIcon size={18} />;
+                else if (
+                    item.label === 'Employees' ||
+                    item.icon === 'UserCheck' ||
+                    item.icon === 'Employees'
+                )
+                    itemIcon = <EmployeesIcon size={18} />;
                 else if (item.label === 'Contracts' || item.icon === 'FileText')
                     itemIcon = <FileTextIcon size={18} />;
                 else if (item.label === 'Attendance' || item.icon === 'Clock')
                     itemIcon = <ClockIcon size={18} />;
+                else itemIcon = <UsersIcon size={18} />;
             }
 
             items.push({

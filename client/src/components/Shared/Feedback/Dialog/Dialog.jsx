@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, isValidElement } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import './Dialog.scss';
@@ -22,7 +22,7 @@ function Dialog({
     onClose,
     title,
     variant = 'primary', // primary | danger | success | warning
-    size = 'md', // sm | md | lg
+    size = 'md', // sm | md | lg | xl
     confirmText = 'Confirm',
     cancelText = 'Cancel',
     onConfirm,
@@ -30,6 +30,7 @@ function Dialog({
     showCloseIcon = true,
     confirmLoading = false,
     confirmDisabled = false,
+    footer,
     children,
 }) {
     // Prevent scrolling on background when modal is open
@@ -105,27 +106,38 @@ function Dialog({
                 <div className="shared-dialog-body">{children}</div>
 
                 {/* Footer Actions */}
-                {Boolean(cancelText || confirmText) && (
-                    <div className="shared-dialog-footer">
-                        {cancelText && (
-                            <Button
-                                preset="cancel"
-                                onClick={onClose}
-                                label={cancelText}
-                                disabled={confirmLoading}
-                            />
-                        )}
-                        {confirmText && (
-                            <Button
-                                preset="save"
-                                onClick={onConfirm}
-                                label={confirmText}
-                                variant={variant}
-                                loading={confirmLoading}
-                                disabled={confirmDisabled || confirmLoading}
-                            />
-                        )}
-                    </div>
+                {footer !== undefined ? (
+                    footer ? (
+                        isValidElement(footer) &&
+                        footer.props?.className?.includes('shared-dialog-footer') ? (
+                            footer
+                        ) : (
+                            <div className="shared-dialog-footer">{footer}</div>
+                        )
+                    ) : null
+                ) : (
+                    Boolean(cancelText || confirmText) && (
+                        <div className="shared-dialog-footer">
+                            {cancelText && (
+                                <Button
+                                    preset="cancel"
+                                    onClick={onClose}
+                                    label={cancelText}
+                                    disabled={confirmLoading}
+                                />
+                            )}
+                            {confirmText && (
+                                <Button
+                                    preset="save"
+                                    onClick={onConfirm}
+                                    label={confirmText}
+                                    variant={variant}
+                                    loading={confirmLoading}
+                                    disabled={confirmDisabled || confirmLoading}
+                                />
+                            )}
+                        </div>
+                    )
                 )}
             </div>
         </div>

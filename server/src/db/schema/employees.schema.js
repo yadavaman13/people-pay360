@@ -53,6 +53,9 @@ export const employees = pgTable(
         gender: text('gender'),
         dateOfBirth: date('date_of_birth'),
         address: text('address'),
+        profileImage: text('profile_image').default(
+            'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
+        ),
 
         // Employment dates.
         // DATE type — calendar concept, not a timestamped event.

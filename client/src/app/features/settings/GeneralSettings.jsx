@@ -1,9 +1,12 @@
+import { Link, useLocation } from 'react-router';
 import { useTheme } from '@/hooks';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import './GeneralSettings.scss';
 
 export default function GeneralSettings() {
     const { theme, setTheme, resolvedTheme } = useTheme();
+    const { pathname } = useLocation();
+    const roleSegment = pathname.includes('/admin/') ? 'admin' : 'user';
 
     return (
         <div className="general-settings-container">
@@ -12,6 +15,21 @@ export default function GeneralSettings() {
                 <p className="settings-card-subtitle">
                     Personalize your application theme, localization, and preferences
                 </p>
+            </div>
+
+            <div className="settings-nav-tabs">
+                <Link
+                    to={`/dashboard/${roleSegment}/settings/general`}
+                    className="settings-nav-tab active"
+                >
+                    General
+                </Link>
+                <Link
+                    to={`/dashboard/${roleSegment}/settings/account`}
+                    className="settings-nav-tab"
+                >
+                    Account
+                </Link>
             </div>
 
             <div className="general-settings-content">
