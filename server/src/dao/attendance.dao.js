@@ -1,6 +1,7 @@
 import { db } from '../config/database.config.js';
 import { attendanceRecords, attendancePunches } from '../db/schema/attendance.schema.js';
 import { employees } from '../db/schema/employees.schema.js';
+import { users } from '../db/schema/users.schema.js';
 import { eq, and, gte, lte, desc, sql, count, inArray } from 'drizzle-orm';
 
 /**
@@ -60,10 +61,12 @@ export async function findAttendanceList({
                     firstName: employees.firstName,
                     lastName: employees.lastName,
                     email: employees.email,
+                    profileImage: users.profileImage,
                 },
             })
             .from(attendanceRecords)
             .leftJoin(employees, eq(attendanceRecords.employeeId, employees.id))
+            .leftJoin(users, eq(employees.userId, users.id))
             .where(whereClause)
             .orderBy(desc(attendanceRecords.attendanceDate), desc(attendanceRecords.checkInTime))
             .limit(limit)
@@ -136,11 +139,13 @@ export async function findAttendanceById(id) {
                 firstName: employees.firstName,
                 lastName: employees.lastName,
                 email: employees.email,
+                profileImage: users.profileImage,
                 workingScheduleId: employees.workingScheduleId,
             },
         })
         .from(attendanceRecords)
         .leftJoin(employees, eq(attendanceRecords.employeeId, employees.id))
+        .leftJoin(users, eq(employees.userId, users.id))
         .where(eq(attendanceRecords.id, id))
         .limit(1);
 

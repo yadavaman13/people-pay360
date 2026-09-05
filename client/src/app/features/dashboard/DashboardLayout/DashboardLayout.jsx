@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import Sidebar from '@/components/Shared/Navigation/Sidebar/Sidebar';
 import MainContent from './MainContent/MainContent';
@@ -7,8 +7,14 @@ import Dialog from '@/components/Shared/Feedback/Dialog';
 import { Drawer, NotificationFeed } from '@/components/Shared/Feedback/Drawer';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
+import {
+    Home as HomeIcon,
+    Users as UsersIcon,
+    UserCheck as EmployeesIcon,
+    Clock as ClockIcon,
+    FileText as FileTextIcon,
+} from 'lucide-react';
 import { loadFeatureRoutes } from '@/app/routes.loader';
-import { Home as HomeIcon, Users as UsersIcon, UserCheck as EmployeesIcon } from 'lucide-react';
 import './DashboardLayout.scss';
 
 function DashboardLayout({ onLogout }) {
@@ -37,35 +43,50 @@ function DashboardLayout({ onLogout }) {
 
     const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
 
-    const { featureNavItems } = loadFeatureRoutes();
+    const { featureNavItems } = useMemo(() => loadFeatureRoutes(), []);
 
-    const NAV_ICON_MAP = {
-        Home: <HomeIcon size={20} />,
-        Users: <UsersIcon size={20} />,
-        Employees: <EmployeesIcon size={20} />,
-    };
+    const sidebarNavItems = useMemo(() => {
+        const items = [
+            {
+                label: 'Home',
+                icon: <HomeIcon size={18} />,
+                path: `/dashboard/${roleSegment}/home`,
+            },
+        ];
 
-    // Remove duplicate labels if any (and prevent duplicate Home/Settings entries in main sidebar)
-    const uniqueFeatureItems = [];
-    const seenLabels = new Set(['Home', 'Settings']);
-    featureNavItems.forEach((item) => {
-        if (!seenLabels.has(item.label)) {
-            seenLabels.add(item.label);
-            uniqueFeatureItems.push(item);
-        }
-    });
+        (featureNavItems || []).forEach((item) => {
+            if (!item || !item.label) return;
+            // Skip Home (handled as primary) and Settings (handled in footer profile card)
+            if (item.label === 'Home' || item.label === 'Settings') return;
 
-    const sidebarNavItems = [
-        {
-            label: 'Home',
-            icon: <HomeIcon size={20} />,
-            path: `/dashboard/${roleSegment}/home`,
-        },
-        ...uniqueFeatureItems.map((item) => ({
-            ...item,
-            icon: item.icon || NAV_ICON_MAP[item.label] || <UsersIcon size={20} />,
-        })),
-    ];
+            // Avoid duplicates
+            if (items.some((i) => i.label === item.label)) return;
+
+            let itemIcon = item.icon;
+            if (!itemIcon || typeof itemIcon === 'string') {
+                if (item.label === 'Users' || item.icon === 'Users')
+                    itemIcon = <UsersIcon size={18} />;
+                else if (
+                    item.label === 'Employees' ||
+                    item.icon === 'UserCheck' ||
+                    item.icon === 'Employees'
+                )
+                    itemIcon = <EmployeesIcon size={18} />;
+                else if (item.label === 'Contracts' || item.icon === 'FileText')
+                    itemIcon = <FileTextIcon size={18} />;
+                else if (item.label === 'Attendance' || item.icon === 'Clock')
+                    itemIcon = <ClockIcon size={18} />;
+                else itemIcon = <UsersIcon size={18} />;
+            }
+
+            items.push({
+                ...item,
+                icon: itemIcon,
+            });
+        });
+
+        return items;
+    }, [featureNavItems, roleSegment]);
 
     const handleToggleSidebar = () => {
         setIsSidebarCollapsed((prev) => {

@@ -26,8 +26,8 @@ export const createContractValidator = [
     body('employeeId')
         .notEmpty()
         .withMessage('employeeId is required')
-        .isUUID()
-        .withMessage('employeeId must be a valid UUID'),
+        .isString()
+        .withMessage('employeeId must be a valid string'),
     body('salaryStructureId')
         .notEmpty()
         .withMessage('salaryStructureId is required')

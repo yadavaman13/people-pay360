@@ -30,8 +30,57 @@
 
         &.advanced-table-skeleton-row {
             .skeleton-cell-bar {
-                height: 14px;
+                height: 13px;
                 width: 70%;
+                border-radius: 4px;
+                background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+                background-size: 200% 100%;
+                animation: skeleton-shimmer 1.5s infinite ease-in-out;
+            }
+
+            .skeleton-employee-cell {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+
+                .skeleton-avatar {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    flex-shrink: 0;
+                    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+                    background-size: 200% 100%;
+                    animation: skeleton-shimmer 1.5s infinite ease-in-out;
+                }
+
+                .skeleton-employee-text {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    flex: 1;
+
+                    .skeleton-cell-bar.skeleton-title {
+                        height: 13px;
+                    }
+
+                    .skeleton-cell-bar.skeleton-subtitle {
+                        height: 10px;
+                    }
+                }
+            }
+
+            .skeleton-badge-pill {
+                height: 22px;
+                width: 68px;
+                border-radius: 9999px;
+                background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+                background-size: 200% 100%;
+                animation: skeleton-shimmer 1.5s infinite ease-in-out;
+            }
+
+            .skeleton-action-icon {
+                width: 24px;
+                height: 24px;
                 border-radius: 4px;
                 background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
                 background-size: 200% 100%;
@@ -50,12 +99,13 @@
     }
 
     .advanced-table-body-cell {
-        padding: 14px 18px;
+        padding: 16px 20px;
         font-size: variables.$font-size-sm;
         font-weight: 500;
         color: variables.$color-gray-800;
         vertical-align: middle;
         border-bottom: 1px solid variables.$color-gray-100;
+        line-height: 1.5;
 
         // Only transition background-color — border-color/opacity transitions
         // cause a black line flash between rows during sort-triggered re-renders.
