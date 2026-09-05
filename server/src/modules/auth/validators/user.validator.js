@@ -1,4 +1,4 @@
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 import { sendResponse } from '../../../utils/response.utlis.js';
 
 function validateRequest(req, res, next) {
@@ -68,5 +68,61 @@ export const adminCreateUserValidator = [
 
 export const deleteAccountValidator = [
     body('password').notEmpty().withMessage('Password is required'),
+    validateRequest,
+];
+
+export const adminListUsersQueryValidator = [
+    query('page')
+        .optional()
+        .isInt({ min: 1 })
+        .withMessage('Page must be an integer greater than or equal to 1'),
+    query('limit')
+        .optional()
+        .isInt({ min: 1, max: 100 })
+        .withMessage('Limit must be an integer between 1 and 100'),
+    query('search')
+        .optional()
+        .isString()
+        .trim()
+        .isLength({ max: 100 })
+        .withMessage('Search term cannot exceed 100 characters'),
+    query('sortBy')
+        .optional()
+        .isIn([
+            'firstName',
+            'lastName',
+            'fullName',
+            'email',
+            'role',
+            'roleName',
+            'isActive',
+            'statusName',
+            'emailVerified',
+            'verifiedName',
+            'createdAt',
+            'updatedAt',
+        ])
+        .withMessage('Invalid sortBy field'),
+    query('sortDir')
+        .optional()
+        .isIn(['asc', 'desc', 'ASC', 'DESC'])
+        .withMessage('sortDir must be asc or desc'),
+    query('role')
+        .optional()
+        .toUpperCase()
+        .isIn(['EMPLOYEE', 'HR_MANAGER', 'HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN'])
+        .withMessage('Role must be a valid PeoplePay360 role'),
+    query('isActive')
+        .optional()
+        .isIn(['true', 'false', true, false])
+        .withMessage('isActive must be a boolean'),
+    query('emailVerified')
+        .optional()
+        .isIn(['true', 'false', true, false])
+        .withMessage('emailVerified must be a boolean'),
+    query('includeDeleted')
+        .optional()
+        .isIn(['true', 'false', true, false])
+        .withMessage('includeDeleted must be a boolean'),
     validateRequest,
 ];

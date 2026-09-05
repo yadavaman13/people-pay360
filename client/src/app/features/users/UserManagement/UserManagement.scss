@@ -3,14 +3,19 @@
 .user-management-page {
     display: flex;
     flex-direction: column;
-    gap: variables.$spacing-lg;
-    padding: variables.$spacing-xl;
+    height: calc(100vh - 56px);
+    max-height: calc(100vh - 56px);
+    padding: variables.$spacing-md variables.$spacing-xl;
+    box-sizing: border-box;
     width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
+    overflow: hidden;
+    gap: variables.$spacing-md;
     font-family: variables.$font-sans;
 
     @media (width <= 768px) {
+        height: auto;
+        max-height: none;
+        overflow: visible;
         padding: variables.$spacing-md;
         gap: variables.$spacing-md;
     }
@@ -22,6 +27,7 @@
     align-items: flex-start;
     gap: variables.$spacing-md;
     flex-wrap: wrap;
+    flex-shrink: 0;
 
     .header-info {
         display: flex;
@@ -59,15 +65,12 @@
         display: flex;
         align-items: center;
         gap: variables.$spacing-sm;
-
-        .spinning {
-            animation: spin 1s linear infinite;
-        }
     }
 }
 
 .notification-banner-wrapper {
     width: 100%;
+    flex-shrink: 0;
 
     .notification-banner {
         padding: variables.$spacing-md;
@@ -111,240 +114,120 @@
 
 .error-banner {
     width: 100%;
+    flex-shrink: 0;
 }
 
-.user-filters-bar {
+.user-table-wrapper {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: variables.$spacing-md;
-    flex-wrap: wrap;
-
-    .search-input-box {
-        position: relative;
-        display: flex;
-        align-items: center;
-        flex: 1;
-        min-width: 260px;
-        max-width: 420px;
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            color: variables.$color-gray-400;
-            pointer-events: none;
-        }
-
-        .search-field {
-            width: 100%;
-            height: 40px;
-            padding: 0 32px 0 36px;
-            border-radius: variables.$radius-medium;
-            border: 1px solid variables.$color-gray-200;
-            background-color: variables.$color-white;
-            color: variables.$color-gray-900;
-            font-size: variables.$font-size-sm;
-            outline: none;
-            transition:
-                border-color 0.2s ease,
-                box-shadow 0.2s ease;
-
-            &:focus {
-                border-color: variables.$color-black;
-                box-shadow: 0 0 0 1px variables.$color-black;
-            }
-        }
-
-        .search-clear {
-            position: absolute;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: variables.$font-size-md;
-            color: variables.$color-gray-400;
-            cursor: pointer;
-            padding: 0 4px;
-
-            &:hover {
-                color: variables.$color-gray-700;
-            }
-        }
-    }
-
-    .role-filter-box {
-        .role-filter-select {
-            height: 40px;
-            padding: 0 variables.$spacing-lg 0 variables.$spacing-md;
-            border-radius: variables.$radius-medium;
-            border: 1px solid variables.$color-gray-200;
-            background-color: variables.$color-white;
-            color: variables.$color-gray-800;
-            font-size: variables.$font-size-sm;
-            font-weight: 500;
-            outline: none;
-            cursor: pointer;
-            transition: border-color 0.2s ease;
-
-            &:focus {
-                border-color: variables.$color-black;
-            }
-        }
-    }
-}
-
-.users-table-card {
-    background-color: variables.$color-white;
-    border-radius: variables.$radius-large;
-    border: 1px solid variables.$color-gray-200;
+    flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
 
-    .table-scroll-container {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .table-state-wrapper {
+    .advanced-table-component {
+        flex: 1;
+        min-height: 0;
+        height: 100%;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: variables.$spacing-xxl variables.$spacing-xl;
-        text-align: center;
-        gap: variables.$spacing-sm;
+        overflow: hidden;
 
-        .text-muted {
-            color: variables.$color-gray-400;
+        .advanced-table-controls,
+        .advanced-table-filter-chips {
+            flex-shrink: 0;
         }
 
-        h3 {
-            font-size: variables.$font-size-lg;
-            font-weight: 600;
-            color: variables.$color-gray-800;
-            margin: variables.$spacing-xs 0 0 0;
+        .advanced-table-viewport-wrapper {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            .advanced-table-scroll-wrapper {
+                flex: 1;
+                min-height: 0;
+                overflow: auto;
+
+                &.has-vertical-scroll {
+                    max-height: none;
+                }
+            }
         }
 
-        p {
-            font-size: variables.$font-size-sm;
-            color: variables.$color-gray-500;
-            margin: 0;
-            max-width: 360px;
-        }
-
-        .spinning {
-            animation: spin 1s linear infinite;
+        .advanced-table-footer {
+            flex-shrink: 0;
         }
     }
 
-    .users-table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-        font-size: variables.$font-size-sm;
+    // Cell Presentational Styling within AdvancedTable
+    .user-name-cell {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-md;
 
-        thead {
-            background-color: variables.$color-gray-50;
-            border-bottom: 1px solid variables.$color-gray-200;
-
-            th {
-                padding: 12px 16px;
-                font-size: variables.$font-size-xs;
-                font-weight: 600;
-                color: variables.$color-gray-500;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                white-space: nowrap;
-            }
-        }
-
-        tbody {
-            tr {
-                border-bottom: 1px solid variables.$color-gray-100;
-                transition: background-color 0.15s ease;
-
-                &:last-child {
-                    border-bottom: none;
-                }
-
-                &:hover {
-                    background-color: variables.$color-gray-50;
-                }
-
-                td {
-                    padding: 14px 16px;
-                    color: variables.$color-gray-800;
-                    vertical-align: middle;
-                }
-            }
-        }
-
-        .user-name-cell {
+        .avatar-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background-color: variables.$color-gray-100;
+            color: variables.$color-gray-700;
             display: flex;
             align-items: center;
-            gap: variables.$spacing-md;
+            justify-content: center;
+            font-size: variables.$font-size-xs;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
 
-            .avatar-circle {
-                width: 34px;
-                height: 34px;
-                border-radius: 50%;
-                background-color: variables.$color-gray-100;
-                color: variables.$color-gray-700;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: variables.$font-size-xs;
-                font-weight: 700;
-                flex-shrink: 0;
-            }
+        .name-details {
+            display: flex;
+            flex-direction: column;
 
-            .name-details {
-                display: flex;
-                flex-direction: column;
-
-                .full-name {
-                    font-weight: 600;
-                    color: variables.$color-gray-900;
-                }
+            .full-name {
+                font-weight: 600;
+                color: variables.$color-gray-900;
             }
         }
+    }
 
-        .user-email-cell {
-            color: variables.$color-gray-600;
-            font-family: monospace;
-            font-size: variables.$font-size-xs;
-        }
+    .user-email-cell {
+        color: variables.$color-gray-600;
+        font-family: monospace;
+        font-size: variables.$font-size-xs;
+    }
 
-        .date-cell {
-            color: variables.$color-gray-500;
-            white-space: nowrap;
-            font-size: variables.$font-size-xs;
-        }
+    .user-role-cell {
+        white-space: nowrap;
 
-        .verification-tag {
+        .role-text {
             font-size: variables.$font-size-xs;
             font-weight: 600;
-            padding: 2px 8px;
-            border-radius: variables.$radius-small;
-
-            &.verified {
-                background-color: variables.$color-success-light;
-                color: variables.$color-success;
-            }
-
-            &.unverified {
-                background-color: variables.$color-warning-light;
-                color: variables.$color-warning;
-            }
+            color: variables.$color-gray-800;
         }
     }
-}
 
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
+    .date-cell {
+        color: variables.$color-gray-500;
+        white-space: nowrap;
+        font-size: variables.$font-size-xs;
     }
 
-    to {
-        transform: rotate(360deg);
+    .verification-tag {
+        font-size: variables.$font-size-xs;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: variables.$radius-small;
+
+        &.verified {
+            background-color: variables.$color-success-light;
+            color: variables.$color-success;
+        }
+
+        &.unverified {
+            background-color: variables.$color-warning-light;
+            color: variables.$color-warning;
+        }
     }
 }

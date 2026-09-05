@@ -1,3 +1,4 @@
+import { UsersProvider } from './context/users.context';
 import UserManagement from './UserManagement/UserManagement';
 
 export default {
@@ -9,7 +10,11 @@ export default {
     adminRoutes: [
         {
             path: 'users',
-            element: <UserManagement />,
+            element: (
+                <UsersProvider>
+                    <UserManagement />
+                </UsersProvider>
+            ),
         },
     ],
 };

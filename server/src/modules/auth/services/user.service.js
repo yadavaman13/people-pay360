@@ -3,7 +3,7 @@ import {
     getUserById,
     updateUser,
     softDeleteUser,
-    listUsers,
+    listUsersWithPagination,
     getUserByEmail,
     getDeletedUserByEmail,
     createUser,
@@ -12,7 +12,7 @@ import { AppError } from '../utils/appError.js';
 import { generateTempPassword } from '../../../utils/password.utils.js';
 import { sendEmail } from '../../../services/mail/mail.service.js';
 import { accountCreatedEmailTemplate } from '../../../templates/email.template.js';
-import { redis } from '../../../config/cache.config.js';
+import redis from '../../../config/cache.config.js';
 
 /**
  * Update current user profile
@@ -92,11 +92,11 @@ export async function adminGetUserById(id) {
 }
 
 /**
- * List users (Admin helper)
- * @param {boolean} includeDeleted
+ * List users with pagination and search (Admin helper)
+ * @param {object} [params]
  */
-export async function adminListUsers(includeDeleted = false) {
-    return listUsers(includeDeleted);
+export async function adminListUsers(params = {}) {
+    return listUsersWithPagination(params);
 }
 
 /**

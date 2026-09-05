@@ -1,6 +1,6 @@
 import { db } from '../config/database.config.js';
 import { users } from '../db/schema/users.schema.js';
-import { eq, and, lt } from 'drizzle-orm';
+import { eq, and, lt, desc, asc, ilike, or, count } from 'drizzle-orm';
 
 /**
  * Get user by email
@@ -98,6 +98,118 @@ export async function listUsers(includeDeleted = false) {
         return db.select().from(users);
     }
     return db.select().from(users).where(eq(users.isDeleted, false));
+}
+
+/**
+ * List users with pagination, sorting, multi-column search, and filters
+ * @param {object} [params]
+ * @param {number} [params.page=1]
+ * @param {number} [params.limit=10]
+ * @param {string} [params.search='']
+ * @param {string} [params.sortBy='createdAt']
+ * @param {string} [params.sortDir='desc']
+ * @param {string} [params.role]
+ * @param {boolean} [params.isActive]
+ * @param {boolean} [params.emailVerified]
+ * @param {boolean} [params.includeDeleted=false]
+ * @returns {Promise<{ users: Array, totalCount: number }>}
+ */
+export async function listUsersWithPagination({
+    page = 1,
+    limit = 10,
+    search = '',
+    sortBy = 'createdAt',
+    sortDir = 'desc',
+    role,
+    isActive,
+    emailVerified,
+    includeDeleted = false,
+} = {}) {
+    const conditions = [];
+
+    if (!includeDeleted) {
+        conditions.push(eq(users.isDeleted, false));
+    }
+
+    if (search && search.trim() !== '') {
+        const searchPattern = `%${search.trim()}%`;
+        conditions.push(
+            or(
+                ilike(users.firstName, searchPattern),
+                ilike(users.lastName, searchPattern),
+                ilike(users.email, searchPattern),
+            ),
+        );
+    }
+
+    if (role) {
+        conditions.push(eq(users.role, role));
+    }
+
+    if (isActive !== undefined && isActive !== null && isActive !== '') {
+        const boolActive = typeof isActive === 'boolean' ? isActive : isActive === 'true';
+        conditions.push(eq(users.isActive, boolActive));
+    }
+
+    if (emailVerified !== undefined && emailVerified !== null && emailVerified !== '') {
+        const boolVerified =
+            typeof emailVerified === 'boolean' ? emailVerified : emailVerified === 'true';
+        conditions.push(eq(users.emailVerified, boolVerified));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    const safePage = Math.max(1, parseInt(page, 10) || 1);
+    const safeLimit = Math.max(1, Math.min(100, parseInt(limit, 10) || 10));
+    const offset = (safePage - 1) * safeLimit;
+
+    // Whitelist and map sort columns
+    const SORT_COLUMN_MAP = {
+        firstName: users.firstName,
+        lastName: users.lastName,
+        fullName: users.firstName,
+        email: users.email,
+        role: users.role,
+        roleName: users.role,
+        isActive: users.isActive,
+        statusName: users.isActive,
+        emailVerified: users.emailVerified,
+        verifiedName: users.emailVerified,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+    };
+
+    const targetCol = SORT_COLUMN_MAP[sortBy] || users.createdAt;
+    const isAsc = String(sortDir).toLowerCase() === 'asc';
+    const orderByClause = isAsc ? asc(targetCol) : desc(targetCol);
+
+    const [userRecords, [{ total }]] = await Promise.all([
+        db
+            .select({
+                id: users.id,
+                firstName: users.firstName,
+                lastName: users.lastName,
+                email: users.email,
+                profileImage: users.profileImage,
+                role: users.role,
+                isActive: users.isActive,
+                isDeleted: users.isDeleted,
+                deletedAt: users.deletedAt,
+                emailVerified: users.emailVerified,
+                createdAt: users.createdAt,
+                updatedAt: users.updatedAt,
+            })
+            .from(users)
+            .where(whereClause)
+            .orderBy(orderByClause)
+            .limit(safeLimit)
+            .offset(offset),
+        db.select({ total: count() }).from(users).where(whereClause),
+    ]);
+
+    return {
+        users: userRecords,
+        totalCount: Number(total),
+    };
 }
 
 /**
