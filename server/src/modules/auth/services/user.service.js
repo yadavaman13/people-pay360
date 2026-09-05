@@ -12,7 +12,7 @@ import { AppError } from '../utils/appError.js';
 import { generateTempPassword } from '../../../utils/password.utils.js';
 import { sendEmail } from '../../../services/mail/mail.service.js';
 import { accountCreatedEmailTemplate } from '../../../templates/email.template.js';
-import { redis } from '../../../config/cache.config.js';
+import redis from '../../../config/cache.config.js';
 
 /**
  * Update current user profile
