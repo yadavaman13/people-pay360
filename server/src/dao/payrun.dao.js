@@ -147,7 +147,7 @@ export async function findPayrunWithPayslips(id) {
                 firstName: employees.firstName,
                 lastName: employees.lastName,
                 departmentName: departments.name,
-                jobTitle: jobPositions.name,
+                jobTitle: jobPositions.title,
             })
             .from(payrunEmployees)
             .innerJoin(employees, eq(payrunEmployees.employeeId, employees.id))
@@ -204,7 +204,7 @@ export async function findEligibleEmployees(structureId, periodStart, periodEnd)
             email: employees.email,
             departmentId: employees.departmentId,
             departmentName: departments.name,
-            jobTitle: jobPositions.name,
+            jobTitle: jobPositions.title,
         })
         .from(employees)
         .leftJoin(departments, eq(employees.departmentId, departments.id))

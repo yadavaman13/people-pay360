@@ -1,13 +1,6 @@
 import { pgTable, uuid, text, boolean, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
 
 /**
- * Role Enum — Option A: keep existing 'role_enum' PostgreSQL type name.
- *
- * Changes from original:
- *   - 'USER' REMOVED → replaced by 'EMPLOYEE' (same semantic meaning for auth layer)
- *   - Added: 'HR_MANAGER', 'HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER'
- *   - 'ADMIN' kept unchanged
- *
  * Hierarchy (highest → lowest privilege):
  *   ADMIN > HR_PAYROLL_MANAGER > HR_PAYROLL_USER > HR_MANAGER > EMPLOYEE
  *
@@ -35,6 +28,7 @@ export const users = pgTable(
         lastName: text('last_name').notNull(),
         email: text('email').unique().notNull(),
         password: text('password'),
+        googleId: text('google_id').unique(),
         profileImage: text('profile_image').default(
             'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
         ),
@@ -58,6 +52,7 @@ export const users = pgTable(
     (table) => {
         return {
             emailIdx: index('users_email_idx').on(table.email),
+            googleIdIdx: index('users_google_id_idx').on(table.googleId),
             roleIdx: index('users_role_idx').on(table.role),
             isDeletedIdx: index('users_is_deleted_idx').on(table.isDeleted),
             deletedAtIdx: index('users_deleted_at_idx').on(table.deletedAt),

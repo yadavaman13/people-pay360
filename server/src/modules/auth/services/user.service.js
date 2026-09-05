@@ -12,6 +12,7 @@ import { AppError } from '../utils/appError.js';
 import { generateTempPassword } from '../../../utils/password.utils.js';
 import { sendEmail } from '../../../services/mail/mail.service.js';
 import { accountCreatedEmailTemplate } from '../../../templates/email.template.js';
+import { redis } from '../../../config/cache.config.js';
 
 /**
  * Update current user profile
@@ -110,6 +111,29 @@ export async function adminUpdateRole(targetUserId, newRole) {
         throw new AppError('User not found', 404);
     }
     return user;
+}
+
+/**
+ * Toggle a user's active status (Admin helper).
+ * Invalidates Redis cache per Playbook Rule #3.
+ * @param {string} targetUserId
+ * @param {boolean} isActive
+ */
+export async function adminUpdateStatus(targetUserId, isActive) {
+    const user = await getUserById(targetUserId);
+    if (!user) {
+        throw new AppError('User not found', 404);
+    }
+
+    const updated = await updateUser(targetUserId, { isActive });
+    if (!updated) {
+        throw new AppError('Failed to update user status', 500);
+    }
+
+    // Invalidate Redis cache so next request picks up the updated isActive flag
+    await redis.del('user:' + targetUserId);
+
+    return updated;
 }
 
 /**

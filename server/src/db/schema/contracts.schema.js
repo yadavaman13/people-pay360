@@ -1,4 +1,14 @@
-import { pgTable, uuid, text, timestamp, date, numeric, index, check } from 'drizzle-orm/pg-core';
+import {
+    pgTable,
+    uuid,
+    text,
+    timestamp,
+    date,
+    numeric,
+    integer,
+    index,
+    check,
+} from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { employees } from './employees.schema.js';
 import { departments } from './departments.schema.js';
@@ -84,6 +94,9 @@ export const contracts = pgTable(
         // Lifecycle: DRAFT → ACTIVE → EXPIRED | CANCELLED
         status: contractStatusEnum('status').default('DRAFT').notNull(),
 
+        // Maximum number of attendance punches (check-in/out cycles) allowed per calendar day. Default: 3.
+        maxPunchesPerDay: integer('max_punches_per_day').default(3).notNull(),
+
         notes: text('notes'),
 
         createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
@@ -109,6 +122,12 @@ export const contracts = pgTable(
         dateOrderCheck: check(
             'chk_contracts_date_order',
             sql`${table.endDate} IS NULL OR ${table.startDate} <= ${table.endDate}`,
+        ),
+
+        // max_punches_per_day must be greater than 0
+        maxPunchesCheck: check(
+            'chk_contracts_max_punches_positive',
+            sql`${table.maxPunchesPerDay} > 0`,
         ),
 
         // ── EXCLUDE CONSTRAINT (requires btree_gist extension) ─────────────────

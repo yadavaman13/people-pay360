@@ -130,6 +130,34 @@ export async function adminUpdateRole(req, res, next) {
 }
 
 /**
+ * Toggle a user's active status (Admin only)
+ */
+export async function adminUpdateStatus(req, res, next) {
+    try {
+        const { isActive } = req.body;
+        const updatedUser = await userService.adminUpdateStatus(req.params.id, isActive);
+        return sendResponse({
+            res,
+            statusCode: 200,
+            message: `User account ${isActive ? 'activated' : 'deactivated'} successfully`,
+            success: true,
+            user: {
+                id: updatedUser.id,
+                firstName: updatedUser.firstName,
+                lastName: updatedUser.lastName,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                isActive: updatedUser.isActive,
+                emailVerified: updatedUser.emailVerified,
+                updatedAt: updatedUser.updatedAt,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
  * Soft delete a user by ID (Admin only)
  */
 export async function adminDeleteUser(req, res, next) {

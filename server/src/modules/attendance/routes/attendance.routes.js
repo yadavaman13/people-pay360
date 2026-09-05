@@ -4,6 +4,7 @@ import * as attendanceController from '../controllers/attendance.controller.js';
 import {
     checkInValidator,
     checkOutValidator,
+    checkOutSelfValidator,
     manualCorrectionValidator,
     attendanceIdParamValidator,
     listAttendanceValidator,
@@ -22,7 +23,11 @@ router
         attendanceController.getSummaryStats,
     );
 
+router.route('/today').get(attendanceController.getTodayStatus);
+
 router.route('/check-in').post(checkInValidator, attendanceController.checkIn);
+
+router.route('/check-out').post(checkOutSelfValidator, attendanceController.checkOut);
 
 router.route('/:id/check-out').post(checkOutValidator, attendanceController.checkOut);
 

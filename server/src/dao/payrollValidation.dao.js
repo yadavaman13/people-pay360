@@ -4,7 +4,9 @@ import { employees } from '../db/schema/employees.schema.js';
 import { contracts } from '../db/schema/contracts.schema.js';
 import { bankAccounts } from '../db/schema/bank_accounts.schema.js';
 import { salaryStructures, salaryRules } from '../db/schema/salary.schema.js';
-import { eq, and, sql, inArray, ne } from 'drizzle-orm';
+import { timeOffRequests } from '../db/schema/time_off.schema.js';
+import { attendanceRecords } from '../db/schema/attendance.schema.js';
+import { eq, and, sql, inArray, ne, gte, lte } from 'drizzle-orm';
 
 /**
  * Get payrun by ID with structure details
@@ -198,4 +200,63 @@ export async function updatePayrunToValidated(payrunId, userId) {
 
         return updatedPayrun;
     });
+}
+
+/**
+ * Get PENDING time-off requests for a set of employees overlapping a payrun period.
+ * Used by auditPayrunWarnings() to detect unapproved leave that may affect net pay.
+ * @param {string[]} employeeIds
+ * @param {string} periodStart - 'YYYY-MM-DD'
+ * @param {string} periodEnd - 'YYYY-MM-DD'
+ */
+export async function getPendingLeaveRequestsInPeriod(employeeIds, periodStart, periodEnd) {
+    if (!employeeIds || employeeIds.length === 0) return [];
+
+    return db
+        .select({
+            id: timeOffRequests.id,
+            employeeId: timeOffRequests.employeeId,
+            startDate: timeOffRequests.startDate,
+            endDate: timeOffRequests.endDate,
+            numberOfDays: timeOffRequests.numberOfDays,
+            status: timeOffRequests.status,
+        })
+        .from(timeOffRequests)
+        .where(
+            and(
+                inArray(timeOffRequests.employeeId, employeeIds),
+                eq(timeOffRequests.status, 'PENDING'),
+                lte(timeOffRequests.startDate, periodEnd),
+                gte(timeOffRequests.endDate, periodStart),
+            ),
+        );
+}
+
+/**
+ * Get attendance records with no checkout for a set of employees within a payrun period.
+ * Used by auditPayrunWarnings() to detect records where worked hours may be inaccurate.
+ * @param {string[]} employeeIds
+ * @param {string} periodStart - 'YYYY-MM-DD'
+ * @param {string} periodEnd - 'YYYY-MM-DD'
+ */
+export async function getOpenAttendanceRecordsInPeriod(employeeIds, periodStart, periodEnd) {
+    if (!employeeIds || employeeIds.length === 0) return [];
+
+    return db
+        .select({
+            id: attendanceRecords.id,
+            employeeId: attendanceRecords.employeeId,
+            attendanceDate: attendanceRecords.attendanceDate,
+            checkInTime: attendanceRecords.checkInTime,
+            checkOutTime: attendanceRecords.checkOutTime,
+        })
+        .from(attendanceRecords)
+        .where(
+            and(
+                inArray(attendanceRecords.employeeId, employeeIds),
+                sql`${attendanceRecords.checkOutTime} IS NULL`,
+                gte(attendanceRecords.attendanceDate, periodStart),
+                lte(attendanceRecords.attendanceDate, periodEnd),
+            ),
+        );
 }

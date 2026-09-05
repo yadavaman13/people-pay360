@@ -18,6 +18,9 @@ import { salaryStructureRouter } from './modules/salary-structures/index.js';
 import { salaryRuleRouter } from './modules/salary-rules/index.js';
 import { payrunRouter } from './modules/payruns/index.js';
 import { payslipRouter } from './modules/payslips/index.js';
+import { employeeRouter } from './modules/employees/index.js';
+import { contractRouter } from './modules/contracts/index.js';
+import { dashboardRouter } from './modules/dashboard/index.js';
 
 const app = express();
 
@@ -45,12 +48,16 @@ app.use('/api/working-schedules', scheduleRouter);
 app.use('/api/attendance', attendanceRouter);
 app.use('/api/time-off', timeOffRouter);
 
+app.use('/api/employees', employeeRouter);
+app.use('/api/contracts', contractRouter);
+
 app.use('/api/salary-structures', salaryStructureRouter);
 app.use('/api/salary-rules', salaryRuleRouter);
 app.use('/api/payruns', payrunRouter);
 app.use('/api/payslips', payslipRouter);
 app.use('/api/payruns', payrollValidationRouter);
 app.use('/api/payslips', payslipDocumentRouter);
+app.use('/api/dashboard', dashboardRouter);
 
 //For SPA
 app.use((req, res, next) => {

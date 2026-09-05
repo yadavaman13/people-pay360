@@ -6,6 +6,7 @@ import {
     adminCreateUserValidator,
     adminListUsersQueryValidator,
     adminUpdateRoleValidator,
+    adminUpdateStatusValidator,
     updateProfileValidator,
     deleteAccountValidator,
 } from '../validators/user.validator.js';
@@ -24,6 +25,7 @@ router.get('/users', adminListUsersQueryValidator, adminController.adminListUser
 router.post('/users/cleanup', adminController.adminCleanupUsers);
 router.get('/users/:id', adminController.adminGetUserById);
 router.patch('/users/:id/role', adminUpdateRoleValidator, adminController.adminUpdateRole);
+router.patch('/users/:id/status', adminUpdateStatusValidator, adminController.adminUpdateStatus);
 router.delete('/users/:id', adminController.adminDeleteUser);
 
 // Admin Profile / Personal Routes
