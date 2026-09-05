@@ -16,32 +16,35 @@ export default function AttendanceHeader({
 
     return (
         <header className="attendance-header">
-            <div className="header-text">
-                <h1 className="page-title">{title || defaultTitle}</h1>
-                <p className="page-subtitle">{subtitle || defaultSubtitle}</p>
+            <div className="header-info">
+                <div className="title-row">
+                    <h1 className="header-title">{title || defaultTitle}</h1>
+                </div>
+                <p className="header-subtitle">{subtitle || defaultSubtitle}</p>
             </div>
 
             <div className="header-actions">
                 {onRefresh && (
                     <Button
                         variant="secondary"
-                        size="sm"
+                        size="md"
                         onClick={onRefresh}
                         disabled={isRefreshing}
+                        className="refresh-btn"
                     >
                         <RotateCw
                             size={16}
                             className={isRefreshing ? 'animate-spin' : ''}
                             style={{ marginRight: '6px' }}
                         />
-                        Refresh
+                        <span>Refresh</span>
                     </Button>
                 )}
 
                 {onExport && (
-                    <Button variant="secondary" size="sm" onClick={onExport}>
+                    <Button variant="secondary" size="md" onClick={onExport} className="export-btn">
                         <Download size={16} style={{ marginRight: '6px' }} />
-                        Export Records
+                        <span>Export</span>
                     </Button>
                 )}
             </div>

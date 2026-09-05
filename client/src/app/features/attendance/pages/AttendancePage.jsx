@@ -904,7 +904,7 @@ export default function AttendancePage({ mode: initialMode }) {
             />
 
             {/* AdvancedTable — server-side driven with API filter wiring */}
-            <div className="attendance-advanced-table-section">
+            <div className="attendance-table-card attendance-advanced-table-section">
                 <AdvancedTable
                     columns={columns}
                     data={tableData}

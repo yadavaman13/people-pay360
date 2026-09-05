@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router';
-import { Receipt, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { usePayslipsList } from '../../hooks/usePayslipsList';
 import PayslipsTable from '../../components/PayslipsTable/PayslipsTable';
 import PayslipMobileCard from '../../components/PayslipMobileCard/PayslipMobileCard';
@@ -66,7 +66,6 @@ function PayslipsListPage() {
             <header className="payslips-list-header">
                 <div className="header-info">
                     <div className="title-row">
-                        <Receipt className="header-icon" size={24} />
                         <h1 className="header-title">Payslips</h1>
                     </div>
                     <p className="header-subtitle">List view of employee payslips</p>

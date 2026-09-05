@@ -1,9 +1,21 @@
-import { Outlet } from 'react-router';
+import { Navigate, Outlet } from 'react-router';
 import { Clock } from 'lucide-react';
 import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
+import { useAuth } from '@/app/features/auth/hooks/useAuth';
 import { AttendanceProvider } from './context/attendance.context';
 import AttendancePage from './pages/AttendancePage';
 import AttendanceDetailPage from './pages/AttendanceDetailPage';
+
+function AttendanceIndexRedirect() {
+    const { user } = useAuth();
+    const role = (user?.role || '').toUpperCase();
+
+    if (role === 'ADMIN') {
+        return <Navigate to="employees-attendance" replace />;
+    }
+
+    return <Navigate to="my-attendance" replace />;
+}
 
 export default {
     // Multi-Role RBAC: specify which roles can access this feature
@@ -13,20 +25,20 @@ export default {
     navItem: [
         {
             label: 'Attendance',
-            path: '/dashboard/employee/attendance',
+            path: '/dashboard/employee/attendance/my-attendance',
             icon: <Clock size={18} />,
             roles: ['EMPLOYEE'],
         },
         {
             label: 'Attendance',
-            path: '/dashboard/hr/attendance',
+            path: '/dashboard/hr/attendance/my-attendance',
             subTabs: ['My Attendance', 'Employees Attendance'],
             icon: <Clock size={18} />,
             roles: ['HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'],
         },
         {
             label: 'Attendance',
-            path: '/dashboard/admin/attendance',
+            path: '/dashboard/admin/attendance/employees-attendance',
             subTabs: ['Employees Attendance'],
             icon: <Clock size={18} />,
             roles: ['ADMIN'],
@@ -45,7 +57,7 @@ export default {
             children: [
                 {
                     index: true,
-                    element: <AttendancePage />,
+                    element: <AttendanceIndexRedirect />,
                 },
                 {
                     path: 'my-attendance',
