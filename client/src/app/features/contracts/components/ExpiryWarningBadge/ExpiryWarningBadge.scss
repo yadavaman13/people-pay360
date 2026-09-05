@@ -1,0 +1,33 @@
+@use '@/styles/variables' as variables;
+
+.expiry-warning-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: variables.$spacing-xs;
+    padding: 2px variables.$spacing-sm;
+    border-radius: variables.$radius-small;
+    font-family: variables.$font-sans;
+    font-size: variables.$font-size-xs;
+    font-weight: 600;
+    line-height: 1.2;
+    width: fit-content;
+    white-space: nowrap;
+
+    @include variables.transition-ease;
+
+    .expiry-icon {
+        flex-shrink: 0;
+    }
+
+    &.is-expiring {
+        background-color: variables.$color-warning-light;
+        color: variables.$color-warning-dark;
+        border: 1px solid variables.$color-warning-border;
+    }
+
+    &.is-expired {
+        background-color: variables.$color-danger-light;
+        color: variables.$color-danger;
+        border: 1px solid variables.$color-danger-border;
+    }
+}

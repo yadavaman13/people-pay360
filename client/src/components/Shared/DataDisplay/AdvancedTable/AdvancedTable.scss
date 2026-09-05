@@ -164,8 +164,29 @@ mark.at-search-highlight {
             -webkit-overflow-scrolling: touch;
 
             &.has-vertical-scroll {
-                max-height: 360px;
+                max-height: 520px;
                 overflow-y: auto;
+
+                // Slim custom scrollbar
+                scrollbar-width: thin;
+                scrollbar-color: variables.$color-gray-300 transparent;
+
+                &::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background-color: variables.$color-gray-300;
+                    border-radius: 99px;
+
+                    &:hover {
+                        background-color: variables.$color-gray-400;
+                    }
+                }
             }
         }
     }

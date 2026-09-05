@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import Sidebar from '@/components/Shared/Navigation/Sidebar/Sidebar';
 import MainContent from './MainContent/MainContent';
@@ -7,11 +7,15 @@ import Dialog from '@/components/Shared/Feedback/Dialog';
 import { Drawer, NotificationFeed } from '@/components/Shared/Feedback/Drawer';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
-import { Home as HomeIcon, Users as UsersIcon, Clock as ClockIcon } from 'lucide-react';
+import {
+    Home as HomeIcon,
+    Users as UsersIcon,
+    UserCheck as EmployeesIcon,
+    Clock as ClockIcon,
+    FileText as FileTextIcon,
+} from 'lucide-react';
 import { loadFeatureRoutes } from '@/app/routes.loader';
 import './DashboardLayout.scss';
-
-const { featureNavItems } = loadFeatureRoutes();
 
 function DashboardLayout({ onLogout }) {
     const navigate = useNavigate();
@@ -39,42 +43,69 @@ function DashboardLayout({ onLogout }) {
 
     const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
 
-    const dynamicNavItems = (featureNavItems || [])
-        .filter((item) => {
-            if (!item.roles || item.roles.length === 0) return true;
-            return item.roles.some((r) => r.toUpperCase() === user?.role?.toUpperCase());
-        })
-        .map((item) => ({
-            ...item,
-            path: item.path.replace(/\/dashboard\/(?:user|admin)\//, `/dashboard/${roleSegment}/`),
-        }));
+    const { featureNavItems } = useMemo(() => loadFeatureRoutes(), []);
 
-    const sidebarNavItems = [
-        {
-            label: 'Home',
-            icon: <HomeIcon />,
-            path: `/dashboard/${roleSegment}/home`,
-        },
-        ...(roleSegment === 'admin'
-            ? [
-                  {
-                      label: 'Users',
-                      icon: <UsersIcon />,
-                      path: `/dashboard/admin/users`,
-                      roles: ['ADMIN'],
-                  },
-              ]
-            : []),
-        {
-            label: 'Attendance',
-            icon: <ClockIcon />,
-            path: `/dashboard/user/attendance`,
-            roles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER', 'EMPLOYEE'],
-        },
-        ...dynamicNavItems.filter(
-            (item) => !['Users', 'Home', 'Settings', 'Attendance'].includes(item.label),
-        ),
-    ];
+    const sidebarNavItems = useMemo(() => {
+        const items = [
+            {
+                label: 'Home',
+                icon: <HomeIcon size={18} />,
+                path: `/dashboard/${roleSegment}/home`,
+            },
+        ];
+
+        (featureNavItems || []).forEach((item) => {
+            if (!item || !item.label) return;
+            // Skip Home (handled as primary) and Settings (handled in footer profile card)
+            if (item.label === 'Home' || item.label === 'Settings') return;
+
+            // Role-based authorization filter
+            if (item.roles && item.roles.length > 0) {
+                if (!user?.role) return;
+                const userRole = user.role.toUpperCase();
+                const hasRole = item.roles.some((r) => r.toUpperCase() === userRole);
+                if (!hasRole) return;
+            }
+
+            // Avoid duplicates
+            if (items.some((i) => i.label === item.label)) return;
+
+            // Dynamic route path replacement
+            const dynamicPath = item.path
+                ? item.path.replace(/\/dashboard\/(?:user|admin)\//, `/dashboard/${roleSegment}/`)
+                : item.path;
+
+            let itemIcon = item.icon;
+            if (itemIcon && typeof itemIcon === 'object') {
+                // Already a React element (e.g. <Banknote size={18} />)
+            } else if (typeof itemIcon === 'function') {
+                const IconComponent = itemIcon;
+                itemIcon = <IconComponent size={18} />;
+            } else if (!itemIcon || typeof itemIcon === 'string') {
+                if (item.label === 'Users' || item.icon === 'Users')
+                    itemIcon = <UsersIcon size={18} />;
+                else if (
+                    item.label === 'Employees' ||
+                    item.icon === 'UserCheck' ||
+                    item.icon === 'Employees'
+                )
+                    itemIcon = <EmployeesIcon size={18} />;
+                else if (item.label === 'Contracts' || item.icon === 'FileText')
+                    itemIcon = <FileTextIcon size={18} />;
+                else if (item.label === 'Attendance' || item.icon === 'Clock')
+                    itemIcon = <ClockIcon size={18} />;
+                else itemIcon = <UsersIcon size={18} />;
+            }
+
+            items.push({
+                ...item,
+                path: dynamicPath,
+                icon: itemIcon,
+            });
+        });
+
+        return items;
+    }, [featureNavItems, roleSegment, user?.role]);
 
     const handleToggleSidebar = () => {
         setIsSidebarCollapsed((prev) => {

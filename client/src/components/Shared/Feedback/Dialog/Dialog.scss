@@ -47,6 +47,10 @@
         max-width: 780px;
     }
 
+    &.size-xl {
+        max-width: 960px;
+    }
+
     // Variants (border accents removed)
 }
 
@@ -155,35 +159,41 @@
                 background-color: color-mix(in srgb, variables.$color-primary 90%, white);
                 color: variables.$color-white;
             }
+        }
 
-            &.btn-danger {
-                background-color: variables.$color-danger-light;
-                color: variables.$color-danger;
+        &.btn-danger {
+            background-color: variables.$color-danger;
+            color: variables.$color-white;
+            border: 1px solid variables.$color-danger;
 
-                &:hover {
-                    background-color: variables.$color-danger-light;
-                    color: variables.$color-danger;
-                }
+            &:hover {
+                background-color: color-mix(in srgb, variables.$color-danger 88%, black);
+                border-color: color-mix(in srgb, variables.$color-danger 88%, black);
+                color: variables.$color-white;
             }
+        }
 
-            &.btn-success {
-                background-color: rgba(variables.$color-success, 0.18);
-                color: color-mix(in srgb, variables.$color-success 90%, black);
+        &.btn-success {
+            background-color: variables.$color-success;
+            color: variables.$color-white;
+            border: 1px solid variables.$color-success;
 
-                &:hover {
-                    background-color: rgba(variables.$color-success, 0.18);
-                    color: color-mix(in srgb, variables.$color-success 90%, black);
-                }
+            &:hover {
+                background-color: color-mix(in srgb, variables.$color-success 88%, black);
+                border-color: color-mix(in srgb, variables.$color-success 88%, black);
+                color: variables.$color-white;
             }
+        }
 
-            &.btn-warning {
-                background-color: rgba(variables.$color-warning, 0.18);
-                color: color-mix(in srgb, variables.$color-warning 90%, black);
+        &.btn-warning {
+            background-color: variables.$color-warning;
+            color: variables.$color-white;
+            border: 1px solid variables.$color-warning;
 
-                &:hover {
-                    background-color: rgba(variables.$color-warning, 0.18);
-                    color: color-mix(in srgb, variables.$color-warning 90%, black);
-                }
+            &:hover {
+                background-color: color-mix(in srgb, variables.$color-warning 88%, black);
+                border-color: color-mix(in srgb, variables.$color-warning 88%, black);
+                color: variables.$color-white;
             }
         }
     }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pencil } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { useNavigate, Link, useLocation } from 'react-router';
 import InputField from '@/components/Shared/Form/InputField/InputField';
 import Upload from '@/components/Shared/Form/Upload/Upload';
 import Button from '@/components/Shared/Buttons/Button/Button';
@@ -16,6 +16,8 @@ export default function AccountSettings() {
         auth;
     const { success, error } = useToast();
     const navigate = useNavigate();
+    const { pathname } = useLocation();
+    const roleSegment = pathname.includes('/admin/') ? 'admin' : 'user';
 
     const user = auth.user;
 
@@ -285,6 +287,21 @@ export default function AccountSettings() {
 
     return (
         <div className="account-settings-container" key={user?.email || 'loading'}>
+            <div className="settings-nav-tabs">
+                <Link
+                    to={`/dashboard/${roleSegment}/settings/general`}
+                    className="settings-nav-tab"
+                >
+                    General
+                </Link>
+                <Link
+                    to={`/dashboard/${roleSegment}/settings/account`}
+                    className="settings-nav-tab active"
+                >
+                    Account
+                </Link>
+            </div>
+
             <div className="section-outline-card">
                 <div className="settings-card-header">
                     <div className="section-header-row">
@@ -360,7 +377,7 @@ export default function AccountSettings() {
                             />
                         </div>
 
-                        <div className="form-field-wrapper">
+                        <div className="form-field-wrapper full-width">
                             <InputField
                                 label="Email Address"
                                 id="settings-email"

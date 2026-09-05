@@ -1,0 +1,204 @@
+@use '@/styles/variables' as variables;
+
+.contract-table-container,
+.contracts-table-card {
+    width: 100%;
+}
+
+.contract-employee-cell {
+    display: flex;
+    align-items: center;
+    gap: variables.$spacing-sm;
+    cursor: pointer;
+    padding: 2px 0;
+    text-align: left;
+
+    .employee-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        background-color: variables.$color-gray-100;
+        border: 1px solid variables.$color-gray-200;
+    }
+
+    .employee-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+
+        .employee-full-name {
+            font-weight: 600;
+            color: variables.$color-gray-900;
+            font-size: variables.$font-size-sm;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            @include variables.transition-ease;
+        }
+
+        .employee-code {
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-500;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+    }
+
+    &:hover .employee-full-name {
+        color: variables.$color-blue-accent;
+    }
+}
+
+.contract-name-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: variables.$spacing-xs;
+    cursor: pointer;
+    text-align: left;
+    appearance: none;
+    max-width: 100%;
+
+    @include variables.transition-ease;
+
+    .contract-title-text {
+        font-weight: 500;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-900;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+
+        @include variables.transition-ease;
+    }
+
+    .name-link-icon {
+        opacity: 0;
+        color: variables.$color-blue-accent;
+        flex-shrink: 0;
+
+        @include variables.transition-ease;
+    }
+
+    &:hover {
+        .contract-title-text {
+            color: variables.$color-blue-accent;
+        }
+
+        .name-link-icon {
+            opacity: 1;
+        }
+    }
+}
+
+.contract-period-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: variables.$spacing-xs;
+
+    .period-dates {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: variables.$font-size-sm;
+        font-weight: 500;
+        color: variables.$color-gray-700;
+        white-space: nowrap;
+
+        .date-start {
+            color: variables.$color-gray-800;
+        }
+
+        .date-arrow {
+            color: variables.$color-gray-400;
+            font-size: variables.$font-size-xs;
+        }
+
+        .date-end {
+            color: variables.$color-gray-800;
+
+            &.is-open {
+                color: variables.$color-gray-500;
+                font-style: normal;
+            }
+        }
+    }
+}
+
+.contract-wage-cell {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    white-space: nowrap;
+
+    .wage-amount {
+        font-weight: 600;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-900;
+        letter-spacing: -0.01em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .wage-unit {
+        font-size: variables.$font-size-xs;
+        font-weight: 400;
+        color: variables.$color-gray-500;
+    }
+}
+
+.contract-structure-cell {
+    font-size: variables.$font-size-sm;
+    font-weight: 400;
+    color: variables.$color-gray-600;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    .structure-text {
+        color: variables.$color-gray-600;
+    }
+}
+
+.contract-row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: variables.$spacing-xs;
+
+    .view-details-arrow-btn {
+        background: transparent;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        cursor: pointer;
+        color: variables.$color-gray-400;
+        padding: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: variables.$radius-small;
+        appearance: none;
+
+        @include variables.transition-ease;
+
+        &:hover {
+            color: variables.$color-blue-accent;
+            background-color: variables.$color-gray-100;
+        }
+    }
+}
