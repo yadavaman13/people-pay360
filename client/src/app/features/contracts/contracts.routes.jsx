@@ -1,73 +1,31 @@
 import { Outlet } from 'react-router';
 import { FileText } from 'lucide-react';
+import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
 import { ContractProvider } from './context/ContractContext';
 import ContractsListPage from './pages/ContractsListPage';
 import ContractFormPage from './pages/ContractFormPage';
 import ContractDetailPage from './pages/ContractDetailPage';
-import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
 
 export default {
+    // Multi-Role RBAC: specify which roles can access this feature
+    allowedRoles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'],
+
+    // Navigation metadata for Sidebar and Topbar Breadcrumbs
     navItem: {
         label: 'Contracts',
-        path: '/dashboard/user/contracts',
-        icon: FileText,
+        path: '/dashboard/employee/contracts',
+        icon: <FileText size={18} />,
         roles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'],
     },
-    userRoutes: [
+
+    // Feature routes auto-discovered by routes.loader.jsx
+    routes: [
         {
             path: 'contracts',
             element: (
-                <ProtectedRoute
-                    allowedRoles={['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER']}
-                >
-                    <ContractProvider>
-                        <Outlet />
-                    </ContractProvider>
-                </ProtectedRoute>
-            ),
-            children: [
-                {
-                    index: true,
-                    element: <ContractsListPage />,
-                },
-                {
-                    path: 'new',
-                    element: (
-                        <ProtectedRoute
-                            allowedRoles={['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER']}
-                        >
-                            <ContractFormPage mode="create" />
-                        </ProtectedRoute>
-                    ),
-                },
-                {
-                    path: ':id',
-                    element: <ContractDetailPage />,
-                },
-                {
-                    path: ':id/edit',
-                    element: (
-                        <ProtectedRoute
-                            allowedRoles={['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER']}
-                        >
-                            <ContractFormPage mode="edit" />
-                        </ProtectedRoute>
-                    ),
-                },
-            ],
-        },
-    ],
-    adminRoutes: [
-        {
-            path: 'contracts',
-            element: (
-                <ProtectedRoute
-                    allowedRoles={['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER']}
-                >
-                    <ContractProvider>
-                        <Outlet />
-                    </ContractProvider>
-                </ProtectedRoute>
+                <ContractProvider>
+                    <Outlet />
+                </ContractProvider>
             ),
             children: [
                 {

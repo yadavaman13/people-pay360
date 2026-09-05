@@ -1,8 +1,8 @@
 export default {
-    userRoutes: [
+    employeeRoutes: [
         {
             path: 'home',
-            element: <div className="main-dashboard-placeholder">This is main dashboard</div>,
+            element: <div className="main-dashboard-placeholder">This is employee dashboard</div>,
         },
     ],
     hrRoutes: [

@@ -138,7 +138,7 @@ export default function AttendancePage({ mode: initialMode }) {
     const roleSegment = useMemo(() => {
         if (isAdmin) return 'admin';
         if (isHRRole) return 'hr';
-        return 'user';
+        return 'employee';
     }, [isAdmin, isHRRole]);
 
     // Determine effective mode:
