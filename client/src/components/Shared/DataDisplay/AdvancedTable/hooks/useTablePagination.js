@@ -7,6 +7,7 @@ export function useTablePagination({
     processedData = [],
     totalCount = null,
     serverSide = false,
+    showAllOption = false,
 }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
@@ -46,13 +47,15 @@ export function useTablePagination({
             );
         });
         opts.sort((a, b) => a.value - b.value);
-        opts.push({
-            value: totalRows,
-            label: `Show all ${totalRows}`,
-            description: 'Display every row on one page',
-        });
+        if (showAllOption) {
+            opts.push({
+                value: totalRows,
+                label: `Show all ${totalRows}`,
+                description: 'Display every row on one page',
+            });
+        }
         return opts;
-    }, [rowsPerPage, totalRows]);
+    }, [rowsPerPage, totalRows, showAllOption]);
 
     const showRowsPerPage = useMemo(() => {
         if (totalRows <= 1) return false;

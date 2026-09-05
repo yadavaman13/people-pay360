@@ -6,12 +6,13 @@ const adminApiInstance = axios.create({
 });
 
 /**
- * Fetch all users (Admin only)
- * @param {boolean} includeDeleted
+ * Fetch users with optional pagination, sorting, and filters (Admin only)
+ * @param {object|boolean} [params={}]
  */
-export async function adminListUsers(includeDeleted = false) {
+export async function adminListUsers(params = {}) {
+    const queryParams = typeof params === 'boolean' ? { includeDeleted: params } : { ...params };
     const response = await adminApiInstance.get('/users', {
-        params: { includeDeleted },
+        params: queryParams,
     });
     return response.data;
 }
