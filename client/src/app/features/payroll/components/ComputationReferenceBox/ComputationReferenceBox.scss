@@ -1,0 +1,141 @@
+@use '@/styles/variables' as variables;
+
+.computation-reference-box {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-lg;
+    box-shadow: variables.$shadow-sm;
+
+    .reference-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: variables.$spacing-md;
+        margin-bottom: variables.$spacing-md;
+        border-bottom: 1px solid variables.$color-gray-200;
+        padding-bottom: variables.$spacing-md;
+        flex-wrap: wrap;
+
+        .reference-title {
+            font-size: variables.$font-size-md;
+            font-weight: 700;
+            color: variables.$color-gray-900;
+            margin: 0;
+            letter-spacing: -0.01em;
+        }
+
+        .reference-tabs {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-xs;
+            background-color: variables.$color-gray-100;
+            padding: 3px;
+            border-radius: variables.$radius-medium;
+            flex-wrap: wrap;
+
+            .reference-tab-btn {
+                background: none;
+                border: none;
+                padding: variables.$spacing-xs variables.$spacing-sm;
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                color: variables.$color-gray-600;
+                border-radius: variables.$radius-small;
+                cursor: pointer;
+
+                @include variables.transition-ease;
+
+                &:hover:not(.is-active) {
+                    color: variables.$color-gray-900;
+                }
+
+                &.is-active {
+                    background-color: variables.$color-white;
+                    color: variables.$color-gray-900;
+                    box-shadow: variables.$shadow-sm;
+                }
+            }
+        }
+    }
+
+    .reference-content {
+        .reference-panel {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-sm;
+
+            .syntax-row {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-sm;
+                flex-wrap: wrap;
+
+                .syntax-label {
+                    font-size: variables.$font-size-sm;
+                    font-weight: 600;
+                    color: variables.$color-gray-700;
+                }
+
+                .syntax-code {
+                    font-family: monospace;
+                    font-size: variables.$font-size-xs;
+                    font-weight: 600;
+                    color: variables.$color-gray-800;
+                    background-color: variables.$color-gray-100;
+                    border: 1px solid variables.$color-gray-200;
+                    padding: 2px variables.$spacing-sm;
+                    border-radius: variables.$radius-tiny;
+                }
+            }
+
+            .reference-desc {
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-600;
+                line-height: 1.5;
+                margin: 0;
+
+                code {
+                    font-family: monospace;
+                    font-size: variables.$font-size-xs;
+                    color: variables.$color-gray-800;
+                    background-color: variables.$color-gray-100;
+                    padding: 1px 4px;
+                    border-radius: variables.$radius-tiny;
+                }
+            }
+
+            .example-box {
+                display: flex;
+                align-items: flex-start;
+                gap: variables.$spacing-xs;
+                background-color: variables.$color-gray-50;
+                border: 1px solid variables.$color-gray-200;
+                border-radius: variables.$radius-medium;
+                padding: variables.$spacing-sm variables.$spacing-md;
+
+                .example-tag {
+                    font-size: variables.$font-size-xs;
+                    font-weight: 700;
+                    color: variables.$color-gray-700;
+                    flex-shrink: 0;
+                }
+
+                .example-text {
+                    font-size: variables.$font-size-xs;
+                    color: variables.$color-gray-600;
+                    line-height: 1.4;
+
+                    code {
+                        font-family: monospace;
+                        font-size: variables.$font-size-xs;
+                        color: variables.$color-gray-800;
+                        background-color: variables.$color-gray-200;
+                        padding: 1px 4px;
+                        border-radius: variables.$radius-tiny;
+                    }
+                }
+            }
+        }
+    }
+}

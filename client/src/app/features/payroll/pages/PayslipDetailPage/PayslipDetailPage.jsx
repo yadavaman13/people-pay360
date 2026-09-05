@@ -4,7 +4,6 @@ import { usePayslipDetail } from '../../hooks/usePayslipDetail';
 import PayslipActionBar from '../../components/PayslipActionBar/PayslipActionBar';
 import PayslipSummaryGrid from '../../components/PayslipSummaryGrid/PayslipSummaryGrid';
 import SalaryComputationTable from '../../components/SalaryComputationTable/SalaryComputationTable';
-import Breadcrumbs from '@/components/Shared/Navigation/Breadcrumbs/Breadcrumbs';
 import Spinner from '@/components/Shared/Feedback/Spinner/Spinner';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/Shared/Feedback/Alert/Alert';
@@ -76,19 +75,8 @@ function PayslipDetailPage() {
 
     const titleText = `Payslip / ${employeeName} / ${periodMonth}`;
 
-    const breadcrumbItems = [
-        { label: 'Payroll', path: `/dashboard/${roleSegment}/payroll/payruns` },
-        { label: 'Payslips', path: `/dashboard/${roleSegment}/payroll/payslips` },
-        { label: titleText },
-    ];
-
     return (
         <div className="payslip-detail-page">
-            {/* Top Hierarchical Breadcrumb Navigation */}
-            <div className="payslip-detail-page__breadcrumb-wrapper">
-                <Breadcrumbs items={breadcrumbItems} />
-            </div>
-
             {/* Header with Title/Subtitle on Left & Actions aligned horizontally in a line on the Right */}
             <header className="payslip-detail-page__header">
                 <div className="payslip-detail-page__header-info">
