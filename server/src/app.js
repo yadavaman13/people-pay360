@@ -18,6 +18,8 @@ import { salaryStructureRouter } from './modules/salary-structures/index.js';
 import { salaryRuleRouter } from './modules/salary-rules/index.js';
 import { payrunRouter } from './modules/payruns/index.js';
 import { payslipRouter } from './modules/payslips/index.js';
+import { employeeRouter } from './modules/employees/index.js';
+import { contractRouter } from './modules/contracts/index.js';
 
 const app = express();
 
@@ -44,6 +46,9 @@ app.use('/api/pdf', pdfRouter);
 app.use('/api/working-schedules', scheduleRouter);
 app.use('/api/attendance', attendanceRouter);
 app.use('/api/time-off', timeOffRouter);
+
+app.use('/api/employees', employeeRouter);
+app.use('/api/contracts', contractRouter);
 
 app.use('/api/salary-structures', salaryStructureRouter);
 app.use('/api/salary-rules', salaryRuleRouter);
