@@ -162,3 +162,35 @@ export async function getEmployeesForPayrun(req, res, next) {
         next(error);
     }
 }
+
+/**
+ * Upload employee profile avatar image
+ */
+export async function uploadEmployeeAvatar(req, res, next) {
+    try {
+        if (!req.file) {
+            return sendResponse({
+                res,
+                statusCode: 400,
+                success: false,
+                message: 'No avatar image received. Send image file under "avatar" field.',
+            });
+        }
+
+        const result = await employeeService.uploadEmployeeAvatar(
+            req.params.id,
+            req.file,
+            req.user,
+        );
+
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Employee profile photo updated successfully',
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+}

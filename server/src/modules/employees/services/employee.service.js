@@ -1,5 +1,6 @@
 import * as employeeDao from '../../../dao/employee.dao.js';
-import { getUserById } from '../../../dao/user.dao.js';
+import { getUserById, updateUser } from '../../../dao/user.dao.js';
+import { uploadImageOnImageKit } from '../../../services/image.service.js';
 import { generateEmployeeCode } from '../../../utils/employeeCode.utils.js';
 import { AppError } from '../../../utils/appError.js';
 
@@ -64,6 +65,8 @@ export async function createEmployeeProfile(data, authenticatedUser) {
         gender: data.gender || null,
         dateOfBirth: data.dateOfBirth || null,
         address: data.address || null,
+        profileImage:
+            targetUser.profileImage || 'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
         hireDate,
         departmentId: isPrivileged ? data.departmentId || null : null,
         jobPositionId: isPrivileged ? data.jobPositionId || null : null,
@@ -179,6 +182,7 @@ export async function updateEmployeeProfile(id, updateData, authenticatedUser) {
         'workingScheduleId',
         'status',
         'notes',
+        'profileImage',
     ];
 
     const sanitized = {};
@@ -230,4 +234,31 @@ export async function listEmployees(queryParams) {
  */
 export async function getEmployeesForPayrun(structureId, periodStart, periodEnd) {
     return employeeDao.getEmployeesForPayrun(structureId, periodStart, periodEnd);
+}
+
+/**
+ * Upload employee avatar to ImageKit and update employee profileImage
+ * @param {string} id
+ * @param {object} file
+ * @param {object} authenticatedUser
+ */
+export async function uploadEmployeeAvatar(id, file, authenticatedUser) {
+    const employee = await employeeDao.findEmployeeById(id);
+    if (!employee) {
+        throw new AppError('Employee not found', 404);
+    }
+
+    const uploaded = await uploadImageOnImageKit({ image: file });
+    const imageUrl = uploaded.url;
+
+    await employeeDao.updateEmployee(id, { profileImage: imageUrl });
+
+    if (employee.userId) {
+        await updateUser(employee.userId, { profileImage: imageUrl });
+    }
+
+    return {
+        imageUrl,
+        employee: await employeeDao.findEmployeeWithJoins(id),
+    };
 }

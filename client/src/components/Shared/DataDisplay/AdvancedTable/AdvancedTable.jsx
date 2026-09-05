@@ -88,6 +88,7 @@ function AdvancedTable({
     cardBodyKeys = [],
     statusVariantMap = {},
     onCardClick,
+    onRowClick = null,
     renderCard,
     gridSkeletonCount = 8,
 }) {
@@ -904,6 +905,7 @@ function AdvancedTable({
                                 searchTerm={searchTerm}
                                 onRowFieldChange={handleRowFieldChange}
                                 onCellContextMenu={handleCellContextMenu}
+                                onRowClick={onRowClick}
                             />
                         </table>
                     </div>

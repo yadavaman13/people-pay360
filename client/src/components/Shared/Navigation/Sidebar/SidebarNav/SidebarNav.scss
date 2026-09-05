@@ -5,4 +5,19 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    min-height: 0;
+    overflow: hidden auto;
+
+    &::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: variables.$color-gray-200;
+        border-radius: 2px;
+
+        &:hover {
+            background-color: variables.$color-gray-300;
+        }
+    }
 }

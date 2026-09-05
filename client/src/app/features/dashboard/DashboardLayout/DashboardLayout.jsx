@@ -7,7 +7,8 @@ import Dialog from '@/components/Shared/Feedback/Dialog';
 import { Drawer, NotificationFeed } from '@/components/Shared/Feedback/Drawer';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
-import { Home as HomeIcon, Users as UsersIcon } from 'lucide-react';
+import { loadFeatureRoutes } from '@/app/routes.loader';
+import { Home as HomeIcon, Users as UsersIcon, UserCheck as EmployeesIcon } from 'lucide-react';
 import './DashboardLayout.scss';
 
 function DashboardLayout({ onLogout }) {
@@ -36,21 +37,34 @@ function DashboardLayout({ onLogout }) {
 
     const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
 
+    const { featureNavItems } = loadFeatureRoutes();
+
+    const NAV_ICON_MAP = {
+        Home: <HomeIcon size={20} />,
+        Users: <UsersIcon size={20} />,
+        Employees: <EmployeesIcon size={20} />,
+    };
+
+    // Remove duplicate labels if any (and prevent duplicate Home/Settings entries in main sidebar)
+    const uniqueFeatureItems = [];
+    const seenLabels = new Set(['Home', 'Settings']);
+    featureNavItems.forEach((item) => {
+        if (!seenLabels.has(item.label)) {
+            seenLabels.add(item.label);
+            uniqueFeatureItems.push(item);
+        }
+    });
+
     const sidebarNavItems = [
         {
             label: 'Home',
-            icon: <HomeIcon />,
+            icon: <HomeIcon size={20} />,
+            path: `/dashboard/${roleSegment}/home`,
         },
-        ...(roleSegment === 'admin'
-            ? [
-                  {
-                      label: 'Users',
-                      icon: <UsersIcon />,
-                      path: `/dashboard/admin/users`,
-                      roles: ['ADMIN'],
-                  },
-              ]
-            : []),
+        ...uniqueFeatureItems.map((item) => ({
+            ...item,
+            icon: item.icon || NAV_ICON_MAP[item.label] || <UsersIcon size={20} />,
+        })),
     ];
 
     const handleToggleSidebar = () => {
