@@ -51,6 +51,7 @@ export async function createAndLoginTestUser(overrides = {}) {
 
     return {
         user,
+        rawPassword: payload.password,
         token,
         cookie: `token=${token}`,
         authHeader: `Bearer ${token}`,

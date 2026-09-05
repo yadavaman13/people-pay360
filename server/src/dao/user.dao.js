@@ -37,23 +37,6 @@ export async function getUserById(id, includeDeleted = false) {
 }
 
 /**
- * Get user by googleId
- * @param {string} googleId
- * @param {boolean} includeDeleted
- */
-export async function getUserByGoogleId(googleId, includeDeleted = false) {
-    const filters = [eq(users.googleId, googleId)];
-    if (!includeDeleted) {
-        filters.push(eq(users.isDeleted, false));
-    }
-    const [user] = await db
-        .select()
-        .from(users)
-        .where(and(...filters));
-    return user || null;
-}
-
-/**
  * Create a new user record
  * @param {object} userData
  */
