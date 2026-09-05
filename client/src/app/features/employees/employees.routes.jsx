@@ -1,3 +1,4 @@
+import { UserCheck } from 'lucide-react';
 import { EmployeesProvider } from './context/employees.context';
 import EmployeesPage from './pages/EmployeesPage/EmployeesPage';
 import EmployeeFormPage from './pages/EmployeeFormPage/EmployeeFormPage';
@@ -9,7 +10,8 @@ export default {
     // Sidebar navigation metadata
     navItem: {
         label: 'Employees',
-        path: '/dashboard/user/employees',
+        path: '/dashboard/employee/employees',
+        icon: <UserCheck size={18} />,
         roles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'],
     },
 

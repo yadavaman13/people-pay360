@@ -15,14 +15,13 @@ export function useTablePagination({
     const totalRows = typeof totalCount === 'number' ? totalCount : processedData.length;
 
     useEffect(() => {
-        if (serverSide) return;
-        if (totalRows === 0) return;
+        if (serverSide || totalRows === 0) return;
         const meaningful = PAGE_SIZE_STANDARDS.filter((n) => n < totalRows);
         if (rowsPerPage >= totalRows && meaningful.length > 0) {
             setRowsPerPage(meaningful[meaningful.length - 1]);
             setCurrentPage(1);
         }
-    }, [totalRows, serverSide]);
+    }, [totalRows, serverSide, rowsPerPage]);
 
     const rowsOptions = useMemo(() => {
         if (totalRows === 0) return [];
@@ -32,12 +31,12 @@ export function useTablePagination({
             opts.push({
                 value: rowsPerPage,
                 label: String(rowsPerPage),
-                disabled: rowsPerPage >= totalRows,
+                disabled: !serverSide && rowsPerPage >= totalRows,
             });
         }
         PAGE_SIZE_STANDARDS.forEach((n) => {
             opts.push(
-                n >= totalRows
+                !serverSide && n >= totalRows
                     ? {
                           value: n,
                           label: String(n),
@@ -56,19 +55,21 @@ export function useTablePagination({
             });
         }
         return opts;
-    }, [rowsPerPage, totalRows, showAllOption]);
+    }, [rowsPerPage, totalRows, showAllOption, serverSide]);
 
     const showRowsPerPage = useMemo(() => {
         if (totalRows <= 1) return false;
+        if (serverSide) return true;
         return rowsOptions.filter((opt) => !opt.disabled && opt.value < totalRows).length >= 1;
-    }, [rowsOptions, totalRows]);
+    }, [rowsOptions, totalRows, serverSide]);
 
     const totalPages = Math.max(Math.ceil(totalRows / rowsPerPage), 1);
 
     useEffect(() => {
+        if (totalRows === 0) return;
         if (currentPage > totalPages) setCurrentPage(totalPages);
         if (currentPage < 1) setCurrentPage(1);
-    }, [totalPages, currentPage]);
+    }, [totalPages, currentPage, totalRows]);
 
     const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
 

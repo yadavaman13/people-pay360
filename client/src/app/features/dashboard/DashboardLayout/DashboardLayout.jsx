@@ -41,7 +41,11 @@ function DashboardLayout({ onLogout }) {
     const isVisuallyCollapsed =
         windowWidth <= 600 ? false : windowWidth <= 900 ? true : isSidebarCollapsed;
 
-    const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
+    const HR_ROLES = ['HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'];
+    const userRoleUpper = user?.role?.toUpperCase() || '';
+    const isAdmin = userRoleUpper === 'ADMIN';
+    const isHR = HR_ROLES.includes(userRoleUpper);
+    const roleSegment = isAdmin ? 'admin' : isHR ? 'hr' : 'employee';
 
     const { featureNavItems } = useMemo(() => loadFeatureRoutes(), []);
 
@@ -72,7 +76,10 @@ function DashboardLayout({ onLogout }) {
 
             // Dynamic route path replacement
             const dynamicPath = item.path
-                ? item.path.replace(/\/dashboard\/(?:user|admin)\//, `/dashboard/${roleSegment}/`)
+                ? item.path.replace(
+                      /\/dashboard\/(?:user|employee|admin|hr)\//,
+                      `/dashboard/${roleSegment}/`,
+                  )
                 : item.path;
 
             let itemIcon = item.icon;
@@ -105,7 +112,7 @@ function DashboardLayout({ onLogout }) {
         });
 
         return items;
-    }, [featureNavItems, roleSegment, user?.role]);
+    }, [featureNavItems, roleSegment, user]);
 
     const handleToggleSidebar = () => {
         setIsSidebarCollapsed((prev) => {

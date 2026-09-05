@@ -531,7 +531,8 @@
         align-items: center;
         justify-content: space-between;
         padding: variables.$spacing-sm variables.$spacing-md;
-        background-color: var(--color-bg-subtle, #f3f4f6);
+        background-color: var(--color-bg-subtle, #f8fafc);
+        border: 1px solid var(--color-border-subtle, #e2e8f0);
         border-radius: variables.$radius-medium;
         font-size: variables.$font-size-xs;
 
@@ -539,6 +540,68 @@
             font-weight: 600;
             color: var(--color-text-primary, #111827);
         }
+    }
+
+    .modal-content-grid {
+        display: grid;
+        grid-template-columns: 310px 1fr;
+        gap: variables.$spacing-lg;
+        align-items: start;
+
+        @media (width <= 768px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .modal-calendar-panel {
+        background: var(--color-bg-subtle, #f8fafc);
+        border: 1px solid var(--color-border-subtle, #e2e8f0);
+        border-radius: variables.$radius-medium;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-sm;
+
+        .calendar-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--color-border-subtle, #e2e8f0);
+
+            .calendar-panel-title {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-weight: 600;
+                font-size: variables.$font-size-xs;
+                color: var(--color-text-primary, #1e293b);
+            }
+        }
+
+        .calendar-widget-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+
+            .calendar-body-content {
+                width: 100%;
+            }
+        }
+
+        .calendar-panel-hint {
+            font-size: variables.$font-size-xs;
+            color: var(--color-text-secondary, #64748b);
+            text-align: center;
+            padding-top: 4px;
+            border-top: 1px dashed var(--color-border-subtle, #e2e8f0);
+        }
+    }
+
+    .modal-fields-panel {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-md;
     }
 
     .form-inputs-row {
@@ -556,6 +619,7 @@
         font-weight: 600;
         color: var(--color-text-secondary, #4b5563);
         margin-bottom: 4px;
+        display: block;
     }
 
     .field-error-msg {

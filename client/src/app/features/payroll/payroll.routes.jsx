@@ -12,7 +12,7 @@ export default {
     // Navigation Metadata for the Sidebar and Topbar Breadcrumbs
     navItem: {
         label: 'Payroll',
-        path: '/dashboard/user/payroll/payruns',
+        path: '/dashboard/employee/payroll/payruns',
         icon: <Banknote size={18} />,
         roles: ['ADMIN', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'],
         subTabs: ['Payruns', 'Payslips'],

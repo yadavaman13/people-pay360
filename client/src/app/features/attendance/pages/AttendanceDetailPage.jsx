@@ -100,11 +100,7 @@ export default function AttendanceDetailPage() {
         return (
             <div className="attendance-detail-container">
                 <div className="detail-nav-bar" style={{ marginBottom: '16px' }}>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate('/dashboard/user/attendance')}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
                         <ArrowLeft size={16} style={{ marginRight: '6px' }} />
                         Back to Attendance
                     </Button>
@@ -117,7 +113,7 @@ export default function AttendanceDetailPage() {
                         variant="inline"
                         action={{
                             label: 'Back to Attendance',
-                            onClick: () => navigate('/dashboard/user/attendance'),
+                            onClick: () => navigate(-1),
                             icon: ArrowLeft,
                         }}
                     />
@@ -157,11 +153,7 @@ export default function AttendanceDetailPage() {
             {/* Top Navigation Bar */}
             <div className="detail-nav-bar">
                 <div className="back-action-group">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate('/dashboard/user/attendance')}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
                         <ArrowLeft size={16} style={{ marginRight: '6px' }} />
                         Back to Attendance
                     </Button>
