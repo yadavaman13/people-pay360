@@ -4,33 +4,56 @@
     display: flex;
     flex-direction: column;
     gap: variables.$spacing-lg;
-    padding: var(--spacing-md) var(--spacing-xl);
+    padding: variables.$spacing-md variables.$spacing-xl;
+    box-sizing: border-box;
     width: 100%;
+    font-family: variables.$font-sans;
+
+    @include variables.mobile {
+        padding: variables.$spacing-sm variables.$spacing-md;
+        gap: variables.$spacing-sm;
+    }
 
     // ── Header Section ──────────────────────────────────────────────────────
     .attendance-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         flex-wrap: wrap;
         gap: variables.$spacing-md;
+        flex-shrink: 0;
 
-        .header-text {
+        .header-info {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: variables.$spacing-xs;
 
-            .page-title {
-                font-size: variables.$font-size-xl;
-                font-weight: 700;
-                color: var(--color-text-primary, #111827);
-                margin: 0;
+            .title-row {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-sm;
+
+                .header-icon {
+                    color: variables.$color-black;
+                }
+
+                .header-title {
+                    font-size: variables.$font-size-xxl;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    margin: 0;
+                    letter-spacing: -0.02em;
+                    font-family: variables.$font-sans;
+                }
             }
 
-            .page-subtitle {
+            .header-subtitle {
                 font-size: variables.$font-size-sm;
-                color: var(--color-text-secondary, #6b7280);
+                color: variables.$color-gray-500;
                 margin: 0;
+                max-width: 600px;
+                line-height: 1.5;
+                font-family: variables.$font-sans;
             }
         }
 
@@ -38,6 +61,32 @@
             display: flex;
             align-items: center;
             gap: variables.$spacing-sm;
+
+            .refresh-btn,
+            .export-btn {
+                display: inline-flex;
+                align-items: center;
+                font-weight: 500;
+            }
+        }
+
+        @include variables.mobile {
+            .header-info {
+                .title-row {
+                    .header-title {
+                        font-size: variables.$font-size-xl;
+                    }
+                }
+
+                .header-subtitle {
+                    font-size: variables.$font-size-xs;
+                }
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
         }
     }
 
@@ -281,15 +330,15 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: var(--color-bg-card, #fff);
-            border: 1px solid var(--color-border-subtle, #e5e7eb);
-            border-radius: variables.$radius-medium;
+            background: variables.$color-white;
+            border: 1px solid variables.$color-gray-200;
+            border-radius: variables.$radius-large;
             padding: variables.$spacing-xs variables.$spacing-md;
 
             .month-title {
                 font-size: variables.$font-size-md;
                 font-weight: 600;
-                color: var(--color-text-primary, #111827);
+                color: variables.$color-gray-900;
             }
 
             .nav-buttons-group {
@@ -360,10 +409,12 @@
 
     // ── Table Container ─────────────────────────────────────────────────────
     .attendance-table-card {
-        background: var(--color-bg-card, #fff);
-        border: 1px solid var(--color-border-subtle, #e5e7eb);
-        border-radius: variables.$radius-medium;
+        background-color: variables.$color-white;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-large;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
 
         .employee-profile-cell {
             display: flex;
