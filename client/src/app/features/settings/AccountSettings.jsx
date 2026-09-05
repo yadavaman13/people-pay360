@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, Info } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import InputField from '@/components/Shared/Form/InputField/InputField';
 import Upload from '@/components/Shared/Form/Upload/Upload';
@@ -12,18 +12,12 @@ import './AccountSettings.scss';
 
 export default function AccountSettings() {
     const auth = useAuth();
-    const {
-        handleUpdateProfile,
-        handleUploadAvatar,
-        handleChangePassword,
-        handleDeleteAccount,
-        handleDeleteGoogleAccount,
-    } = auth;
+    const { handleUpdateProfile, handleUploadAvatar, handleChangePassword, handleDeleteAccount } =
+        auth;
     const { success, error } = useToast();
     const navigate = useNavigate();
 
     const user = auth.user;
-    const isGoogleUser = !!user?.googleId || !!user?.isGoogleUser;
 
     const emailVal = user ? user.email || '' : '';
     const roleVal = user ? user.role || 'USER' : 'USER';
@@ -229,7 +223,7 @@ export default function AccountSettings() {
     };
 
     const handleDeleteAccountConfirm = async () => {
-        if (!isGoogleUser && !deleteConfirmPassword) {
+        if (!deleteConfirmPassword) {
             setDeleteError('Password is required to confirm deletion.');
             return;
         }
@@ -237,16 +231,8 @@ export default function AccountSettings() {
         setIsDeletingAccount(true);
         setDeleteError('');
         try {
-            if (isGoogleUser) {
-                await handleDeleteGoogleAccount();
-            } else {
-                await handleDeleteAccount({ password: deleteConfirmPassword });
-            }
-            success(
-                isGoogleUser
-                    ? 'Your account has been deleted permanently.'
-                    : 'Your account has been deleted.',
-            );
+            await handleDeleteAccount({ password: deleteConfirmPassword });
+            success('Your account has been deleted.');
             setIsDeleteDialogOpen(false);
             setDeleteConfirmPassword('');
             navigate('/login');
@@ -426,7 +412,7 @@ export default function AccountSettings() {
                                 Update your password to keep your account secure
                             </p>
                         </div>
-                        {!isEditingPassword && !isGoogleUser && (
+                        {!isEditingPassword && (
                             <button
                                 type="button"
                                 className="section-edit-btn"
@@ -439,102 +425,88 @@ export default function AccountSettings() {
                     </div>
                 </div>
 
-                {isGoogleUser ? (
-                    <div className="google-user-info-card">
-                        <Info size={18} className="info-icon" />
-                        <div className="info-content">
-                            <h4 className="info-title">Managed by Google</h4>
-                            <p className="info-desc">
-                                Password management is not available for accounts signed in with
-                                Google. You can manage your security and login credentials directly
-                                in your Google Account.
-                            </p>
+                <form onSubmit={handleChangePasswordSubmit} className="account-settings-form">
+                    <div className="form-fields-grid">
+                        <div className="form-field-wrapper full-width">
+                            <InputField
+                                label="Current Password"
+                                id="settings-currentPassword"
+                                type="password"
+                                placeholder="Enter current password"
+                                value={currentPassword}
+                                onChange={(e) => {
+                                    setCurrentPassword(e.target.value);
+                                    if (passwordErrors.currentPassword)
+                                        setPasswordErrors((prev) => ({
+                                            ...prev,
+                                            currentPassword: '',
+                                        }));
+                                }}
+                                error={passwordErrors.currentPassword}
+                                disabled={!isEditingPassword || isChangingPassword}
+                            />
+                        </div>
+                        <div className="form-field-wrapper">
+                            <InputField
+                                label="New Password"
+                                id="settings-newPassword"
+                                type="password"
+                                placeholder="Enter new password"
+                                value={newPassword}
+                                onChange={(e) => {
+                                    setNewPassword(e.target.value);
+                                    if (passwordErrors.newPassword)
+                                        setPasswordErrors((prev) => ({
+                                            ...prev,
+                                            newPassword: '',
+                                        }));
+                                }}
+                                error={passwordErrors.newPassword}
+                                disabled={!isEditingPassword || isChangingPassword}
+                            />
+                        </div>
+                        <div className="form-field-wrapper">
+                            <InputField
+                                label="Confirm New Password"
+                                id="settings-confirmPassword"
+                                type="password"
+                                placeholder="Confirm new password"
+                                value={confirmPassword}
+                                onChange={(e) => {
+                                    setConfirmPassword(e.target.value);
+                                    if (passwordErrors.confirmPassword)
+                                        setPasswordErrors((prev) => ({
+                                            ...prev,
+                                            confirmPassword: '',
+                                        }));
+                                }}
+                                error={passwordErrors.confirmPassword}
+                                disabled={!isEditingPassword || isChangingPassword}
+                            />
                         </div>
                     </div>
-                ) : (
-                    <form onSubmit={handleChangePasswordSubmit} className="account-settings-form">
-                        <div className="form-fields-grid">
-                            <div className="form-field-wrapper full-width">
-                                <InputField
-                                    label="Current Password"
-                                    id="settings-currentPassword"
-                                    type="password"
-                                    placeholder="Enter current password"
-                                    value={currentPassword}
-                                    onChange={(e) => {
-                                        setCurrentPassword(e.target.value);
-                                        if (passwordErrors.currentPassword)
-                                            setPasswordErrors((prev) => ({
-                                                ...prev,
-                                                currentPassword: '',
-                                            }));
-                                    }}
-                                    error={passwordErrors.currentPassword}
-                                    disabled={!isEditingPassword || isChangingPassword}
-                                />
-                            </div>
-                            <div className="form-field-wrapper">
-                                <InputField
-                                    label="New Password"
-                                    id="settings-newPassword"
-                                    type="password"
-                                    placeholder="Enter new password"
-                                    value={newPassword}
-                                    onChange={(e) => {
-                                        setNewPassword(e.target.value);
-                                        if (passwordErrors.newPassword)
-                                            setPasswordErrors((prev) => ({
-                                                ...prev,
-                                                newPassword: '',
-                                            }));
-                                    }}
-                                    error={passwordErrors.newPassword}
-                                    disabled={!isEditingPassword || isChangingPassword}
-                                />
-                            </div>
-                            <div className="form-field-wrapper">
-                                <InputField
-                                    label="Confirm New Password"
-                                    id="settings-confirmPassword"
-                                    type="password"
-                                    placeholder="Confirm new password"
-                                    value={confirmPassword}
-                                    onChange={(e) => {
-                                        setConfirmPassword(e.target.value);
-                                        if (passwordErrors.confirmPassword)
-                                            setPasswordErrors((prev) => ({
-                                                ...prev,
-                                                confirmPassword: '',
-                                            }));
-                                    }}
-                                    error={passwordErrors.confirmPassword}
-                                    disabled={!isEditingPassword || isChangingPassword}
-                                />
-                            </div>
-                        </div>
 
-                        {isEditingPassword && (
-                            <div className="settings-footer-actions">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    onClick={handleCancelPasswordEdit}
-                                    disabled={isChangingPassword}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    variant="primary"
-                                    loading={isChangingPassword}
-                                    disabled={isChangingPassword}
-                                >
-                                    Update Password
-                                </Button>
-                            </div>
-                        )}
-                    </form>
-                )}
+                    {isEditingPassword && (
+                        <div className="settings-footer-actions">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={handleCancelPasswordEdit}
+                                disabled={isChangingPassword}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                loading={isChangingPassword}
+                                disabled={isChangingPassword}
+                            >
+                                Update Password
+                            </Button>
+                        </div>
+                    )}
+                </form>
             </div>
 
             {/* Divider */}
@@ -584,7 +556,7 @@ export default function AccountSettings() {
                 cancelText="Cancel"
                 onConfirm={handleDeleteAccountConfirm}
                 confirmLoading={isDeletingAccount}
-                confirmDisabled={!isGoogleUser && !deleteConfirmPassword}
+                confirmDisabled={!deleteConfirmPassword}
             >
                 <div className="delete-confirmation-dialog-content">
                     <p className="delete-warning-text">
@@ -592,34 +564,24 @@ export default function AccountSettings() {
                         <strong>irreversible</strong> and will delete all your settings, data, and
                         access.
                     </p>
-                    {!isGoogleUser ? (
-                        <>
-                            <p className="delete-instruction-text">
-                                Please enter your current password to confirm deletion:
-                            </p>
-                            <div className="delete-password-input-wrapper">
-                                <InputField
-                                    label="Current Password"
-                                    id="settings-deleteConfirmPassword"
-                                    type="password"
-                                    placeholder="Enter password to confirm"
-                                    value={deleteConfirmPassword}
-                                    onChange={(e) => {
-                                        setDeleteConfirmPassword(e.target.value);
-                                        if (deleteError) setDeleteError('');
-                                    }}
-                                    error={deleteError}
-                                    disabled={isDeletingAccount}
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <p className="delete-instruction-text google-confirm-note">
-                            Since your account is authenticated with Google and has no recovery
-                            flow, your account will be <strong>permanently deleted</strong>{' '}
-                            immediately. No password is required. Confirm below to proceed.
-                        </p>
-                    )}
+                    <p className="delete-instruction-text">
+                        Please enter your current password to confirm deletion:
+                    </p>
+                    <div className="delete-password-input-wrapper">
+                        <InputField
+                            label="Current Password"
+                            id="settings-deleteConfirmPassword"
+                            type="password"
+                            placeholder="Enter password to confirm"
+                            value={deleteConfirmPassword}
+                            onChange={(e) => {
+                                setDeleteConfirmPassword(e.target.value);
+                                if (deleteError) setDeleteError('');
+                            }}
+                            error={deleteError}
+                            disabled={isDeletingAccount}
+                        />
+                    </div>
                 </div>
             </Dialog>
         </div>

@@ -59,7 +59,6 @@ export async function sendTokenResponse(res, statusCode, message, user, remember
             emailVerified: user.emailVerified,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-            isGoogleUser: !!user.googleId,
         },
     });
 }

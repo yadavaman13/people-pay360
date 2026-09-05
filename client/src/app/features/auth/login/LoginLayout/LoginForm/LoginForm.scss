@@ -1,0 +1,99 @@
+@use '../../variables.scss' as variables2;
+@use '@/styles/variables';
+
+.form-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background-color: variables.$color-white;
+
+    .form-wrapper {
+        width: 100%;
+        max-width: 400px;
+        margin: auto;
+    }
+
+    // Red Lockout Alert Banner
+    .lockout-banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        background-color: color-mix(in srgb, variables.$color-danger-light 70%, white);
+        border: none;
+        border-radius: 12px;
+        color: variables.$color-danger;
+        margin-bottom: 20px;
+        font-size: variables.$font-size-sm;
+        line-height: 1.45;
+        animation: fade-in-banner 0.3s ease-in-out;
+
+        .lockout-icon {
+            flex-shrink: 0;
+            color: variables.$color-danger;
+            margin-top: 2px;
+        }
+
+        .lockout-content {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            .lockout-title {
+                font-weight: 700;
+                font-size: variables.$font-size-sm;
+                color: color-mix(in srgb, variables.$color-danger-dark 80%, black);
+            }
+
+            .lockout-message {
+                color: color-mix(in srgb, variables.$color-danger-dark 80%, black);
+                font-size: variables.$font-size-sm;
+            }
+
+            .lockout-timer-text {
+                font-weight: 600;
+                color: variables.$color-danger;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-top: 2px;
+
+                span {
+                    font-family: monospace;
+                    font-size: variables.$font-size-sm;
+                    font-weight: 700;
+                    background-color: variables.$color-danger-border;
+                    color: variables.$color-danger;
+                    padding: 2px 7px;
+                    border-radius: 6px;
+                    border: none;
+                }
+            }
+        }
+    }
+
+    // Spacing for the role dropdown to match form-group inputs
+    .shared-dropdown-container {
+        margin-bottom: 20px;
+    }
+
+    .login-submit-btn {
+        margin-top: 6px;
+        margin-bottom: 20px;
+    }
+}
+
+@keyframes fade-in-banner {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

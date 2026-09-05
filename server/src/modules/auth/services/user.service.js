@@ -1,11 +1,5 @@
 import bcrypt from 'bcryptjs';
-import {
-    getUserById,
-    updateUser,
-    softDeleteUser,
-    hardDeleteUser,
-    listUsers,
-} from '../../../dao/user.dao.js';
+import { getUserById, updateUser, softDeleteUser, listUsers } from '../../../dao/user.dao.js';
 import { AppError } from '../utils/appError.js';
 
 /**
@@ -67,23 +61,6 @@ export async function deleteAccount(userId, password) {
     }
 
     const deletedUser = await softDeleteUser(userId);
-    if (!deletedUser) {
-        throw new AppError('User not found or already deleted', 404);
-    }
-    return deletedUser;
-}
-
-/**
- * Hard delete Google-authenticated user account permanently (no recovery)
- * @param {string} userId
- */
-export async function deleteGoogleAccount(userId) {
-    const user = await getUserById(userId, true);
-    if (!user) {
-        throw new AppError('User not found', 404);
-    }
-
-    const deletedUser = await hardDeleteUser(userId);
     if (!deletedUser) {
         throw new AppError('User not found or already deleted', 404);
     }

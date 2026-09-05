@@ -7,7 +7,6 @@ import envConfig from './config/env.config.js';
 import { authRouter, userRouter, adminRouter } from './modules/auth/index.js';
 import { pdfRouter } from './modules/pdf/index.js';
 import { errorHandler } from './modules/auth/middleware/errorHandler.js';
-import passport from './config/passport.config.js';
 
 const app = express();
 
@@ -23,7 +22,6 @@ app.use(
     }),
 );
 app.use(morgan('combined'));
-app.use(passport.initialize());
 
 //dev-1
 app.use('/api/auth', authRouter);

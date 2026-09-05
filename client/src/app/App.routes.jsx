@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, Outlet } from 'react-router';
 import App from './App';
 import DashboardLayout from '@/app/features/dashboard/DashboardLayout/DashboardLayout';
 import DashboardIndex from '@/app/features/dashboard/DashboardIndex';
+import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
 import { loadFeatureRoutes } from './routes.loader';
 
 // Auto-discover all *.routes.jsx across all feature modules

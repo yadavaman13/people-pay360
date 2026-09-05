@@ -171,49 +171,6 @@
                 background: rgba(variables.$color-primary, 0.04);
             }
         }
-
-        .google-user-info-card {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 18px 20px;
-            background-color: color-mix(
-                in srgb,
-                variables.$color-info-light 50%,
-                variables.$color-white
-            );
-            border: 1px solid color-mix(in srgb, variables.$color-info-border 60%, transparent);
-            border-radius: variables.$radius-medium;
-            margin-top: 8px;
-
-            .info-icon {
-                flex-shrink: 0;
-                color: variables.$color-info;
-                margin-top: 2px;
-            }
-
-            .info-content {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-
-                .info-title {
-                    font-family: variables.$font-sans;
-                    font-size: variables.$font-size-sm;
-                    font-weight: 700;
-                    color: color-mix(in srgb, variables.$color-primary 80%, variables.$color-black);
-                    margin: 0;
-                }
-
-                .info-desc {
-                    font-family: variables.$font-sans;
-                    font-size: variables.$font-size-sm;
-                    color: variables.$color-gray-600;
-                    margin: 0;
-                    line-height: 1.5;
-                }
-            }
-        }
     }
 
     .settings-divider {
@@ -341,12 +298,6 @@
         font-weight: 600;
         color: variables.$color-gray-800;
         margin: 0;
-
-        &.google-confirm-note {
-            font-weight: 500;
-            color: variables.$color-gray-700;
-            line-height: 1.5;
-        }
     }
 
     .delete-password-input-wrapper {
