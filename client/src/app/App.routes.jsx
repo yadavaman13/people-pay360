@@ -41,13 +41,13 @@ export const router = createBrowserRouter([
                         children: [
                             {
                                 index: true,
-                                element: <Navigate to="home" replace />,
+                                element: <Navigate to="/dashboard/employee/home" replace />,
                             },
                             // Auto-discovered employee feature routes
                             ...employeeRoutes,
                             {
                                 path: '*',
-                                element: <Navigate to="home" replace />,
+                                element: <Navigate to="/dashboard/employee/home" replace />,
                             },
                         ],
                     },
@@ -73,13 +73,13 @@ export const router = createBrowserRouter([
                         children: [
                             {
                                 index: true,
-                                element: <Navigate to="attendance" replace />,
+                                element: <Navigate to="/dashboard/hr/attendance" replace />,
                             },
                             // Auto-discovered hr feature routes
                             ...hrRoutes,
                             {
                                 path: '*',
-                                element: <Navigate to="attendance" replace />,
+                                element: <Navigate to="/dashboard/hr/attendance" replace />,
                             },
                         ],
                     },
@@ -93,13 +93,13 @@ export const router = createBrowserRouter([
                         children: [
                             {
                                 index: true,
-                                element: <Navigate to="home" replace />,
+                                element: <Navigate to="/dashboard/admin/home" replace />,
                             },
                             // Auto-discovered admin feature routes
                             ...adminRoutes,
                             {
                                 path: '*',
-                                element: <Navigate to="home" replace />,
+                                element: <Navigate to="/dashboard/admin/home" replace />,
                             },
                         ],
                     },
