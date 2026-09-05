@@ -6,6 +6,7 @@ import PayrunsListPage from './pages/PayrunsListPage/PayrunsListPage';
 import PayrunDetailPage from './pages/PayrunDetailPage/PayrunDetailPage';
 import PayslipsListPage from './pages/PayslipsListPage/PayslipsListPage';
 import PayslipDetailPage from './pages/PayslipDetailPage/PayslipDetailPage';
+import SalaryStructuresListPage from './pages/SalaryStructuresListPage/SalaryStructuresListPage';
 
 export default {
     // Multi-Role RBAC: roles authorized to access Payroll feature
@@ -17,7 +18,7 @@ export default {
         path: '/dashboard/user/payroll/dashboard',
         icon: <Banknote size={18} />,
         roles: ['ADMIN', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'],
-        subTabs: ['Dashboard', 'Payruns', 'Payslips'],
+        subTabs: ['Dashboard', 'Payruns', 'Payslips', 'Salary Structures'],
     },
 
     // Auto-discovered Feature Routes
@@ -59,6 +60,14 @@ export default {
             element: (
                 <PayrollProvider>
                     <PayslipDetailPage />
+                </PayrollProvider>
+            ),
+        },
+        {
+            path: 'payroll/salary-structures',
+            element: (
+                <PayrollProvider>
+                    <SalaryStructuresListPage />
                 </PayrollProvider>
             ),
         },

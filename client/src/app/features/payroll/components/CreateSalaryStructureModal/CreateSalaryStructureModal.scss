@@ -1,0 +1,30 @@
+@use '@/styles/variables' as variables;
+
+.create-salary-structure-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-md;
+
+    .modal-alert-wrapper {
+        margin-bottom: variables.$spacing-xs;
+    }
+
+    .form-field-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-checkbox-wrapper {
+        padding-top: variables.$spacing-xs;
+        display: flex;
+        align-items: center;
+    }
+}
+
+.create-salary-structure-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: variables.$spacing-sm;
+    width: 100%;
+}

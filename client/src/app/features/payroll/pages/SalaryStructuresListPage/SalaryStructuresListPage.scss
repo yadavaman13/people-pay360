@@ -1,0 +1,129 @@
+@use '@/styles/variables' as variables;
+
+.salary-structures-list-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 56px);
+    max-height: calc(100vh - 56px);
+    padding: variables.$spacing-md variables.$spacing-xl;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+    gap: variables.$spacing-md;
+    font-family: variables.$font-sans;
+
+    @media (width <= 768px) {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        padding: variables.$spacing-md;
+        gap: variables.$spacing-md;
+    }
+
+    .salary-structures-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: variables.$spacing-md;
+        flex-wrap: wrap;
+        flex-shrink: 0;
+
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-xs;
+
+            .title-row {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-sm;
+
+                .header-title {
+                    font-size: variables.$font-size-xxl;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    margin: 0;
+                    letter-spacing: -0.02em;
+                }
+            }
+
+            .header-subtitle {
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-500;
+                margin: 0;
+                max-width: 600px;
+                line-height: 1.5;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+
+            .create-structure-btn {
+                height: 38px;
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .page-error-alert {
+        width: 100%;
+        flex-shrink: 0;
+
+        .alert-retry-action {
+            margin-top: variables.$spacing-xs;
+        }
+    }
+
+    .table-container {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .cards-stack {
+        display: none;
+
+        @include variables.mobile {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-md;
+        }
+
+        .mobile-card-skeleton {
+            height: 120px;
+            border-radius: variables.$radius-medium;
+            background: linear-gradient(
+                90deg,
+                variables.$color-gray-100 25%,
+                variables.$color-gray-200 50%,
+                variables.$color-gray-100 75%
+            );
+            background-size: 200% 100%;
+            animation: mobile-card-shimmer 1.5s infinite;
+        }
+    }
+
+    @include variables.mobile {
+        .table-container {
+            display: none;
+        }
+    }
+}
+
+@keyframes mobile-card-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
