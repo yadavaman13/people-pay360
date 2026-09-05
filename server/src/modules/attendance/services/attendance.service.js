@@ -1,6 +1,7 @@
 import * as attendanceDao from '../../../dao/attendance.dao.js';
 import * as scheduleDao from '../../../dao/schedule.dao.js';
 import * as employeeDao from '../../../dao/employee.dao.js';
+import * as contractDao from '../../../dao/contract.dao.js';
 import { AppError } from '../../../utils/appError.js';
 
 /**
@@ -89,35 +90,125 @@ async function evaluateAttendanceStatus(employee, checkInTime, checkOutTime, wor
 }
 
 /**
- * Check In
+ * Resolve maximum allowed daily punches for an employee based on their applicable contract
+ * Default fallback is 3.
+ */
+export async function resolveMaxDailyPunches(employeeId, dateStr) {
+    try {
+        const contract =
+            (await contractDao.getApplicableContract(employeeId, dateStr, dateStr)) ||
+            (await contractDao.findActiveContractByEmployee(employeeId));
+        if (
+            contract &&
+            contract.maxPunchesPerDay !== undefined &&
+            contract.maxPunchesPerDay !== null
+        ) {
+            return Number(contract.maxPunchesPerDay);
+        }
+    } catch {
+        // Fallback gracefully on query error
+    }
+    return 3;
+}
+
+/**
+ * Check In (Supports initial or subsequent check-in on the same calendar day up to contract max limit)
  */
 export async function checkIn(user, body = {}) {
     const employee = await resolveEmployeeForUser(user, body.employeeId);
     const today = getTodayDateString();
+    const now = new Date();
+
+    const maxPunches = await resolveMaxDailyPunches(employee.id, today);
 
     const existingRecord = await attendanceDao.findAttendanceByDate(employee.id, today);
-    if (existingRecord && existingRecord.checkInTime) {
-        throw new AppError('Already checked in for today', 409);
+
+    if (!existingRecord) {
+        if (maxPunches < 1) {
+            throw new AppError(
+                'Daily punch limit reached for your contract (maximum allowed: 0).',
+                403,
+            );
+        }
+
+        // Initial check-in of the day: create parent attendance_records and first child punch
+        const initialStatus = await evaluateAttendanceStatus(employee, now, null, 0);
+
+        const newRecord = await attendanceDao.createCheckIn({
+            employeeId: employee.id,
+            attendanceDate: today,
+            checkInTime: now,
+            status: initialStatus,
+            notes: body.notes,
+        });
+
+        await attendanceDao.createPunch({
+            attendanceRecordId: newRecord.id,
+            checkInTime: now,
+            notes: body.notes,
+        });
+
+        return attendanceDao.findAttendanceById(newRecord.id);
     }
 
-    const newRecord = await attendanceDao.createCheckIn({
-        employeeId: employee.id,
-        attendanceDate: today,
-        checkInTime: new Date(),
-        status: 'PRESENT',
+    // Record already exists for today: check how many punches were used so far
+    const punches = await attendanceDao.findPunchesByRecordId(existingRecord.id);
+    if (punches.length >= maxPunches) {
+        throw new AppError(
+            `Daily punch limit reached for your contract (maximum allowed: ${maxPunches}). Further check-ins are not permitted today.`,
+            403,
+        );
+    }
+
+    // Check if there is an active (open) punch
+    const activePunch = await attendanceDao.findActivePunch(existingRecord.id);
+    if (activePunch) {
+        throw new AppError(
+            'You already have an active check-in session. Please check out before checking in again.',
+            409,
+        );
+    }
+
+    // All previous punches are checked out: start a new check-in session
+    await attendanceDao.createPunch({
+        attendanceRecordId: existingRecord.id,
+        checkInTime: now,
         notes: body.notes,
     });
 
-    return attendanceDao.findAttendanceById(newRecord.id);
+    // Update parent record: set checkOutTime = null (currently active at work)
+    const combinedNotes = body.notes
+        ? existingRecord.notes
+            ? `${existingRecord.notes}; ${body.notes}`
+            : body.notes
+        : existingRecord.notes;
+
+    await attendanceDao.updateAttendanceRecord(existingRecord.id, {
+        checkOutTime: null,
+        notes: combinedNotes,
+    });
+
+    return attendanceDao.findAttendanceById(existingRecord.id);
 }
 
 /**
- * Check Out
+ * Check Out (Closes current active punch session and recalculates cumulative daily hours)
+ * Can be called with explicit attendanceId or self-service without attendanceId.
  */
 export async function checkOut(attendanceId, user, body = {}) {
-    let record = await attendanceDao.findAttendanceById(attendanceId);
-    if (!record) {
-        throw new AppError('Attendance record not found', 404);
+    let record;
+    if (attendanceId) {
+        record = await attendanceDao.findAttendanceById(attendanceId);
+        if (!record) {
+            throw new AppError('Attendance record not found', 404);
+        }
+    } else {
+        const employee = await resolveEmployeeForUser(user, body.employeeId);
+        const today = getTodayDateString();
+        record = await attendanceDao.findAttendanceByDate(employee.id, today);
+        if (!record) {
+            throw new AppError('No attendance record found for today to check out from', 404);
+        }
     }
 
     if (user.role === 'EMPLOYEE') {
@@ -127,35 +218,113 @@ export async function checkOut(attendanceId, user, body = {}) {
         }
     }
 
-    if (!record.checkInTime) {
-        throw new AppError('Cannot check out without a check-in timestamp', 409);
-    }
-
-    if (record.checkOutTime) {
-        throw new AppError('Already checked out for this attendance record', 409);
+    // Find the currently open punch session
+    const activePunch = await attendanceDao.findActivePunch(record.id);
+    if (!activePunch) {
+        throw new AppError(
+            'No active check-in session found for this attendance record (already checked out)',
+            409,
+        );
     }
 
     const checkOutTime = new Date();
-    const checkInTime = new Date(record.checkInTime);
+    const checkInTime = new Date(activePunch.checkInTime);
     const diffMs = checkOutTime.getTime() - checkInTime.getTime();
-    const workedHours = Number((Math.max(0, diffMs) / (1000 * 60 * 60)).toFixed(2));
+    const sessionWorkedHours = Number((Math.max(0, diffMs) / (1000 * 60 * 60)).toFixed(2));
 
+    // Close the active punch session
+    await attendanceDao.updatePunch(activePunch.id, {
+        checkOutTime,
+        workedHours: sessionWorkedHours,
+        notes: body.notes !== undefined ? body.notes : activePunch.notes,
+    });
+
+    // Recalculate total daily worked hours across all punches
+    const punches = await attendanceDao.findPunchesByRecordId(record.id);
+    const totalDailyWorkedHours = Number(
+        punches
+            .reduce((sum, p) => {
+                const hrs =
+                    p.id === activePunch.id ? sessionWorkedHours : parseFloat(p.workedHours || 0);
+                return sum + hrs;
+            }, 0)
+            .toFixed(2),
+    );
+
+    // Re-evaluate daily status based on first check-in (lateness) and cumulative worked hours
     const employee = await employeeDao.findEmployeeById(record.employeeId);
     const evaluatedStatus = await evaluateAttendanceStatus(
         employee,
-        checkInTime,
+        record.checkInTime,
         checkOutTime,
-        workedHours,
+        totalDailyWorkedHours,
     );
 
-    const updated = await attendanceDao.updateCheckOut(attendanceId, {
+    // Update parent daily attendance record
+    const updatedNotes = body.notes !== undefined ? body.notes : record.notes;
+    await attendanceDao.updateAttendanceRecord(record.id, {
         checkOutTime,
-        workedHours,
+        workedHours: String(totalDailyWorkedHours),
         status: evaluatedStatus,
-        notes: body.notes !== undefined ? body.notes : record.notes,
+        notes: updatedNotes,
     });
 
-    return attendanceDao.findAttendanceById(updated.id);
+    return attendanceDao.findAttendanceById(record.id);
+}
+
+/**
+ * Get live attendance status for current employee today
+ */
+export async function getTodayStatus(user, explicitEmployeeId) {
+    const employee = await resolveEmployeeForUser(user, explicitEmployeeId);
+    const today = getTodayDateString();
+    const maxPunches = await resolveMaxDailyPunches(employee.id, today);
+
+    const record = await attendanceDao.findAttendanceByDate(employee.id, today);
+    if (!record) {
+        return {
+            hasAttendanceToday: false,
+            isCurrentlyCheckedIn: false,
+            attendanceDate: today,
+            totalWorkedHours: 0,
+            maxPunchesPerDay: maxPunches,
+            punchesUsed: 0,
+            remainingPunches: maxPunches,
+            canCheckIn: maxPunches > 0,
+            activePunch: null,
+            currentSessionMinutes: 0,
+            punches: [],
+            record: null,
+        };
+    }
+
+    const punchesUsed = record.punches ? record.punches.length : 0;
+    const remainingPunches = Math.max(0, maxPunches - punchesUsed);
+    const activePunch = record.activePunch;
+    let currentSessionMinutes = 0;
+    if (activePunch) {
+        const now = new Date();
+        const start = new Date(activePunch.checkInTime);
+        currentSessionMinutes = Math.max(
+            0,
+            Math.floor((now.getTime() - start.getTime()) / (1000 * 60)),
+        );
+    }
+
+    return {
+        hasAttendanceToday: true,
+        isCurrentlyCheckedIn: record.isCurrentlyCheckedIn,
+        attendanceDate: today,
+        totalWorkedHours: Number(record.workedHours || 0),
+        maxPunchesPerDay: maxPunches,
+        punchesUsed,
+        remainingPunches,
+        canCheckIn: !record.isCurrentlyCheckedIn && remainingPunches > 0,
+        activePunch,
+        currentSessionMinutes,
+        punches: record.punches,
+        record,
+    };
 }
 
 /**

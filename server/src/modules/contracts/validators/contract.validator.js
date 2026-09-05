@@ -70,11 +70,16 @@ export const createContractValidator = [
         .toUpperCase()
         .isIn(['DRAFT', 'ACTIVE', 'CANCELLED', 'EXPIRED'])
         .withMessage('Status must be one of DRAFT, ACTIVE, CANCELLED, EXPIRED'),
+    body('maxPunchesPerDay')
+        .optional({ nullable: true, checkFalsy: true })
+        .isInt({ min: 1, max: 20 })
+        .withMessage('maxPunchesPerDay must be a positive integer between 1 and 20'),
     body('notes')
         .optional({ nullable: true, checkFalsy: true })
         .isString()
         .trim()
         .withMessage('notes must be a valid string'),
+
     validateRequest,
 ];
 
@@ -126,11 +131,16 @@ export const updateContractValidator = [
         .toUpperCase()
         .isIn(['DRAFT', 'ACTIVE', 'CANCELLED', 'EXPIRED'])
         .withMessage('Status must be one of DRAFT, ACTIVE, CANCELLED, EXPIRED'),
+    body('maxPunchesPerDay')
+        .optional({ nullable: true, checkFalsy: true })
+        .isInt({ min: 1, max: 20 })
+        .withMessage('maxPunchesPerDay must be a positive integer between 1 and 20'),
     body('notes')
         .optional({ nullable: true, checkFalsy: true })
         .isString()
         .trim()
         .withMessage('notes must be a valid string'),
+
     validateRequest,
 ];
 

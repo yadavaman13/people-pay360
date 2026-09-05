@@ -119,3 +119,54 @@ export const attendanceRecords = pgTable(
         ),
     }),
 );
+
+/**
+ * attendance_punches
+ *
+ * Tracks individual check-in / check-out intervals (punches) per daily attendance record.
+ * Enables multiple check-ins and check-outs on the same calendar day (split shifts, lunch, errands).
+ *
+ * Key constraints:
+ * 1. CASCADE on delete: deleting the parent attendance_record cleans up all child punches.
+ * 2. Partial unique index: at most ONE open punch (check_out_time IS NULL) per attendance record.
+ * 3. check_out_time IS NULL OR check_in_time < check_out_time.
+ */
+export const attendancePunches = pgTable(
+    'attendance_punches',
+    {
+        id: uuid('id').defaultRandom().primaryKey(),
+
+        attendanceRecordId: uuid('attendance_record_id')
+            .references(() => attendanceRecords.id, { onDelete: 'cascade' })
+            .notNull(),
+
+        checkInTime: timestamp('check_in_time', { withTimezone: true }).notNull(),
+        checkOutTime: timestamp('check_out_time', { withTimezone: true }),
+
+        // Computed for this specific session: (check_out - check_in) in hours
+        workedHours: numeric('worked_hours', { precision: 5, scale: 2 }),
+
+        notes: text('notes'),
+
+        createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+        updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+    },
+    (table) => ({
+        recordIdx: index('attendance_punches_record_idx').on(table.attendanceRecordId),
+
+        // Guarantees at most ONE open session per attendance record at any time
+        activePunchUniqueIdx: uniqueIndex('attendance_punches_active_unique_idx')
+            .on(table.attendanceRecordId)
+            .where(sql`${table.checkOutTime} IS NULL`),
+
+        timeOrderCheck: check(
+            'chk_punch_time_order',
+            sql`${table.checkOutTime} IS NULL OR ${table.checkInTime} < ${table.checkOutTime}`,
+        ),
+
+        workedHoursCheck: check(
+            'chk_punch_worked_hours_non_negative',
+            sql`${table.workedHours} IS NULL OR ${table.workedHours} >= 0`,
+        ),
+    }),
+);

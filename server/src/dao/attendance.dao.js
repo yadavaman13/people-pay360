@@ -1,7 +1,7 @@
 import { db } from '../config/database.config.js';
-import { attendanceRecords } from '../db/schema/attendance.schema.js';
+import { attendanceRecords, attendancePunches } from '../db/schema/attendance.schema.js';
 import { employees } from '../db/schema/employees.schema.js';
-import { eq, and, gte, lte, desc, sql, count } from 'drizzle-orm';
+import { eq, and, gte, lte, desc, sql, count, inArray } from 'drizzle-orm';
 
 /**
  * Attendance DAO
@@ -72,8 +72,37 @@ export async function findAttendanceList({
         db.select({ totalCount: count() }).from(attendanceRecords).where(whereClause),
     ]);
 
+    let enrichedRecords = records;
+    if (records.length > 0) {
+        const recordIds = records.map((r) => r.id);
+        const punches = await db
+            .select()
+            .from(attendancePunches)
+            .where(inArray(attendancePunches.attendanceRecordId, recordIds))
+            .orderBy(attendancePunches.checkInTime);
+
+        const punchMap = new Map();
+        for (const p of punches) {
+            if (!punchMap.has(p.attendanceRecordId)) {
+                punchMap.set(p.attendanceRecordId, []);
+            }
+            punchMap.get(p.attendanceRecordId).push(p);
+        }
+
+        enrichedRecords = records.map((rec) => {
+            const recPunches = punchMap.get(rec.id) || [];
+            const activePunch = recPunches.find((p) => p.checkOutTime === null) || null;
+            return {
+                ...rec,
+                isCurrentlyCheckedIn: Boolean(activePunch),
+                activePunch,
+                punches: recPunches,
+            };
+        });
+    }
+
     return {
-        records,
+        records: enrichedRecords,
         total: Number(totalCount),
         page: Number(page),
         limit: Number(limit),
@@ -115,7 +144,22 @@ export async function findAttendanceById(id) {
         .where(eq(attendanceRecords.id, id))
         .limit(1);
 
-    return record || null;
+    if (!record) return null;
+
+    const punches = await db
+        .select()
+        .from(attendancePunches)
+        .where(eq(attendancePunches.attendanceRecordId, id))
+        .orderBy(attendancePunches.checkInTime);
+
+    const activePunch = punches.find((p) => p.checkOutTime === null) || null;
+
+    return {
+        ...record,
+        isCurrentlyCheckedIn: Boolean(activePunch),
+        activePunch,
+        punches,
+    };
 }
 
 /**
@@ -135,7 +179,22 @@ export async function findAttendanceByDate(employeeId, date) {
         )
         .limit(1);
 
-    return record || null;
+    if (!record) return null;
+
+    const punches = await db
+        .select()
+        .from(attendancePunches)
+        .where(eq(attendancePunches.attendanceRecordId, record.id))
+        .orderBy(attendancePunches.checkInTime);
+
+    const activePunch = punches.find((p) => p.checkOutTime === null) || null;
+
+    return {
+        ...record,
+        isCurrentlyCheckedIn: Boolean(activePunch),
+        activePunch,
+        punches,
+    };
 }
 
 /**
@@ -157,6 +216,92 @@ export async function findOpenAttendance(employeeId, date) {
         .limit(1);
 
     return record || null;
+}
+
+/**
+ * Find active punch (checkOutTime IS NULL) for an attendance record
+ * @param {string} attendanceRecordId
+ */
+export async function findActivePunch(attendanceRecordId) {
+    const [punch] = await db
+        .select()
+        .from(attendancePunches)
+        .where(
+            and(
+                eq(attendancePunches.attendanceRecordId, attendanceRecordId),
+                sql`${attendancePunches.checkOutTime} IS NULL`,
+            ),
+        )
+        .limit(1);
+
+    return punch || null;
+}
+
+/**
+ * Get all punches for an attendance record ordered by checkInTime ASC
+ * @param {string} attendanceRecordId
+ */
+export async function findPunchesByRecordId(attendanceRecordId) {
+    return db
+        .select()
+        .from(attendancePunches)
+        .where(eq(attendancePunches.attendanceRecordId, attendanceRecordId))
+        .orderBy(attendancePunches.checkInTime);
+}
+
+/**
+ * Create a new punch in attendance_punches
+ * @param {object} param0
+ */
+export async function createPunch({ attendanceRecordId, checkInTime, notes }) {
+    const [punch] = await db
+        .insert(attendancePunches)
+        .values({
+            attendanceRecordId,
+            checkInTime: checkInTime ?? new Date(),
+            notes: notes ?? null,
+        })
+        .returning();
+
+    return punch;
+}
+
+/**
+ * Update an existing punch in attendance_punches
+ * @param {string} punchId
+ * @param {object} param1
+ */
+export async function updatePunch(punchId, { checkOutTime, workedHours, notes }) {
+    const updates = {
+        checkOutTime: checkOutTime ?? new Date(),
+        workedHours: workedHours !== undefined ? String(workedHours) : undefined,
+        updatedAt: new Date(),
+    };
+
+    if (notes !== undefined) {
+        updates.notes = notes;
+    }
+
+    const [punch] = await db
+        .update(attendancePunches)
+        .set(updates)
+        .where(eq(attendancePunches.id, punchId))
+        .returning();
+
+    return punch || null;
+}
+
+/**
+ * Delete a punch from attendance_punches
+ * @param {string} punchId
+ */
+export async function deletePunch(punchId) {
+    const [deleted] = await db
+        .delete(attendancePunches)
+        .where(eq(attendancePunches.id, punchId))
+        .returning();
+
+    return deleted || null;
 }
 
 /**
@@ -205,6 +350,24 @@ export async function updateCheckOut(id, { checkOutTime, workedHours, status, no
 }
 
 /**
+ * Update attendance record fields (generic helper)
+ * @param {string} id
+ * @param {object} updates
+ */
+export async function updateAttendanceRecord(id, updates) {
+    const [record] = await db
+        .update(attendanceRecords)
+        .set({
+            ...updates,
+            updatedAt: new Date(),
+        })
+        .where(eq(attendanceRecords.id, id))
+        .returning();
+
+    return record || null;
+}
+
+/**
  * Manual correction by HR
  * @param {string} id
  * @param {object} correctionData
@@ -230,7 +393,7 @@ export async function manualCorrect(id, correctionData) {
 }
 
 /**
- * Delete an attendance record
+ * Delete an attendance record (cascades to child attendance_punches)
  * @param {string} id
  */
 export async function deleteAttendance(id) {
