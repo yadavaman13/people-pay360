@@ -21,6 +21,8 @@ function SidebarSubTabs({ subTabs, parentLabel, onSubTabClick }) {
         const segment = sub.toLowerCase();
         if (parentLabel === 'Settings') {
             navigate(`/dashboard/${roleSegment}/settings/${segment}`);
+        } else if (parentLabel === 'Payroll') {
+            navigate(`/dashboard/${roleSegment}/payroll/${segment}`);
         }
     };
 

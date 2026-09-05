@@ -59,11 +59,29 @@ function DashboardLayout({ onLogout }) {
             // Skip Home (handled as primary) and Settings (handled in footer profile card)
             if (item.label === 'Home' || item.label === 'Settings') return;
 
+            // Role-based authorization filter
+            if (item.roles && item.roles.length > 0) {
+                if (!user?.role) return;
+                const userRole = user.role.toUpperCase();
+                const hasRole = item.roles.some((r) => r.toUpperCase() === userRole);
+                if (!hasRole) return;
+            }
+
             // Avoid duplicates
             if (items.some((i) => i.label === item.label)) return;
 
+            // Dynamic route path replacement
+            const dynamicPath = item.path
+                ? item.path.replace(/\/dashboard\/(?:user|admin)\//, `/dashboard/${roleSegment}/`)
+                : item.path;
+
             let itemIcon = item.icon;
-            if (!itemIcon || typeof itemIcon === 'string') {
+            if (itemIcon && typeof itemIcon === 'object') {
+                // Already a React element (e.g. <Banknote size={18} />)
+            } else if (typeof itemIcon === 'function') {
+                const IconComponent = itemIcon;
+                itemIcon = <IconComponent size={18} />;
+            } else if (!itemIcon || typeof itemIcon === 'string') {
                 if (item.label === 'Users' || item.icon === 'Users')
                     itemIcon = <UsersIcon size={18} />;
                 else if (
@@ -81,12 +99,13 @@ function DashboardLayout({ onLogout }) {
 
             items.push({
                 ...item,
+                path: dynamicPath,
                 icon: itemIcon,
             });
         });
 
         return items;
-    }, [featureNavItems, roleSegment]);
+    }, [featureNavItems, roleSegment, user?.role]);
 
     const handleToggleSidebar = () => {
         setIsSidebarCollapsed((prev) => {

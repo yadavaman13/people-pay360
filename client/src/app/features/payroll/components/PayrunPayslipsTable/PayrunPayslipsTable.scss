@@ -1,0 +1,141 @@
+@use '@/styles/variables' as variables;
+
+.payrun-payslips-table {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-lg variables.$spacing-xl;
+    margin-bottom: variables.$spacing-xl;
+
+    &__header {
+        margin-bottom: variables.$spacing-md;
+        padding-bottom: variables.$spacing-sm;
+        border-bottom: 1px solid variables.$color-gray-100;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: variables.$font-size-md;
+        font-weight: 600;
+        color: variables.$color-gray-900;
+    }
+
+    &__empty {
+        background-color: variables.$color-white;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-large;
+        padding: variables.$spacing-xl;
+        margin-bottom: variables.$spacing-xl;
+    }
+
+    &__wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+
+    &__table {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: variables.$font-size-sm;
+
+        thead {
+            border-bottom: 1px solid variables.$color-gray-200;
+
+            th {
+                padding: variables.$spacing-sm variables.$spacing-md;
+                color: variables.$color-gray-500;
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                white-space: nowrap;
+            }
+        }
+
+        tbody {
+            tr {
+                border-bottom: 1px solid variables.$color-gray-100;
+
+                @include variables.transition-ease;
+
+                &:hover {
+                    background-color: variables.$color-gray-50;
+                }
+
+                &:last-child {
+                    border-bottom: none;
+                }
+            }
+
+            td {
+                padding: variables.$spacing-md;
+                color: variables.$color-gray-800;
+                vertical-align: middle;
+            }
+        }
+    }
+
+    &__emp-name {
+        font-weight: 600;
+        color: variables.$color-gray-900;
+    }
+
+    &__emp-meta {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-500;
+        margin-top: variables.$spacing-xs;
+    }
+
+    &__warning-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+        font-size: variables.$font-size-xs;
+        font-weight: 500;
+        color: variables.$color-warning-dark;
+        background-color: variables.$color-warning-light;
+        padding: variables.$spacing-xs variables.$spacing-sm;
+        border-radius: variables.$radius-small;
+        border: 1px solid variables.$color-warning-border;
+        white-space: nowrap;
+    }
+
+    &__no-warning {
+        color: variables.$color-gray-400;
+    }
+
+    &__th-number,
+    &__td-number {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    &__td-net {
+        font-weight: 600;
+        color: variables.$color-gray-900;
+    }
+
+    &__th-action,
+    &__td-action {
+        text-align: center;
+        width: 80px;
+    }
+
+    &__pdf-btn {
+        font-size: variables.$font-size-xs;
+        font-weight: 600;
+        padding: variables.$spacing-xs variables.$spacing-sm;
+    }
+
+    @include variables.tablet {
+        padding: variables.$spacing-md;
+    }
+
+    @include variables.mobile {
+        padding: variables.$spacing-md;
+    }
+}

@@ -15,13 +15,14 @@ export function useTablePagination({
     const totalRows = typeof totalCount === 'number' ? totalCount : processedData.length;
 
     useEffect(() => {
+        if (serverSide) return;
         if (totalRows === 0) return;
         const meaningful = PAGE_SIZE_STANDARDS.filter((n) => n < totalRows);
         if (rowsPerPage >= totalRows && meaningful.length > 0) {
             setRowsPerPage(meaningful[meaningful.length - 1]);
             setCurrentPage(1);
         }
-    }, [totalRows]);
+    }, [totalRows, serverSide]);
 
     const rowsOptions = useMemo(() => {
         if (totalRows === 0) return [];

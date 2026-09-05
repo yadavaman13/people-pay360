@@ -80,6 +80,7 @@ export function useToast() {
 
     return {
         toasts: context.toasts,
+        addToast: showToast,
         showToast,
         removeToast: context.removeToast,
         success,

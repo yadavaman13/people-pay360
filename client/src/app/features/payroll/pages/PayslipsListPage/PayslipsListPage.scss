@@ -1,0 +1,150 @@
+@use '@/styles/variables' as variables;
+
+.payslips-list-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 56px);
+    max-height: calc(100vh - 56px);
+    padding: variables.$spacing-md variables.$spacing-xl;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+    gap: variables.$spacing-md;
+    font-family: variables.$font-sans;
+
+    @media (width <= 768px) {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        padding: variables.$spacing-md;
+        gap: variables.$spacing-md;
+    }
+}
+
+.payslips-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: variables.$spacing-md;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+
+    .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-xs;
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+
+            .header-icon {
+                color: variables.$color-black;
+            }
+
+            .header-title {
+                font-size: variables.$font-size-xxl;
+                font-weight: 700;
+                color: variables.$color-gray-900;
+                margin: 0;
+                letter-spacing: -0.02em;
+            }
+        }
+
+        .header-subtitle {
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-500;
+            margin: 0;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+    }
+}
+
+.payslips-list-page__error-alert {
+    width: 100%;
+    flex-shrink: 0;
+
+    .alert-retry-action {
+        margin-top: variables.$spacing-sm;
+    }
+}
+
+.payslips-list-page__empty {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-xxl;
+    margin-bottom: variables.$spacing-lg;
+}
+
+// ─── Mobile Card List (< 576px) ──────────────────────────────────────────────
+.payslips-list-page__mobile-card-list {
+    display: none; // Hidden on desktop & tablet
+    flex-direction: column;
+    gap: variables.$spacing-md;
+}
+
+.payslips-mobile-card-skeletons {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-md;
+}
+
+.payslips-mobile-card-skeleton {
+    height: 150px;
+    background-color: variables.$color-gray-100;
+    border-radius: variables.$radius-medium;
+    border: 1px solid variables.$color-gray-200;
+    animation: payslips-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes payslips-pulse {
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+// ─── Mobile Compact Pagination (< 576px) ─────────────────────────────────────
+.payslips-list-page__pagination-mobile {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: variables.$spacing-sm;
+    padding: variables.$spacing-xs 0;
+    margin-top: variables.$spacing-sm;
+
+    .pagination-mobile-btn {
+        min-height: 44px;
+        min-width: 90px;
+    }
+
+    .pagination-mobile-label {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-600;
+        font-weight: 500;
+    }
+}
+
+// ─── Breakpoints ─────────────────────────────────────────────────────────────
+@include variables.mobile {
+    .payslips-list-page__mobile-card-list {
+        display: flex;
+    }
+
+    .payslips-list-page__pagination-mobile {
+        display: flex;
+    }
+}

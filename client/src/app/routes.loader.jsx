@@ -71,6 +71,14 @@ function registerNavEntry(path, label, subTabs = [], isExplicit = false) {
     if (primary && (!featureNavRegistry.has(primary) || isExplicit)) {
         featureNavRegistry.set(primary, entry);
     }
+
+    if (isExplicit && subTabs && subTabs.length > 0) {
+        subTabs.forEach((sub) => {
+            const subLabel = typeof sub === 'string' ? sub : sub.label || formatSegmentToTitle(sub);
+            const subKey = subLabel.toLowerCase().replace(/\s+/g, '-');
+            featureNavRegistry.set(`${primary}/${subKey}`, entry);
+        });
+    }
 }
 
 // Build navigation registry immediately on module load
@@ -126,7 +134,16 @@ export function resolveNavState(pathname) {
     const [, primary, secondary] = match;
     const fullSubPath = secondary ? `${primary}/${secondary}` : primary;
 
-    const entry = featureNavRegistry.get(fullSubPath) || featureNavRegistry.get(primary);
+    const fullEntry = featureNavRegistry.get(fullSubPath);
+    const primaryEntry = featureNavRegistry.get(primary);
+
+    // Prioritize explicit navigation entries: if primary module explicitly declares subTabs,
+    // it handles all sub-routes unless the sub-route itself has an explicit nav item.
+    const entry = fullEntry?.isExplicit
+        ? fullEntry
+        : primaryEntry?.isExplicit && primaryEntry?.subTabs?.length > 0
+          ? primaryEntry
+          : fullEntry || primaryEntry;
 
     if (entry) {
         let activeSubTab = '';
