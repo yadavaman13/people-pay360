@@ -20,6 +20,7 @@ import { payrunRouter } from './modules/payruns/index.js';
 import { payslipRouter } from './modules/payslips/index.js';
 import { employeeRouter } from './modules/employees/index.js';
 import { contractRouter } from './modules/contracts/index.js';
+import { dashboardRouter } from './modules/dashboard/index.js';
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use('/api/payruns', payrunRouter);
 app.use('/api/payslips', payslipRouter);
 app.use('/api/payruns', payrollValidationRouter);
 app.use('/api/payslips', payslipDocumentRouter);
+app.use('/api/dashboard', dashboardRouter);
 
 //For SPA
 app.use((req, res, next) => {
