@@ -7,9 +7,37 @@
     justify-content: space-between;
     height: 56px;
     margin-bottom: 16px;
+    padding: 0 2px;
+    box-sizing: border-box;
 
-    .logo-dashboard {
-        margin-bottom: 0;
+    .sidebar-brand-link {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        outline: none;
+        border-radius: variables.$radius-small;
+        flex-shrink: 0;
+
+        &:focus-visible {
+            outline: 2px solid variables.$color-primary;
+            outline-offset: 2px;
+        }
+    }
+
+    .sidebar-brand-logo {
+        height: 32px;
+        width: auto;
+        max-width: 130px;
+        object-fit: contain;
+        display: block;
+        user-select: none;
+        transition:
+            opacity 0.2s ease,
+            transform 0.2s ease;
+
+        &:hover {
+            opacity: 0.9;
+        }
     }
 
     .sidebar-toggle-btn,
@@ -18,25 +46,55 @@
         background: transparent;
         color: variables.$color-gray-400;
         cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 6px;
+        width: 32px;
+        height: 32px;
+        padding: 0;
         border-radius: variables.$radius-small;
+        flex-shrink: 0;
 
         @include variables.transition-ease;
 
         &:hover {
-            background-color: variables.$color-gray-50;
+            background-color: variables.$color-gray-100;
             color: variables.$color-black;
         }
+    }
+
+    .collapsed-brand-icon {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+        display: block;
+        border-radius: 50%;
+        user-select: none;
+    }
+
+    .collapsed-expand-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: variables.$radius-small;
+        color: variables.$color-gray-500;
+
+        &:hover {
+            color: variables.$color-gray-800;
+            background-color: variables.$color-gray-100;
+        }
+    }
+
+    &.is-collapsed {
+        justify-content: center;
+        padding: 0;
     }
 }
 
 @include variables.tablet {
     .sidebar-logo-wrapper {
-        justify-content: center;
-
         .sidebar-toggle-btn {
             display: none;
         }
@@ -46,20 +104,5 @@
 @include variables.mobile {
     .sidebar-logo-wrapper {
         justify-content: space-between;
-    }
-}
-
-.sidebar-logo-wrapper .sidebar-toggle-btn.collapsed-expand-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: variables.$radius-small;
-    color: variables.$color-gray-500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &:hover {
-        color: variables.$color-gray-800;
-        background-color: variables.$color-gray-100;
     }
 }

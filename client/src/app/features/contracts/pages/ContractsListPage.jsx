@@ -61,6 +61,7 @@ function ContractsListPage() {
         setFilter,
         setSearch,
         setPage,
+        setLimit,
         resetFilters,
         refetch,
     } = useContracts();
@@ -128,22 +129,106 @@ function ContractsListPage() {
                 const wageFormatted = formatCurrencyParts(c.wage).formatted;
                 const wageUnit = isHourly ? '/ hr' : '/ mo';
                 const structureName = c.salaryStructure?.name || '—';
+                const departmentName = c.department?.name || '—';
+                const termType = c.endDate ? 'Fixed-Term' : 'Open-Ended';
 
                 return {
                     ...c,
                     employeeName,
                     employeeCode,
                     contractName,
+                    contractStatus: c.status,
                     startDateFormatted: startFormatted,
                     endDateFormatted: endFormatted,
                     isOpenEnded: !c.endDate,
+                    termType,
                     wageNumber,
                     wageFormatted,
                     wageUnit,
                     structureName,
+                    departmentName,
                 };
             }),
         [contracts],
+    );
+
+    // ── Filter configuration for the Filter toggle panel (allows multiple filters) ──
+    const filterConfig = useMemo(() => {
+        const configs = [
+            {
+                key: 'contractStatus',
+                label: 'Status',
+                type: 'select',
+                options: ['ACTIVE', 'DRAFT', 'EXPIRED', 'CANCELLED'],
+            },
+            {
+                key: 'wageType',
+                label: 'Wage Type',
+                type: 'select',
+                options: ['MONTHLY', 'HOURLY'],
+            },
+            {
+                key: 'termType',
+                label: 'Contract Term',
+                type: 'select',
+                options: ['Fixed-Term', 'Open-Ended'],
+            },
+        ];
+
+        const uniqueStructures = Array.from(
+            new Set(
+                (tableData || [])
+                    .map((row) => row.structureName)
+                    .filter((name) => name && name !== '—'),
+            ),
+        );
+        if (uniqueStructures.length > 0) {
+            configs.push({
+                key: 'structureName',
+                label: 'Salary Structure',
+                type: 'select',
+                options: uniqueStructures,
+            });
+        }
+
+        const uniqueDepts = Array.from(
+            new Set(
+                (tableData || [])
+                    .map((row) => row.departmentName)
+                    .filter((name) => name && name !== '—'),
+            ),
+        );
+        if (uniqueDepts.length > 0) {
+            configs.push({
+                key: 'departmentName',
+                label: 'Department',
+                type: 'select',
+                options: uniqueDepts,
+            });
+        }
+
+        return configs;
+    }, [tableData]);
+
+    const handleTableChange = useCallback(
+        ({ page, rowsPerPage, columnFilters }) => {
+            if (rowsPerPage && rowsPerPage !== pagination.limit) {
+                setLimit(rowsPerPage);
+            }
+            if (page && page !== pagination.page) {
+                setPage(page);
+            }
+            if (columnFilters?.contractStatus) {
+                const selected = columnFilters.contractStatus;
+                const joined = selected.join(',');
+                if (joined !== filters.status) {
+                    setFilter('status', joined);
+                }
+            } else if (filters.status && !columnFilters?.contractStatus) {
+                setFilter('status', '');
+            }
+        },
+        [pagination.limit, pagination.page, filters.status, setLimit, setPage, setFilter],
     );
 
     // ── Column definitions for AdvancedTable ─────────────────────────────────
@@ -328,10 +413,18 @@ function ContractsListPage() {
                     totalCount={pagination.total}
                     searchable={false}
                     showColumnSorting={true}
+                    showSortDropdown={true}
+                    showFilter={true}
+                    filterConfig={filterConfig}
+                    showColumnToggle={true}
+                    showRefresh={true}
+                    onRefresh={refetch}
+                    showRowsPerPage={true}
+                    showResultsCount={true}
                     showSerialNumber={false}
                     showPagination={false}
-                    showResultsCount={true}
                     initialRowsPerPage={pagination.limit}
+                    onTableChange={handleTableChange}
                     tabs={contractTabs}
                     showTabs={true}
                     activeTab={filters.status || 'all'}

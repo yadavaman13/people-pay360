@@ -5,19 +5,17 @@ import { Card, CardContent } from '@/components/Shared/DataDisplay/Card/Card';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import InputField from '@/components/Shared/Form/InputField/InputField';
 import Badge from '@/components/Shared/DataDisplay/Badge/Badge';
-import { Clock, LogIn, LogOut, Info, ShieldCheck } from 'lucide-react';
+import { Clock, LogIn, LogOut, CheckCircle2 } from 'lucide-react';
 
 /**
- * Formats seconds into HH:MM:SS display string
+ * Splits seconds into padded { hrs, mins, secs }
  */
-function formatDuration(seconds) {
-    if (seconds < 0) seconds = 0;
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
+function parseDuration(seconds) {
+    const s = Math.max(0, seconds || 0);
+    const hrs = String(Math.floor(s / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+    const secs = String(Math.floor(s % 60)).padStart(2, '0');
+    return { hrs, mins, secs };
 }
 
 export default function AttendanceQuickWidget({
@@ -53,6 +51,8 @@ export default function AttendanceQuickWidget({
               )
             : 0;
 
+    const { hrs, mins, secs } = parseDuration(elapsedSeconds);
+
     // ── Check-In handler ─────────────────────────────────────────────────────
     const handleCheckIn = async () => {
         try {
@@ -85,57 +85,47 @@ export default function AttendanceQuickWidget({
     return (
         <Card className={`quick-punch-widget ${isCheckedIn ? 'is-checked-in' : ''}`}>
             <CardContent className="widget-content-grid">
-                {/* Left: User Profile + Live Stopwatch */}
+                {/* Left: User Profile + Modern Stopwatch */}
                 <div className="punch-timer-section">
-                    {/* User Profile Bar */}
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            marginBottom: '8px',
-                        }}
-                    >
-                        <CircularAvatar
-                            src={profileImage}
-                            name={userFullName}
-                            size="lg"
-                            status={isCheckedIn ? 'online' : 'offline'}
-                        />
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <h3
-                                    style={{
-                                        margin: 0,
-                                        fontSize: '16px',
-                                        fontWeight: 700,
-                                        color: 'var(--color-text-primary, #111827)',
-                                    }}
-                                >
-                                    {userFullName}
-                                </h3>
+                    <div className="widget-profile-row">
+                        <CircularAvatar src={profileImage} name={userFullName} size="md" />
+                        <div className="profile-details">
+                            <div className="name-badge-row">
+                                <h3 className="widget-user-name">{userFullName}</h3>
                                 <Badge
                                     variant={isCheckedIn ? 'success' : 'neutral'}
-                                    size="sm"
+                                    type="light"
                                     showDot
+                                    className="widget-status-badge"
                                 >
-                                    {isCheckedIn ? 'Checked In' : 'Not Clocked In'}
+                                    {isCheckedIn ? 'Clocked In' : 'Not Clocked In'}
                                 </Badge>
                             </div>
-                            <span
-                                style={{
-                                    fontSize: '12px',
-                                    color: 'var(--color-text-secondary, #6b7280)',
-                                }}
-                            >
+                            <span className="widget-user-meta">
                                 {user?.role || 'EMPLOYEE'} •{' '}
                                 {todayStatus?.employee?.employeeCode || 'Self Service'}
                             </span>
                         </div>
                     </div>
 
-                    <div className="timer-clock">
-                        {isCheckedIn ? formatDuration(elapsedSeconds) : '00h 00m 00s'}
+                    <div
+                        className="stopwatch-display"
+                        aria-label={`Elapsed time: ${hrs}h ${mins}m ${secs}s`}
+                    >
+                        <div className="stopwatch-segment">
+                            <span className="stopwatch-val">{hrs}</span>
+                            <span className="stopwatch-unit">h</span>
+                        </div>
+                        <span className="stopwatch-sep">:</span>
+                        <div className="stopwatch-segment">
+                            <span className="stopwatch-val">{mins}</span>
+                            <span className="stopwatch-unit">m</span>
+                        </div>
+                        <span className="stopwatch-sep">:</span>
+                        <div className="stopwatch-segment">
+                            <span className="stopwatch-val">{secs}</span>
+                            <span className="stopwatch-unit">s</span>
+                        </div>
                     </div>
 
                     <div className="timer-caption">
@@ -147,20 +137,19 @@ export default function AttendanceQuickWidget({
 
                 {/* Right: Actions, Notes & Shift Metadata */}
                 <div className="punch-action-section">
-                    <div className="shift-meta-pills">
-                        <span className="meta-pill">
-                            <Clock size={13} />
+                    <div className="shift-meta-strip">
+                        <span className="meta-chip">
+                            <Clock size={12} className="meta-icon" />
                             Shift: 09:00 AM - 06:00 PM
                         </span>
-                        <span className="meta-pill">
-                            <Info size={13} />
+                        <span className="meta-chip">
                             Today:{' '}
                             {todayStatus?.totalWorkedHours
                                 ? `${Number(todayStatus.totalWorkedHours).toFixed(2)} hrs`
                                 : '0.00 hrs'}
                         </span>
-                        <span className="meta-pill">
-                            <ShieldCheck size={13} />
+                        <span className="meta-chip">
+                            <CheckCircle2 size={12} className="meta-icon" />
                             Punches: {punchesUsed}/{maxPunches} ({remainingPunches} left)
                         </span>
                     </div>
@@ -180,31 +169,30 @@ export default function AttendanceQuickWidget({
                         />
                     </div>
 
-                    {/* Both buttons always visible — Check-Out disabled until checked in */}
                     <div className="punch-button-cluster">
                         <Button
                             type="button"
                             variant="primary"
                             size="md"
-                            className="punch-submit-btn"
+                            className="punch-submit-btn check-in-btn"
                             onClick={handleCheckIn}
-                            isLoading={isActionLoading && !isCheckedIn}
+                            loading={isActionLoading && !isCheckedIn}
                             disabled={isActionLoading || isCheckedIn || !canPunchIn}
+                            icon={<LogIn size={15} />}
                         >
-                            <LogIn size={16} style={{ marginRight: '8px' }} />
                             Check In Shift
                         </Button>
 
                         <Button
                             type="button"
-                            variant="danger"
+                            variant={isCheckedIn ? 'danger' : 'secondary'}
                             size="md"
-                            className="punch-submit-btn"
+                            className="punch-submit-btn check-out-btn"
                             onClick={handleCheckOut}
-                            isLoading={isActionLoading && isCheckedIn}
+                            loading={isActionLoading && isCheckedIn}
                             disabled={isActionLoading || !isCheckedIn}
+                            icon={<LogOut size={15} />}
                         >
-                            <LogOut size={16} style={{ marginRight: '8px' }} />
                             Check Out Shift
                         </Button>
                     </div>

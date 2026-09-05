@@ -395,10 +395,47 @@ function AdvancedTable({
 
     const processedData = useMemo(() => {
         if (serverSide) {
-            if (sortConfig.key && sortConfig.direction) {
-                return sortTableData(internalData, sortConfig, effectiveColumns);
+            let result = internalData;
+            if (isFilterActive) {
+                Object.entries(columnFilters).forEach(([key, vals]) => {
+                    if (!vals || vals.length === 0) return;
+                    result = result.filter((row) => vals.includes(String(row[key])));
+                });
+
+                Object.entries(dateRangeFilters).forEach(([key, range]) => {
+                    if (!range || (!range.from && !range.to)) return;
+                    const fromDate = range.from ? parseDate(range.from) : null;
+                    const toDate = range.to ? parseDate(range.to) : null;
+                    if (toDate) toDate.setHours(23, 59, 59, 999);
+
+                    result = result.filter((row) => {
+                        const cellDate = parseDate(row[key]);
+                        if (!cellDate) return false;
+                        if (fromDate && cellDate < fromDate) return false;
+                        if (toDate && cellDate > toDate) return false;
+                        return true;
+                    });
+                });
+
+                Object.entries(numericFilters).forEach(([key, range]) => {
+                    if (!range || (range.min === '' && range.max === '')) return;
+                    const minVal = range.min !== '' ? parseNumeric(range.min) : null;
+                    const maxVal = range.max !== '' ? parseNumeric(range.max) : null;
+
+                    result = result.filter((row) => {
+                        const val = parseNumeric(row[key]);
+                        if (val === null) return false;
+                        if (minVal !== null && val < minVal) return false;
+                        if (maxVal !== null && val > maxVal) return false;
+                        return true;
+                    });
+                });
             }
-            return internalData;
+
+            if (sortConfig.key && sortConfig.direction) {
+                return sortTableData(result, sortConfig, effectiveColumns);
+            }
+            return result;
         }
 
         let result = [...internalData];
@@ -495,6 +532,19 @@ function AdvancedTable({
         numericFilters,
     ]);
 
+    const isAnyFilterActive =
+        isFilterActive &&
+        (Object.values(columnFilters).some((a) => a?.length > 0) ||
+            Object.values(dateRangeFilters).some((r) => r?.from || r?.to) ||
+            Object.values(numericFilters).some((n) => n?.min !== '' || n?.max !== ''));
+
+    const effectiveTotalCount =
+        serverSide && !isAnyFilterActive
+            ? totalCount
+            : typeof totalCount === 'number' && !isAnyFilterActive
+              ? totalCount
+              : processedData.length;
+
     // ── Pagination hook ───────────────────────────────────────────────────────
     const {
         currentPage,
@@ -509,7 +559,7 @@ function AdvancedTable({
     } = useTablePagination({
         initialRowsPerPage,
         processedData,
-        totalCount,
+        totalCount: effectiveTotalCount,
         serverSide,
         showAllOption,
     });

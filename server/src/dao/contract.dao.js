@@ -6,7 +6,7 @@ import { departments } from '../db/schema/departments.schema.js';
 import { jobPositions } from '../db/schema/job_positions.schema.js';
 import { workingSchedules } from '../db/schema/working_schedules.schema.js';
 import { payslips } from '../db/schema/payroll.schema.js';
-import { eq, and, lte, or, gte, isNull, ne, sql, desc, ilike } from 'drizzle-orm';
+import { eq, and, lte, or, gte, isNull, ne, sql, desc, ilike, inArray } from 'drizzle-orm';
 
 /**
  * Contract DAO — Data Access Object
@@ -304,7 +304,13 @@ export async function listContractsWithFilters({
         conditions.push(eq(contracts.employeeId, employeeId));
     }
     if (status) {
-        conditions.push(eq(contracts.status, String(status).toUpperCase()));
+        const rawList = Array.isArray(status) ? status : String(status).split(',');
+        const statusList = rawList.map((s) => String(s).trim().toUpperCase()).filter(Boolean);
+        if (statusList.length === 1) {
+            conditions.push(eq(contracts.status, statusList[0]));
+        } else if (statusList.length > 1) {
+            conditions.push(inArray(contracts.status, statusList));
+        }
     }
     if (departmentId) {
         conditions.push(eq(contracts.departmentId, departmentId));
