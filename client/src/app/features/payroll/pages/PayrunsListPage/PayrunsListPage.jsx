@@ -18,8 +18,12 @@ function PayrunsListPage() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
-    // Determine current role context for routing ('user' or 'admin')
-    const roleSegment = pathname.includes('/admin/') ? 'admin' : 'user';
+    // Determine current role context for routing ('admin', 'hr', or 'employee')
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
 
     const {
         payruns,

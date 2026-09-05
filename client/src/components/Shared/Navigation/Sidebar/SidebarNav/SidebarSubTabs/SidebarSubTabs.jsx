@@ -13,7 +13,7 @@ function SidebarSubTabs({ subTabs, parentLabel, onSubTabClick }) {
         ? 'admin'
         : segments.includes('hr')
           ? 'hr'
-          : 'user';
+          : 'employee';
 
     const handleSubTabClick = (sub, e) => {
         e.stopPropagation();

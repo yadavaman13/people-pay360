@@ -17,7 +17,11 @@ export default function AccountSettings() {
     const { success, error } = useToast();
     const navigate = useNavigate();
     const { pathname } = useLocation();
-    const roleSegment = pathname.includes('/admin/') ? 'admin' : 'user';
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
 
     const user = auth.user;
 

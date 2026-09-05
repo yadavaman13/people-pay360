@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { Plus, RotateCcw, ExternalLink, ChevronRight } from 'lucide-react';
 import { useContracts } from '../hooks/useContracts';
 import { useAuth } from '@/app/features/auth/hooks/useAuth';
@@ -44,7 +44,13 @@ function formatCurrencyParts(amount) {
 
 function ContractsListPage() {
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const { user } = useAuth();
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
     const {
         contracts,
         counts,
@@ -151,11 +157,12 @@ function ContractsListPage() {
                 render: (_val, row) => (
                     <div
                         className="contract-employee-cell"
-                        onClick={() => navigate(`/dashboard/user/contracts/${row.id}`)}
+                        onClick={() => navigate(`/dashboard/${roleSegment}/contracts/${row.id}`)}
                         role="button"
                         tabIndex={0}
                         onKeyDown={(e) =>
-                            e.key === 'Enter' && navigate(`/dashboard/user/contracts/${row.id}`)
+                            e.key === 'Enter' &&
+                            navigate(`/dashboard/${roleSegment}/contracts/${row.id}`)
                         }
                     >
                         <img
@@ -185,7 +192,7 @@ function ContractsListPage() {
                     <button
                         type="button"
                         className="contract-name-btn"
-                        onClick={() => navigate(`/dashboard/user/contracts/${row.id}`)}
+                        onClick={() => navigate(`/dashboard/${roleSegment}/contracts/${row.id}`)}
                         title="View contract details"
                     >
                         <span className="contract-title-text">{val}</span>
@@ -253,7 +260,9 @@ function ContractsListPage() {
                         <button
                             type="button"
                             className="view-details-arrow-btn"
-                            onClick={() => navigate(`/dashboard/user/contracts/${row.id}`)}
+                            onClick={() =>
+                                navigate(`/dashboard/${roleSegment}/contracts/${row.id}`)
+                            }
                             aria-label={`View details for ${row.contractName}`}
                             title="View details"
                         >
@@ -263,7 +272,7 @@ function ContractsListPage() {
                 ),
             },
         ],
-        [navigate],
+        [navigate, roleSegment],
     );
 
     return (
@@ -285,7 +294,7 @@ function ContractsListPage() {
                         <Button
                             variant="primary"
                             size="md"
-                            onClick={() => navigate('/dashboard/user/contracts/new')}
+                            onClick={() => navigate(`/dashboard/${roleSegment}/contracts/new`)}
                             className="create-contract-btn"
                         >
                             <Plus size={16} />

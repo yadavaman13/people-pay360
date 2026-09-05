@@ -38,7 +38,7 @@ function SidebarNav({
         ? 'admin'
         : segments.includes('hr')
           ? 'hr'
-          : 'user';
+          : 'employee';
 
     const handlePinToggle = (label) => {
         let nextPinned;
@@ -89,7 +89,7 @@ function SidebarNav({
                 } else if (roleSegment === 'hr') {
                     navigate('/dashboard/hr/attendance/my-attendance');
                 } else {
-                    navigate('/dashboard/user/attendance');
+                    navigate('/dashboard/employee/attendance');
                 }
                 break;
             default:

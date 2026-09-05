@@ -45,13 +45,7 @@ function DashboardLayout({ onLogout }) {
     const userRoleUpper = user?.role?.toUpperCase() || '';
     const isAdmin = userRoleUpper === 'ADMIN';
     const isHR = HR_ROLES.includes(userRoleUpper);
-    const roleSegment = isAdmin ? 'admin' : isHR ? 'hr' : 'user';
-
-    const attendancePath = isAdmin
-        ? '/dashboard/admin/attendance/employees-attendance'
-        : isHR
-          ? '/dashboard/hr/attendance/my-attendance'
-          : '/dashboard/user/attendance';
+    const roleSegment = isAdmin ? 'admin' : isHR ? 'hr' : 'employee';
 
     const { featureNavItems } = useMemo(() => loadFeatureRoutes(), []);
 
@@ -81,15 +75,12 @@ function DashboardLayout({ onLogout }) {
             if (items.some((i) => i.label === item.label)) return;
 
             // Dynamic route path replacement
-            const dynamicPath =
-                item.label === 'Attendance' && attendancePath
-                    ? attendancePath
-                    : item.path
-                      ? item.path.replace(
-                            /\/dashboard\/(?:user|admin|hr)\//,
-                            `/dashboard/${roleSegment}/`,
-                        )
-                      : item.path;
+            const dynamicPath = item.path
+                ? item.path.replace(
+                      /\/dashboard\/(?:user|employee|admin|hr)\//,
+                      `/dashboard/${roleSegment}/`,
+                  )
+                : item.path;
 
             let itemIcon = item.icon;
             if (itemIcon && typeof itemIcon === 'object') {
@@ -121,7 +112,7 @@ function DashboardLayout({ onLogout }) {
         });
 
         return items;
-    }, [featureNavItems, roleSegment, user, attendancePath]);
+    }, [featureNavItems, roleSegment, user]);
 
     const handleToggleSidebar = () => {
         setIsSidebarCollapsed((prev) => {

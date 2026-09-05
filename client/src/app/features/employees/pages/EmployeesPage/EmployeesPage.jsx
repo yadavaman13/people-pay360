@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useContext, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { EmployeesContext } from '../../context/employees.context';
 import { useEmployees } from '../../hooks';
 import { useAuth } from '@/app/features/auth/hooks/useAuth';
@@ -12,7 +12,13 @@ import './EmployeesPage.scss';
 
 function EmployeesPage() {
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const { user } = useAuth();
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
     const role = (user?.role || '').toUpperCase();
     const canCreateEmployee = ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER'].includes(role);
 
@@ -50,11 +56,11 @@ function EmployeesPage() {
     };
 
     const handleCardClick = (employee) => {
-        navigate(`/dashboard/user/employees/${employee.id}`);
+        navigate(`/dashboard/${roleSegment}/employees/${employee.id}`);
     };
 
     const handleAddNew = () => {
-        navigate('/dashboard/user/employees/new');
+        navigate(`/dashboard/${roleSegment}/employees/new`);
     };
 
     // Columns for List View matching Image 2

@@ -42,7 +42,11 @@ function PayrunDetailPage() {
     const [downloadingPdfId, setDownloadingPdfId] = useState(null);
 
     // Resolve current role segment for navigation
-    const roleSegment = pathname.includes('/admin/') ? 'admin' : 'user';
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
 
     useEffect(() => {
         if (payrunId) {

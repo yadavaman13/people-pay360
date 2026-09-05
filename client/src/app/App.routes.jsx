@@ -6,7 +6,12 @@ import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
 import { loadFeatureRoutes } from './routes.loader';
 
 // Auto-discover all *.routes.jsx across all feature modules
-const { userRoutes, hrRoutes, adminRoutes, publicRoutes } = loadFeatureRoutes();
+const {
+    employeeRoutes = [],
+    hrRoutes = [],
+    adminRoutes = [],
+    publicRoutes = [],
+} = loadFeatureRoutes();
 
 export const router = createBrowserRouter([
     {
@@ -32,19 +37,24 @@ export const router = createBrowserRouter([
                         element: <DashboardIndex />,
                     },
                     {
-                        path: 'user',
+                        path: 'employee',
                         children: [
                             {
                                 index: true,
                                 element: <Navigate to="home" replace />,
                             },
-                            // Auto-discovered user feature routes
-                            ...userRoutes,
+                            // Auto-discovered employee feature routes
+                            ...employeeRoutes,
                             {
                                 path: '*',
                                 element: <Navigate to="home" replace />,
                             },
                         ],
+                    },
+                    // Backward-compatibility redirect alias for any legacy links/bookmarks:
+                    {
+                        path: 'user/*',
+                        element: <Navigate to="/dashboard/employee" replace />,
                     },
                     {
                         path: 'hr',

@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import {
     ArrowLeft,
     User,
@@ -43,7 +43,13 @@ function formatCurrency(amount) {
 function ContractDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const { user } = useAuth();
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
 
     const { contract, loading, error, actionLoading, handleActivate, handleCancel, handleDelete } =
         useContractDetail(id);
@@ -65,7 +71,7 @@ function ContractDetailPage() {
                     <button
                         type="button"
                         className="back-btn"
-                        onClick={() => navigate('/dashboard/user/contracts')}
+                        onClick={() => navigate(`/dashboard/${roleSegment}/contracts`)}
                     >
                         <ArrowLeft size={18} />
                         <span>Back to Contracts</span>
@@ -82,7 +88,7 @@ function ContractDetailPage() {
                         <Button
                             variant="primary"
                             size="sm"
-                            onClick={() => navigate('/dashboard/user/contracts')}
+                            onClick={() => navigate(`/dashboard/${roleSegment}/contracts`)}
                             className="not-found-back-btn"
                         >
                             Return to Contracts List
@@ -120,7 +126,7 @@ function ContractDetailPage() {
                 <button
                     type="button"
                     className="back-btn"
-                    onClick={() => navigate('/dashboard/user/contracts')}
+                    onClick={() => navigate(`/dashboard/${roleSegment}/contracts`)}
                     aria-label="Back to Contracts"
                 >
                     <ArrowLeft size={18} />

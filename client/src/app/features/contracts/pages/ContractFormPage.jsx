@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { useContractForm } from '../hooks/useContractForm';
 import ContractFormFields from '../components/ContractFormFields/ContractFormFields';
@@ -9,6 +9,12 @@ import './ContractFormPage.scss';
 function ContractFormPage({ mode = 'create' }) {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { pathname } = useLocation();
+    const roleSegment = pathname.includes('/admin/')
+        ? 'admin'
+        : pathname.includes('/hr/')
+          ? 'hr'
+          : 'employee';
 
     const isEdit = mode === 'edit';
     const contractId = isEdit ? id : null;
@@ -30,18 +36,18 @@ function ContractFormPage({ mode = 'create' }) {
         if (res?.success) {
             const targetId = res.id || contractId;
             if (isEdit) {
-                navigate(`/dashboard/user/contracts/${targetId}`, { replace: true });
+                navigate(`/dashboard/${roleSegment}/contracts/${targetId}`, { replace: true });
             } else {
-                navigate(`/dashboard/user/contracts/${targetId}`);
+                navigate(`/dashboard/${roleSegment}/contracts/${targetId}`);
             }
         }
     };
 
     const handleCancel = () => {
         if (isEdit && contractId) {
-            navigate(`/dashboard/user/contracts/${contractId}`);
+            navigate(`/dashboard/${roleSegment}/contracts/${contractId}`);
         } else {
-            navigate('/dashboard/user/contracts');
+            navigate(`/dashboard/${roleSegment}/contracts`);
         }
     };
 

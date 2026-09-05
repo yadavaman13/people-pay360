@@ -10,5 +10,5 @@ export default function DashboardIndex() {
     if (['HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'].includes(roleUpper)) {
         return <Navigate to="hr" replace />;
     }
-    return <Navigate to="user" replace />;
+    return <Navigate to="employee" replace />;
 }
