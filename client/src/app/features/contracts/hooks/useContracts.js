@@ -2,6 +2,12 @@ import { useContext, useEffect, useRef, useCallback } from 'react';
 import { ContractContext, CONTRACT_ACTIONS } from '../context/ContractContext';
 import * as contractsService from '../services/contracts.service';
 
+// Keeps a stable snapshot of the filter key used for the most recent successful
+// contracts list fetch. Lives outside the component so it survives remounts
+// (ContractsListPage unmounts when navigating to /new and remounts on return).
+let lastFetchedFilterKey = null;
+let lastFetchCompleted = false;
+
 /**
  * Hook for managing the contracts list, debounced filtering, and pagination.
  */
@@ -11,9 +17,15 @@ export function useContracts() {
         throw new Error('useContracts must be used within a ContractProvider');
     }
 
-    const { contracts, pagination, filters, loading, error, dispatch } = context;
-    const searchTimeoutRef = useRef(null);
+    const { contracts, counts, pagination, filters, loading, error, dispatch } = context;
+    const filtersRef = useRef(filters);
+    filtersRef.current = filters; // always current, no effect needed
     const abortControllerRef = useRef(null);
+    const countsFetchedRef = useRef(false);
+
+    // Build a stable string key from the current filters so we can detect
+    // whether the active filter set has already been fetched.
+    const filterKey = `${filters.page}|${filters.limit}|${filters.status}|${filters.employeeId}|${filters.search}`;
 
     const fetchContracts = useCallback(
         async (customFilters = {}) => {
@@ -25,11 +37,7 @@ export function useContracts() {
             dispatch({ type: CONTRACT_ACTIONS.FETCH_START });
 
             const activeFilters = {
-                page: filters.page,
-                limit: filters.limit,
-                search: filters.search,
-                status: filters.status,
-                employeeId: filters.employeeId,
+                ...filtersRef.current,
                 ...customFilters,
             };
 
@@ -73,18 +81,35 @@ export function useContracts() {
                 });
             }
         },
-        [filters, dispatch],
+        [dispatch],
     );
 
-    // Initial load and filter change trigger
+    // Re-fetch whenever any filter changes (including search).
+    // Skip the fetch when remounting with the same filters — this prevents a
+    // redundant /api/contracts call every time the user navigates to /new and
+    // then returns to the list page.
     useEffect(() => {
-        fetchContracts();
+        const alreadyFetched = lastFetchedFilterKey === filterKey && lastFetchCompleted;
+
+        if (!alreadyFetched) {
+            fetchContracts();
+            lastFetchedFilterKey = filterKey;
+            lastFetchCompleted = true;
+        }
+
         return () => {
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
             }
         };
-    }, [filters.page, filters.limit, filters.status, filters.employeeId, fetchContracts]);
+    }, [
+        filters.page,
+        filters.limit,
+        filters.status,
+        filters.employeeId,
+        filters.search,
+        fetchContracts,
+    ]);
 
     const setFilter = useCallback(
         (key, value) => {
@@ -98,18 +123,12 @@ export function useContracts() {
 
     const setSearch = useCallback(
         (term) => {
-            if (searchTimeoutRef.current) {
-                clearTimeout(searchTimeoutRef.current);
-            }
-            searchTimeoutRef.current = setTimeout(() => {
-                dispatch({
-                    type: CONTRACT_ACTIONS.SET_FILTERS,
-                    payload: { search: term, page: 1 },
-                });
-                fetchContracts({ search: term, page: 1 });
-            }, 300);
+            dispatch({
+                type: CONTRACT_ACTIONS.SET_FILTERS,
+                payload: { search: term, page: 1 },
+            });
         },
-        [dispatch, fetchContracts],
+        [dispatch],
     );
 
     const setPage = useCallback(
@@ -132,17 +151,40 @@ export function useContracts() {
         [dispatch],
     );
 
+    const fetchCounts = useCallback(async () => {
+        try {
+            const result = await contractsService.getContractCounts();
+            dispatch({
+                type: CONTRACT_ACTIONS.SET_COUNTS,
+                payload: result,
+            });
+        } catch {
+            // ignore
+        }
+    }, [dispatch]);
+
+    // Fetch tab counts once on initial mount
+    useEffect(() => {
+        if (!countsFetchedRef.current) {
+            countsFetchedRef.current = true;
+            fetchCounts();
+        }
+    }, [fetchCounts]);
+
     const resetFilters = useCallback(() => {
         dispatch({ type: CONTRACT_ACTIONS.RESET_FILTERS });
-        fetchContracts({ search: '', status: '', employeeId: '', page: 1 });
-    }, [dispatch, fetchContracts]);
+    }, [dispatch]);
 
     const refetch = useCallback(() => {
+        // Bypass the dedup guard so an explicit refresh always hits the API.
+        lastFetchedFilterKey = null;
+        lastFetchCompleted = false;
         return fetchContracts();
     }, [fetchContracts]);
 
     return {
         contracts,
+        counts,
         pagination,
         filters,
         loading,
@@ -153,5 +195,6 @@ export function useContracts() {
         setLimit,
         resetFilters,
         refetch,
+        fetchCounts,
     };
 }

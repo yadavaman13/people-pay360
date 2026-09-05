@@ -57,4 +57,48 @@ export default {
             ],
         },
     ],
+    adminRoutes: [
+        {
+            path: 'contracts',
+            element: (
+                <ProtectedRoute
+                    allowedRoles={['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER']}
+                >
+                    <ContractProvider>
+                        <Outlet />
+                    </ContractProvider>
+                </ProtectedRoute>
+            ),
+            children: [
+                {
+                    index: true,
+                    element: <ContractsListPage />,
+                },
+                {
+                    path: 'new',
+                    element: (
+                        <ProtectedRoute
+                            allowedRoles={['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER']}
+                        >
+                            <ContractFormPage mode="create" />
+                        </ProtectedRoute>
+                    ),
+                },
+                {
+                    path: ':id',
+                    element: <ContractDetailPage />,
+                },
+                {
+                    path: ':id/edit',
+                    element: (
+                        <ProtectedRoute
+                            allowedRoles={['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER']}
+                        >
+                            <ContractFormPage mode="edit" />
+                        </ProtectedRoute>
+                    ),
+                },
+            ],
+        },
+    ],
 };

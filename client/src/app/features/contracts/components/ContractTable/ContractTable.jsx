@@ -5,6 +5,7 @@ import AdvancedTable from '@/components/Shared/DataDisplay/AdvancedTable/Advance
 import ContractStatusBadge from '../ContractStatusBadge/ContractStatusBadge';
 import ExpiryWarningBadge from '../ExpiryWarningBadge/ExpiryWarningBadge';
 import Button from '@/components/Shared/Buttons/Button/Button';
+import { DEFAULT_AVATAR_URL } from '@/utils/avatar';
 import './ContractTable.scss';
 
 function formatDisplayDate(dateStr) {
@@ -18,15 +19,17 @@ function formatDisplayDate(dateStr) {
     });
 }
 
-function formatCurrency(amount) {
-    if (amount === undefined || amount === null || amount === '') return '—';
+function formatCurrencyParts(amount) {
+    if (amount === undefined || amount === null || amount === '') return { formatted: '—' };
     const num = Number(amount);
-    if (isNaN(num)) return String(amount);
-    return new Intl.NumberFormat('en-IN', {
+    if (isNaN(num)) return { formatted: String(amount) };
+    const formatted = new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR',
+        minimumFractionDigits: 0,
         maximumFractionDigits: 2,
     }).format(num);
+    return { formatted };
 }
 
 function ContractTable({
@@ -64,8 +67,10 @@ function ContractTable({
                     : 'Employment Contract');
             const startFormatted = formatDisplayDate(c.startDate) || '—';
             const endFormatted = formatDisplayDate(c.endDate) || 'Open-Ended';
-            const periodString = `${startFormatted} → ${endFormatted}`;
-            const wageFormatted = `${formatCurrency(c.wage)} / ${(c.wageType || 'MONTHLY').toLowerCase() === 'hourly' ? 'hr' : 'mo'}`;
+            const isHourly = (c.wageType || 'MONTHLY').toLowerCase() === 'hourly';
+            const wageNumber = Number(c.wage) || 0;
+            const wageFormatted = formatCurrencyParts(c.wage).formatted;
+            const wageUnit = isHourly ? '/ hr' : '/ mo';
             const structureName = c.salaryStructure?.name || '—';
             const scheduleName = c.workingSchedule?.name || 'Standard';
 
@@ -74,8 +79,12 @@ function ContractTable({
                 employeeName,
                 employeeCode,
                 contractName,
-                periodString,
+                startDateFormatted: startFormatted,
+                endDateFormatted: endFormatted,
+                isOpenEnded: !c.endDate,
+                wageNumber,
                 wageFormatted,
+                wageUnit,
                 structureName,
                 scheduleName,
             };
@@ -90,32 +99,32 @@ function ContractTable({
                 key: 'employeeName',
                 label: 'Employee',
                 sortable: true,
-                render: (_val, row) => {
-                    const initials = (row.employeeName || 'U')
-                        .split(' ')
-                        .map((n) => n[0])
-                        .slice(0, 2)
-                        .join('')
-                        .toUpperCase();
-
-                    return (
-                        <div
-                            className="contract-employee-cell"
-                            onClick={() => handleRowSelect(row)}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => e.key === 'Enter' && handleRowSelect(row)}
-                        >
-                            <div className="employee-avatar">{initials}</div>
-                            <div className="employee-info">
-                                <span className="employee-full-name">{row.employeeName}</span>
-                                {row.employeeCode && (
-                                    <span className="employee-code">{row.employeeCode}</span>
-                                )}
-                            </div>
+                width: '230px',
+                render: (_val, row) => (
+                    <div
+                        className="contract-employee-cell"
+                        onClick={() => handleRowSelect(row)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && handleRowSelect(row)}
+                    >
+                        <img
+                            src={row.employee?.profileImage || DEFAULT_AVATAR_URL}
+                            alt={row.employeeName || 'Employee'}
+                            className="employee-avatar"
+                            onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = DEFAULT_AVATAR_URL;
+                            }}
+                        />
+                        <div className="employee-info">
+                            <span className="employee-full-name">{row.employeeName}</span>
+                            {row.employeeCode && (
+                                <span className="employee-code">{row.employeeCode}</span>
+                            )}
                         </div>
-                    );
-                },
+                    </div>
+                ),
             });
         }
 
@@ -124,6 +133,7 @@ function ContractTable({
                 key: 'contractName',
                 label: 'Contract Name',
                 sortable: true,
+                width: '280px',
                 render: (val, row) => (
                     <button
                         type="button"
@@ -131,44 +141,66 @@ function ContractTable({
                         onClick={() => handleRowSelect(row)}
                         title="View contract details"
                     >
-                        <span>{val}</span>
+                        <span className="contract-title-text">{val}</span>
                         <ExternalLink size={13} className="name-link-icon" />
                     </button>
                 ),
             },
             {
-                key: 'periodString',
+                key: 'startDate',
                 label: 'Period',
                 sortable: true,
-                render: (val, row) => (
+                sortValue: (_val, row) => (row.startDate ? new Date(row.startDate).getTime() : 0),
+                width: '220px',
+                render: (_val, row) => (
                     <div className="contract-period-cell">
-                        <span className="period-text">{val}</span>
+                        <div className="period-dates">
+                            <span className="date-start">{row.startDateFormatted}</span>
+                            <span className="date-arrow">→</span>
+                            <span className={`date-end ${row.isOpenEnded ? 'is-open' : ''}`}>
+                                {row.endDateFormatted}
+                            </span>
+                        </div>
                         {row.endDate && <ExpiryWarningBadge endDate={row.endDate} />}
                     </div>
                 ),
             },
             {
-                key: 'wageFormatted',
+                key: 'wage',
                 label: 'Wage',
                 sortable: true,
-                render: (val) => <span className="contract-wage-cell">{val}</span>,
+                sortValue: (_val, row) => row.wageNumber,
+                width: '180px',
+                render: (_val, row) => (
+                    <div className="contract-wage-cell">
+                        <span className="wage-amount">{row.wageFormatted}</span>
+                        <span className="wage-unit">{row.wageUnit}</span>
+                    </div>
+                ),
             },
             {
                 key: 'structureName',
-                label: 'Structure',
+                label: 'Salary Structure',
                 sortable: true,
-                render: (val) => <span className="contract-structure-cell">{val}</span>,
+                width: '240px',
+                render: (val) => (
+                    <div className="contract-structure-cell" title={val}>
+                        <span className="structure-text">{val}</span>
+                    </div>
+                ),
             },
             {
                 key: 'status',
                 label: 'Status',
                 sortable: true,
+                width: '120px',
                 render: (val) => <ContractStatusBadge status={val} size="sm" />,
             },
             {
                 key: 'actions',
                 label: '',
                 sortable: false,
+                width: '56px',
                 render: (_val, row) => (
                     <div className="contract-row-actions">
                         {row.status === 'DRAFT' && onActivate && (
@@ -200,6 +232,7 @@ function ContractTable({
                             className="view-details-arrow-btn"
                             onClick={() => handleRowSelect(row)}
                             aria-label={`View details for ${row.contractName}`}
+                            title="View details"
                         >
                             <ChevronRight size={16} />
                         </button>
@@ -217,7 +250,8 @@ function ContractTable({
                 columns={columns}
                 data={tableData}
                 loading={loading}
-                serverSide={false}
+                skeletonRows={6}
+                serverSide={true}
                 searchable={false}
                 showColumnSorting={true}
                 showSerialNumber={false}

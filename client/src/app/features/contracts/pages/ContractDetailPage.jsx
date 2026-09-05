@@ -1,5 +1,13 @@
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, FileText, User, DollarSign, Calendar, Layers, AlertCircle } from 'lucide-react';
+import {
+    ArrowLeft,
+    User,
+    Wallet,
+    CalendarDays,
+    Building2,
+    FileSignature,
+    AlertCircle,
+} from 'lucide-react';
 import { useContractDetail } from '../hooks/useContractDetail';
 import { useAuth } from '@/app/features/auth/hooks/useAuth';
 import ContractStatusBadge from '../components/ContractStatusBadge/ContractStatusBadge';
@@ -123,6 +131,10 @@ function ContractDetailPage() {
             {/* Main Header Banner */}
             <div className="contract-header-card">
                 <div className="header-meta">
+                    <div className="category-tag-row">
+                        <span className="contract-category-tag">Employment Contract</span>
+                    </div>
+
                     <div className="title-and-badges">
                         <h1 className="contract-detail-title">{contractName}</h1>
                         <div className="badges-group">
@@ -131,16 +143,17 @@ function ContractDetailPage() {
                         </div>
                     </div>
 
-                    <div className="employee-headline">
-                        <User size={16} className="headline-icon" />
-                        <span className="headline-text">
-                            Assigned to: <strong>{employeeName}</strong>
-                            {contract.employee?.employeeCode && (
-                                <span className="employee-code-tag">
-                                    {contract.employee.employeeCode}
-                                </span>
-                            )}
-                        </span>
+                    <div className="employee-profile-pill">
+                        <div className="employee-avatar-circle">
+                            <User size={13} />
+                        </div>
+                        <span className="employee-assigned-label">Assigned to:</span>
+                        <span className="employee-name">{employeeName}</span>
+                        {contract.employee?.employeeCode && (
+                            <span className="employee-code-tag">
+                                {contract.employee.employeeCode}
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -161,7 +174,9 @@ function ContractDetailPage() {
                 <div className="payroll-impact-notice">
                     <Alert variant="warning">
                         <div className="notice-inner">
-                            <AlertCircle size={20} className="notice-icon" />
+                            <div className="notice-icon-box">
+                                <AlertCircle size={18} />
+                            </div>
                             <div className="notice-content">
                                 <AlertTitle>Active Contract Payroll Notice</AlertTitle>
                                 <AlertDescription>
@@ -181,16 +196,16 @@ function ContractDetailPage() {
                 {/* 1. Compensation & Salary Structure */}
                 <div className="info-card">
                     <div className="card-header">
-                        <DollarSign size={18} className="card-icon" />
+                        <Wallet size={17} className="card-icon" />
                         <h2 className="card-title">Compensation & Structure</h2>
                     </div>
                     <div className="card-body">
-                        <div className="info-row highlight-row">
+                        <div className="info-row wage-row">
                             <span className="info-label">Gross Wage</span>
-                            <span className="info-value wage-value">
-                                {wageFormatted}{' '}
+                            <div className="info-value wage-value-group">
+                                <span className="wage-amount">{wageFormatted}</span>
                                 <span className="wage-frequency">{wageFrequency}</span>
-                            </span>
+                            </div>
                         </div>
 
                         <div className="info-row">
@@ -216,7 +231,7 @@ function ContractDetailPage() {
                 {/* 2. Schedule & Period */}
                 <div className="info-card">
                     <div className="card-header">
-                        <Calendar size={18} className="card-icon" />
+                        <CalendarDays size={17} className="card-icon" />
                         <h2 className="card-title">Schedule & Period</h2>
                     </div>
                     <div className="card-body">
@@ -249,7 +264,7 @@ function ContractDetailPage() {
                 {/* 3. Department & Organization Assignment */}
                 <div className="info-card">
                     <div className="card-header">
-                        <Layers size={18} className="card-icon" />
+                        <Building2 size={17} className="card-icon" />
                         <h2 className="card-title">Organization Alignment</h2>
                     </div>
                     <div className="card-body">
@@ -279,7 +294,7 @@ function ContractDetailPage() {
                 {/* 4. Notes and Specific Provisions */}
                 <div className="info-card col-span-full">
                     <div className="card-header">
-                        <FileText size={18} className="card-icon" />
+                        <FileSignature size={17} className="card-icon" />
                         <h2 className="card-title">Contract Terms & Notes</h2>
                     </div>
                     <div className="card-body">

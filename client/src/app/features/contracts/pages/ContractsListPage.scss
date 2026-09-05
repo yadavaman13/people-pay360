@@ -71,49 +71,34 @@
         }
     }
 
-    .contracts-filter-bar {
+    .contracts-table-controls-left {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: variables.$spacing-sm;
         flex-wrap: wrap;
-        gap: variables.$spacing-md;
-        background-color: variables.$color-white;
-        padding: variables.$spacing-md;
-        border-radius: variables.$radius-large;
-        border: 1px solid variables.$color-gray-200;
-
-        @include variables.mobile {
-            flex-direction: column;
-            align-items: stretch;
-        }
 
         .search-filter-col {
-            flex: 1;
-            min-width: 280px;
+            min-width: 260px;
+            max-width: 320px;
+
+            @include variables.mobile {
+                max-width: 100%;
+                width: 100%;
+            }
 
             .contract-search-bar {
                 width: 100%;
             }
         }
 
-        .dropdown-filter-col {
-            display: flex;
+        .clear-filters-btn {
+            display: inline-flex;
             align-items: center;
-            gap: variables.$spacing-sm;
+            gap: variables.$spacing-xs;
+            color: variables.$color-gray-600;
 
-            .status-dropdown {
-                min-width: 170px;
-            }
-
-            .clear-filters-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: variables.$spacing-xs;
-                color: variables.$color-gray-600;
-
-                &:hover {
-                    color: variables.$color-danger;
-                }
+            &:hover {
+                color: variables.$color-danger;
             }
         }
     }
@@ -125,6 +110,35 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
+
+        .advanced-table-component {
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+
+            .table-tabs-container {
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    width: 0;
+                    height: 0;
+                }
+            }
+
+            .table-tabs-list {
+                overflow-y: hidden;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    width: 0;
+                    height: 0;
+                }
+            }
+        }
 
         .contracts-loading-state {
             padding: variables.$spacing-xxl;
@@ -140,16 +154,13 @@
         .contracts-pagination-bar {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             padding: variables.$spacing-md variables.$spacing-lg;
             border-top: 1px solid variables.$color-gray-200;
-            flex-wrap: wrap;
-            gap: variables.$spacing-md;
 
-            .pagination-count-text {
-                font-family: variables.$font-sans;
-                font-size: variables.$font-size-sm;
-                color: variables.$color-gray-600;
+            &.is-loading {
+                opacity: 0.6;
+                pointer-events: none;
             }
         }
     }

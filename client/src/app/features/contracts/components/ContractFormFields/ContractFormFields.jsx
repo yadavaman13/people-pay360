@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import InputField from '@/components/Shared/Form/InputField/InputField';
 import Dropdown from '@/components/Shared/Form/Dropdown/Dropdown';
 import DatePicker from '@/components/Shared/Form/DatePicker/DatePicker';
@@ -22,46 +21,22 @@ function ContractFormFields({
     errors = {},
     salaryStructures = [],
     workingSchedules = [],
-    employees = [],
     mode = 'create',
     disabled = false,
 }) {
     const isEdit = mode === 'edit';
 
-    const employeeOptions = useMemo(() => {
-        return (employees || []).map((emp) => {
-            const fullName = `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || 'Unnamed';
-            const code = emp.employeeCode ? ` (${emp.employeeCode})` : '';
-            return {
-                value: emp.id,
-                label: `${fullName}${code}`,
-                description: emp.email || '',
-            };
-        });
-    }, [employees]);
+    const structureOptions = (salaryStructures || []).map((s) => ({
+        value: s.id,
+        label: s.name,
+        description: s.code ? `Code: ${s.code}` : undefined,
+    }));
 
-    const structureOptions = useMemo(() => {
-        return (salaryStructures || []).map((s) => ({
-            value: s.id,
-            label: s.name,
-            description: s.code ? `Code: ${s.code}` : undefined,
-        }));
-    }, [salaryStructures]);
-
-    const scheduleOptions = useMemo(() => {
-        return (workingSchedules || []).map((w) => ({
-            value: w.id,
-            label: w.name,
-            description: w.totalWeeklyHours ? `${w.totalWeeklyHours} hrs/week` : undefined,
-        }));
-    }, [workingSchedules]);
-
-    // Resolve employee name for edit mode display
-    const selectedEmployeeLabel = useMemo(() => {
-        if (!form.employeeId) return 'No employee assigned';
-        const found = employeeOptions.find((e) => e.value === form.employeeId);
-        return found ? found.label : form.employeeId;
-    }, [form.employeeId, employeeOptions]);
+    const scheduleOptions = (workingSchedules || []).map((w) => ({
+        value: w.id,
+        label: w.name,
+        description: w.totalWeeklyHours ? `${w.totalWeeklyHours} hrs/week` : undefined,
+    }));
 
     return (
         <div className="contract-form-fields">
@@ -73,26 +48,25 @@ function ContractFormFields({
             )}
 
             <div className="form-grid">
-                {/* 1. Employee Selection */}
+                {/* 1. Employee */}
                 <div className="form-grid-item col-span-2">
                     {isEdit ? (
                         <div className="locked-field-container">
-                            <label className="locked-field-label">Employee</label>
+                            <label className="locked-field-label">Employee ID</label>
                             <div className="locked-field-value">
-                                <span>{selectedEmployeeLabel}</span>
+                                <span>{form.employeeId || 'No employee assigned'}</span>
                                 <span className="locked-tag">Cannot be changed in edit mode</span>
                             </div>
                         </div>
                     ) : (
-                        <Dropdown
-                            label="Employee *"
-                            placeholder="Search and select an employee..."
-                            options={employeeOptions}
+                        <InputField
+                            id="employeeId"
+                            name="employeeId"
+                            label="Employee ID *"
+                            placeholder="Enter employee ID..."
                             value={form.employeeId}
-                            onChange={(val) => onChange('employeeId', val)}
+                            onChange={(e) => onChange('employeeId', e.target.value)}
                             error={errors.employeeId}
-                            searchable={true}
-                            clearable={true}
                             disabled={disabled}
                         />
                     )}

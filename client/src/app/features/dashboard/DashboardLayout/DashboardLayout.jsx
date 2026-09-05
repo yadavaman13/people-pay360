@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import Sidebar from '@/components/Shared/Navigation/Sidebar/Sidebar';
 import MainContent from './MainContent/MainContent';
@@ -7,7 +7,8 @@ import Dialog from '@/components/Shared/Feedback/Dialog';
 import { Drawer, NotificationFeed } from '@/components/Shared/Feedback/Drawer';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
-import { Home as HomeIcon, Users as UsersIcon } from 'lucide-react';
+import { Home as HomeIcon, Users as UsersIcon, FileText as FileTextIcon } from 'lucide-react';
+import { loadFeatureRoutes } from '@/app/routes.loader';
 import './DashboardLayout.scss';
 
 function DashboardLayout({ onLogout }) {
@@ -36,22 +37,39 @@ function DashboardLayout({ onLogout }) {
 
     const roleSegment = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
 
-    const sidebarNavItems = [
-        {
-            label: 'Home',
-            icon: <HomeIcon />,
-        },
-        ...(roleSegment === 'admin'
-            ? [
-                  {
-                      label: 'Users',
-                      icon: <UsersIcon />,
-                      path: `/dashboard/admin/users`,
-                      roles: ['ADMIN'],
-                  },
-              ]
-            : []),
-    ];
+    const { featureNavItems } = useMemo(() => loadFeatureRoutes(), []);
+
+    const sidebarNavItems = useMemo(() => {
+        const items = [
+            {
+                label: 'Home',
+                icon: <HomeIcon size={18} />,
+                path: `/dashboard/${roleSegment}/home`,
+            },
+        ];
+
+        (featureNavItems || []).forEach((item) => {
+            if (!item || !item.label) return;
+            // Skip Home (handled as primary) and Settings (handled in footer profile card)
+            if (item.label === 'Home' || item.label === 'Settings') return;
+
+            // Avoid duplicates
+            if (items.some((i) => i.label === item.label)) return;
+
+            let itemIcon = item.icon;
+            if (!itemIcon) {
+                if (item.label === 'Users') itemIcon = <UsersIcon size={18} />;
+                else if (item.label === 'Contracts') itemIcon = <FileTextIcon size={18} />;
+            }
+
+            items.push({
+                ...item,
+                icon: itemIcon,
+            });
+        });
+
+        return items;
+    }, [featureNavItems, roleSegment]);
 
     const handleToggleSidebar = () => {
         setIsSidebarCollapsed((prev) => {

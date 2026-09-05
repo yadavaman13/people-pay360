@@ -20,7 +20,6 @@ function ContractFormPage({ mode = 'create' }) {
         loadingDependencies,
         salaryStructures,
         workingSchedules,
-        employees,
         handleFieldChange,
         handleSubmit,
     } = useContractForm({ mode, contractId });
@@ -85,7 +84,6 @@ function ContractFormPage({ mode = 'create' }) {
                             errors={errors}
                             salaryStructures={salaryStructures}
                             workingSchedules={workingSchedules}
-                            employees={employees}
                             mode={mode}
                             disabled={isSubmitting}
                         />

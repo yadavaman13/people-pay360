@@ -1,31 +1,53 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, FileText, RotateCcw } from 'lucide-react';
+import { Plus, RotateCcw, ExternalLink, ChevronRight } from 'lucide-react';
 import { useContracts } from '../hooks/useContracts';
 import { useAuth } from '@/app/features/auth/hooks/useAuth';
-import ContractTable from '../components/ContractTable/ContractTable';
-import SearchBar from '@/components/Shared/Form/SearchBar/SearchBar';
-import Dropdown from '@/components/Shared/Form/Dropdown/Dropdown';
-import Button from '@/components/Shared/Buttons/Button/Button';
-import EmptyState from '@/components/Shared/DataDisplay/EmptyState/EmptyState';
+import AdvancedTable from '@/components/Shared/DataDisplay/AdvancedTable/AdvancedTable';
 import Pagination from '@/components/Shared/Navigation/Pagination/Pagination';
-import Spinner from '@/components/Shared/Feedback/Spinner/Spinner';
+import ContractStatusBadge from '../components/ContractStatusBadge/ContractStatusBadge';
+import ExpiryWarningBadge from '../components/ExpiryWarningBadge/ExpiryWarningBadge';
+import ContractSearchBar from '../components/ContractSearchBar';
+import Button from '@/components/Shared/Buttons/Button/Button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/Shared/Feedback/Alert/Alert';
+import { DEFAULT_AVATAR_URL } from '@/utils/avatar';
 import './ContractsListPage.scss';
+import '../components/ContractTable/ContractTable.scss';
 
-const STATUS_FILTER_OPTIONS = [
-    { value: '', label: 'All Statuses' },
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'ACTIVE', label: 'Active' },
-    { value: 'EXPIRED', label: 'Expired' },
-    { value: 'CANCELLED', label: 'Cancelled' },
-];
+// ── Formatters ──────────────────────────────────────────────────────────────
+function formatDisplayDate(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return String(dateStr);
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatCurrency(amount) {
+    if (amount === undefined || amount === null || amount === '') return '—';
+    const num = Number(amount);
+    if (isNaN(num)) return String(amount);
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(num);
+}
+
+function formatCurrencyParts(amount) {
+    if (amount === undefined || amount === null || amount === '') return { formatted: '—' };
+    const num = Number(amount);
+    if (isNaN(num)) return { formatted: String(amount) };
+    const formatted = formatCurrency(amount);
+    return { formatted };
+}
 
 function ContractsListPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const {
         contracts,
+        counts,
         pagination,
         filters,
         loading,
@@ -38,43 +60,218 @@ function ContractsListPage() {
     } = useContracts();
 
     const [searchValue, setSearchValue] = useState(filters.search || '');
+    const searchDebounceRef = useRef(null);
 
     const userRole = (user?.role || '').toUpperCase();
     const canCreate = ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER'].includes(userRole);
 
-    const handleSearchChange = (e) => {
-        const val = e.target.value;
-        setSearchValue(val);
-        setSearch(val);
-    };
+    const handleSearchChange = useCallback(
+        (e) => {
+            const val = e.target.value;
+            setSearchValue(val);
+            if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+            searchDebounceRef.current = setTimeout(() => setSearch(val), 350);
+        },
+        [setSearch],
+    );
 
-    const handleSearchClear = () => {
+    const handleSearchClear = useCallback(() => {
+        if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
         setSearchValue('');
         setSearch('');
-    };
-
-    const handleStatusChange = (val) => {
-        setFilter('status', val);
-    };
+    }, [setSearch]);
 
     const handleResetAll = () => {
         setSearchValue('');
         resetFilters();
     };
 
-    // Calculate pagination range display (e.g., Showing 1-20 of 47)
-    const startIndex = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
-    const endIndex = Math.min(pagination.page * pagination.limit, pagination.total);
-
     const hasActiveFilters = Boolean(searchValue || filters.status || filters.employeeId);
+
+    const contractTabs = useMemo(() => {
+        const c = counts || {};
+        const allCount = c.all || (!filters.status ? pagination.total : 0) || 0;
+        return [
+            { id: 'all', label: 'All Contracts', count: allCount },
+            { id: 'ACTIVE', label: 'Active', count: c.ACTIVE ?? 0 },
+            { id: 'DRAFT', label: 'Draft', count: c.DRAFT ?? 0 },
+            { id: 'EXPIRED', label: 'Expired', count: c.EXPIRED ?? 0 },
+            { id: 'CANCELLED', label: 'Cancelled', count: c.CANCELLED ?? 0 },
+        ];
+    }, [counts, filters.status, pagination.total]);
+
+    // ── Transform raw contracts for the table ────────────────────────────────
+    const tableData = useMemo(
+        () =>
+            (contracts || []).map((c) => {
+                const employeeName = c.employee
+                    ? `${c.employee.firstName || ''} ${c.employee.lastName || ''}`.trim() ||
+                      'Unknown'
+                    : 'Unknown';
+                const employeeCode = c.employee?.employeeCode || '';
+                const contractName =
+                    c.contractName ||
+                    c.notes?.split('\n')[0] ||
+                    (c.salaryStructure?.name
+                        ? `${c.salaryStructure.name} Contract`
+                        : 'Employment Contract');
+                const startFormatted = formatDisplayDate(c.startDate) || '—';
+                const endFormatted = formatDisplayDate(c.endDate) || 'Open-Ended';
+                const isHourly = (c.wageType || 'MONTHLY').toLowerCase() === 'hourly';
+                const wageNumber = Number(c.wage) || 0;
+                const wageFormatted = formatCurrencyParts(c.wage).formatted;
+                const wageUnit = isHourly ? '/ hr' : '/ mo';
+                const structureName = c.salaryStructure?.name || '—';
+
+                return {
+                    ...c,
+                    employeeName,
+                    employeeCode,
+                    contractName,
+                    startDateFormatted: startFormatted,
+                    endDateFormatted: endFormatted,
+                    isOpenEnded: !c.endDate,
+                    wageNumber,
+                    wageFormatted,
+                    wageUnit,
+                    structureName,
+                };
+            }),
+        [contracts],
+    );
+
+    // ── Column definitions for AdvancedTable ─────────────────────────────────
+    const columns = useMemo(
+        () => [
+            {
+                key: 'employeeName',
+                label: 'Employee',
+                sortable: true,
+                width: '230px',
+                render: (_val, row) => (
+                    <div
+                        className="contract-employee-cell"
+                        onClick={() => navigate(`/dashboard/user/contracts/${row.id}`)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) =>
+                            e.key === 'Enter' && navigate(`/dashboard/user/contracts/${row.id}`)
+                        }
+                    >
+                        <img
+                            src={row.employee?.profileImage || DEFAULT_AVATAR_URL}
+                            alt={row.employeeName || 'Employee'}
+                            className="employee-avatar"
+                            onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = DEFAULT_AVATAR_URL;
+                            }}
+                        />
+                        <div className="employee-info">
+                            <span className="employee-full-name">{row.employeeName}</span>
+                            {row.employeeCode && (
+                                <span className="employee-code">{row.employeeCode}</span>
+                            )}
+                        </div>
+                    </div>
+                ),
+            },
+            {
+                key: 'contractName',
+                label: 'Contract Name',
+                sortable: true,
+                width: '280px',
+                render: (val, row) => (
+                    <button
+                        type="button"
+                        className="contract-name-btn"
+                        onClick={() => navigate(`/dashboard/user/contracts/${row.id}`)}
+                        title="View contract details"
+                    >
+                        <span className="contract-title-text">{val}</span>
+                        <ExternalLink size={13} className="name-link-icon" />
+                    </button>
+                ),
+            },
+            {
+                key: 'startDate',
+                label: 'Period',
+                sortable: true,
+                sortValue: (_val, row) => (row.startDate ? new Date(row.startDate).getTime() : 0),
+                width: '220px',
+                render: (_val, row) => (
+                    <div className="contract-period-cell">
+                        <div className="period-dates">
+                            <span className="date-start">{row.startDateFormatted}</span>
+                            <span className="date-arrow">→</span>
+                            <span className={`date-end ${row.isOpenEnded ? 'is-open' : ''}`}>
+                                {row.endDateFormatted}
+                            </span>
+                        </div>
+                        {row.endDate && <ExpiryWarningBadge endDate={row.endDate} />}
+                    </div>
+                ),
+            },
+            {
+                key: 'wage',
+                label: 'Wage',
+                sortable: true,
+                sortValue: (_val, row) => row.wageNumber,
+                width: '180px',
+                render: (_val, row) => (
+                    <div className="contract-wage-cell">
+                        <span className="wage-amount">{row.wageFormatted}</span>
+                        <span className="wage-unit">{row.wageUnit}</span>
+                    </div>
+                ),
+            },
+            {
+                key: 'structureName',
+                label: 'Salary Structure',
+                sortable: true,
+                width: '240px',
+                render: (val) => (
+                    <div className="contract-structure-cell" title={val}>
+                        <span className="structure-text">{val}</span>
+                    </div>
+                ),
+            },
+            {
+                key: 'status',
+                label: 'Status',
+                sortable: true,
+                width: '120px',
+                render: (val) => <ContractStatusBadge status={val} size="sm" />,
+            },
+            {
+                key: 'actions',
+                label: '',
+                sortable: false,
+                width: '56px',
+                render: (_val, row) => (
+                    <div className="contract-row-actions">
+                        <button
+                            type="button"
+                            className="view-details-arrow-btn"
+                            onClick={() => navigate(`/dashboard/user/contracts/${row.id}`)}
+                            aria-label={`View details for ${row.contractName}`}
+                            title="View details"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                ),
+            },
+        ],
+        [navigate],
+    );
 
     return (
         <div className="contracts-list-page">
-            {/* Header Section */}
+            {/* Header */}
             <header className="contracts-page-header">
                 <div className="header-info">
                     <div className="title-row">
-                        <FileText className="header-icon" size={26} />
                         <h1 className="header-title">Employment Contracts</h1>
                     </div>
                     <p className="header-subtitle">
@@ -98,7 +295,7 @@ function ContractsListPage() {
                 )}
             </header>
 
-            {/* Error Notification */}
+            {/* Error */}
             {error && (
                 <div className="error-alert-wrapper">
                     <Alert variant="danger">
@@ -111,92 +308,60 @@ function ContractsListPage() {
                 </div>
             )}
 
-            {/* Filters Bar */}
-            <div className="contracts-filter-bar">
-                <div className="search-filter-col">
-                    <SearchBar
-                        value={searchValue}
-                        onChange={handleSearchChange}
-                        onClear={handleSearchClear}
-                        placeholder="Search by employee name or code..."
-                        className="contract-search-bar"
-                    />
-                </div>
-
-                <div className="dropdown-filter-col">
-                    <Dropdown
-                        options={STATUS_FILTER_OPTIONS}
-                        value={filters.status || ''}
-                        onChange={handleStatusChange}
-                        placeholder="Filter by Status"
-                        className="status-dropdown"
-                    />
-
-                    {hasActiveFilters && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleResetAll}
-                            className="clear-filters-btn"
-                        >
-                            <RotateCcw size={14} />
-                            <span>Clear</span>
-                        </Button>
-                    )}
-                </div>
-            </div>
-
-            {/* Main Content / Table Area */}
-            <div className="contracts-table-card">
-                {loading && contracts.length === 0 ? (
-                    <div className="contracts-loading-state">
-                        <Spinner label="Loading employment contracts..." />
-                    </div>
-                ) : contracts.length === 0 ? (
-                    <div className="contracts-empty-state">
-                        <EmptyState
-                            icon={FileText}
-                            title="No contracts found"
-                            description={
-                                hasActiveFilters
-                                    ? 'No contracts match your current search and filter criteria.'
-                                    : 'There are currently no contracts in the system.'
-                            }
-                            actionLabel={
-                                canCreate && !hasActiveFilters ? '+ Create Contract' : undefined
-                            }
-                            onActionClick={
-                                canCreate && !hasActiveFilters
-                                    ? () => navigate('/dashboard/user/contracts/new')
-                                    : undefined
-                            }
-                        />
-                    </div>
-                ) : (
-                    <>
-                        <ContractTable
-                            contracts={contracts}
-                            loading={loading}
-                            showEmployeeColumn={true}
-                            onRowClick={(row) => navigate(`/dashboard/user/contracts/${row.id}`)}
-                        />
-
-                        {/* Pagination Footer */}
-                        <div className="contracts-pagination-bar">
-                            <span className="pagination-count-text">
-                                Showing {startIndex}–{endIndex} of {pagination.total}{' '}
-                                {pagination.total === 1 ? 'contract' : 'contracts'}
-                            </span>
-
-                            {pagination.totalPages > 1 && (
-                                <Pagination
-                                    currentPage={pagination.page}
-                                    totalPages={pagination.totalPages}
-                                    onPageChange={setPage}
+            {/* AdvancedTable — shared component used directly */}
+            <div className="contracts-table-card contract-table-container">
+                <AdvancedTable
+                    columns={columns}
+                    data={tableData}
+                    loading={loading}
+                    skeletonRows={6}
+                    serverSide={true}
+                    totalCount={pagination.total}
+                    searchable={false}
+                    showColumnSorting={true}
+                    showSerialNumber={false}
+                    showPagination={false}
+                    showResultsCount={true}
+                    initialRowsPerPage={pagination.limit}
+                    tabs={contractTabs}
+                    showTabs={true}
+                    activeTab={filters.status || 'all'}
+                    onTabChange={(tabId) => setFilter('status', tabId === 'all' ? '' : tabId)}
+                    controlsLeft={
+                        <div className="contracts-table-controls-left">
+                            <div className="search-filter-col">
+                                <ContractSearchBar
+                                    value={searchValue}
+                                    onChange={handleSearchChange}
+                                    onClear={handleSearchClear}
                                 />
+                            </div>
+
+                            {hasActiveFilters && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleResetAll}
+                                    className="clear-filters-btn"
+                                >
+                                    <RotateCcw size={14} />
+                                    <span>Clear</span>
+                                </Button>
                             )}
                         </div>
-                    </>
+                    }
+                />
+
+                {/* External pagination for server-side page control */}
+                {pagination.totalPages > 1 && (
+                    <div className={`contracts-pagination-bar ${loading ? 'is-loading' : ''}`}>
+                        <Pagination
+                            currentPage={pagination.page}
+                            totalPages={pagination.totalPages}
+                            onPageChange={setPage}
+                            disabled={loading}
+                        />
+                    </div>
                 )}
             </div>
         </div>

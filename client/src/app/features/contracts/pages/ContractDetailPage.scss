@@ -27,12 +27,15 @@
             font-size: variables.$font-size-sm;
             font-weight: 500;
             cursor: pointer;
-            padding: variables.$spacing-xs 0;
+            padding: variables.$spacing-xs variables.$spacing-sm;
+            border-radius: variables.$radius-small;
+            background-color: color-mix(in srgb, variables.$color-gray-100 60%, transparent);
 
             @include variables.transition-ease;
 
             &:hover {
                 color: variables.$color-blue-accent;
+                background-color: color-mix(in srgb, variables.$color-blue-accent 8%, transparent);
             }
         }
     }
@@ -46,16 +49,20 @@
         }
     }
 
+    // ─── Header Banner Card ──────────────────────────────────────────────────
     .contract-header-card {
-        background-color: variables.$color-white;
+        background-color: var(--color-bg-card, variables.$color-white);
         border-radius: variables.$radius-large;
-        border: 1px solid variables.$color-gray-200;
+        border: 1px solid var(--color-border-subtle, variables.$color-gray-200);
+        box-shadow: variables.$shadow-sm;
         padding: variables.$spacing-xl;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: variables.$spacing-lg;
+
+        @include variables.transition-ease;
 
         @include variables.mobile {
             padding: variables.$spacing-md;
@@ -66,20 +73,43 @@
         .header-meta {
             display: flex;
             flex-direction: column;
-            gap: variables.$spacing-sm;
+            gap: variables.$spacing-xs;
+
+            .category-tag-row {
+                .contract-category-tag {
+                    display: inline-block;
+                    font-family: variables.$font-sans;
+                    font-size: variables.$font-size-xxs;
+                    font-weight: 700;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    color: variables.$color-blue-accent;
+                    background-color: color-mix(
+                        in srgb,
+                        variables.$color-blue-accent 8%,
+                        transparent
+                    );
+                    border: 1px solid
+                        color-mix(in srgb, variables.$color-blue-accent 18%, transparent);
+                    padding: 2px variables.$spacing-xs;
+                    border-radius: variables.$radius-tiny;
+                }
+            }
 
             .title-and-badges {
                 display: flex;
                 align-items: center;
-                gap: variables.$spacing-md;
+                gap: variables.$spacing-sm;
                 flex-wrap: wrap;
 
                 .contract-detail-title {
                     margin: 0;
-                    font-size: variables.$font-size-xxl;
+                    font-size: variables.$font-size-xl;
                     font-weight: 700;
-                    color: variables.$color-gray-900;
+                    color: var(--color-text-primary, variables.$color-gray-900);
                     font-family: variables.$font-sans;
+                    letter-spacing: -0.02em;
+                    line-height: 1.25;
                 }
 
                 .badges-group {
@@ -89,26 +119,60 @@
                 }
             }
 
-            .employee-headline {
-                display: flex;
+            .employee-profile-pill {
+                display: inline-flex;
                 align-items: center;
                 gap: variables.$spacing-xs;
-                font-family: variables.$font-sans;
-                font-size: variables.$font-size-sm;
-                color: variables.$color-gray-700;
+                background-color: color-mix(in srgb, variables.$color-gray-100 80%, transparent);
+                border: 1px solid color-mix(in srgb, variables.$color-gray-200 80%, transparent);
+                border-radius: 9999px;
+                padding: 4px variables.$spacing-sm 4px variables.$spacing-xs;
+                width: fit-content;
+                margin-top: 4px;
 
-                .headline-icon {
+                .employee-avatar-circle {
+                    width: 22px;
+                    height: 22px;
+                    border-radius: 50%;
+                    background-color: color-mix(
+                        in srgb,
+                        variables.$color-blue-accent 15%,
+                        transparent
+                    );
+                    color: variables.$color-blue-accent;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+
+                .employee-assigned-label {
+                    font-size: variables.$font-size-xs;
                     color: variables.$color-gray-500;
+                    font-family: variables.$font-sans;
+                }
+
+                .employee-name {
+                    font-size: variables.$font-size-xs;
+                    font-weight: 600;
+                    color: var(--color-text-primary, variables.$color-gray-900);
+                    font-family: variables.$font-sans;
                 }
 
                 .employee-code-tag {
-                    margin-left: variables.$spacing-xs;
-                    padding: 2px variables.$spacing-xs;
-                    background-color: variables.$color-gray-100;
-                    border: 1px solid variables.$color-gray-300;
-                    border-radius: variables.$radius-tiny;
                     font-size: variables.$font-size-xxs;
-                    color: variables.$color-gray-600;
+                    font-weight: 600;
+                    font-family: variables.$font-sans;
+                    padding: 1px 6px;
+                    border-radius: variables.$radius-tiny;
+                    background-color: color-mix(
+                        in srgb,
+                        variables.$color-blue-accent 10%,
+                        transparent
+                    );
+                    color: variables.$color-blue-accent;
+                    border: 1px solid
+                        color-mix(in srgb, variables.$color-blue-accent 20%, transparent);
                 }
             }
         }
@@ -120,14 +184,29 @@
         }
     }
 
+    // ─── Active Contract Impact Banner ───────────────────────────────────────
     .payroll-impact-notice {
+        .shared-alert.variant-warning {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: variables.$spacing-xs 0;
+        }
+
         .notice-inner {
             display: flex;
             align-items: flex-start;
             gap: variables.$spacing-sm;
 
-            .notice-icon {
+            .notice-icon-box {
+                width: auto;
+                height: auto;
+                background: transparent;
                 color: variables.$color-warning;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 flex-shrink: 0;
                 margin-top: 2px;
             }
@@ -136,10 +215,24 @@
                 display: flex;
                 flex-direction: column;
                 gap: 2px;
+
+                .shared-alert-title {
+                    font-size: variables.$font-size-sm;
+                    font-weight: 600;
+                    color: color-mix(in srgb, variables.$color-warning 85%, black);
+                    letter-spacing: -0.01em;
+                }
+
+                .shared-alert-description {
+                    font-size: variables.$font-size-xs;
+                    color: color-mix(in srgb, variables.$color-warning 75%, black);
+                    line-height: 1.5;
+                }
             }
         }
     }
 
+    // ─── Information Cards Grid ──────────────────────────────────────────────
     .contract-info-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -147,6 +240,7 @@
 
         @include variables.tablet {
             grid-template-columns: repeat(2, 1fr);
+            gap: variables.$spacing-md;
         }
 
         @include variables.mobile {
@@ -155,13 +249,20 @@
         }
 
         .info-card {
-            background-color: variables.$color-white;
+            background-color: var(--color-bg-card, variables.$color-white);
             border-radius: variables.$radius-large;
-            border: 1px solid variables.$color-gray-200;
+            border: 1px solid var(--color-border-subtle, variables.$color-gray-200);
+            box-shadow: variables.$shadow-sm;
             padding: variables.$spacing-lg;
             display: flex;
             flex-direction: column;
-            gap: variables.$spacing-md;
+            gap: variables.$spacing-xs;
+
+            @include variables.transition-ease;
+
+            &:hover {
+                box-shadow: variables.$shadow-md;
+            }
 
             &.col-span-full {
                 grid-column: 1 / -1;
@@ -171,18 +272,21 @@
                 display: flex;
                 align-items: center;
                 gap: variables.$spacing-xs;
-                border-bottom: 1px solid variables.$color-gray-100;
-                padding-bottom: variables.$spacing-xs;
+                border-bottom: 1px solid
+                    color-mix(in srgb, variables.$color-gray-200 60%, transparent);
+                padding-bottom: variables.$spacing-sm;
+                margin-bottom: variables.$spacing-xs;
 
                 .card-icon {
-                    color: variables.$color-blue-accent;
+                    color: variables.$color-gray-400;
+                    flex-shrink: 0;
                 }
 
                 .card-title {
                     margin: 0;
                     font-size: variables.$font-size-md;
                     font-weight: 600;
-                    color: variables.$color-gray-800;
+                    color: var(--color-text-primary, variables.$color-gray-900);
                     font-family: variables.$font-sans;
                 }
             }
@@ -190,43 +294,68 @@
             .card-body {
                 display: flex;
                 flex-direction: column;
-                gap: variables.$spacing-sm;
 
                 .info-row {
                     display: flex;
-                    align-items: center;
+                    align-items: flex-start;
                     justify-content: space-between;
                     font-family: variables.$font-sans;
                     font-size: variables.$font-size-sm;
+                    padding: variables.$spacing-sm 0;
+                    border-bottom: 1px solid
+                        color-mix(in srgb, variables.$color-gray-200 45%, transparent);
+                    gap: variables.$spacing-md;
+
+                    &:last-child {
+                        border-bottom: none;
+                        padding-bottom: 0;
+                    }
+
+                    &:first-child {
+                        padding-top: variables.$spacing-xs;
+                    }
 
                     .info-label {
-                        color: variables.$color-gray-600;
+                        flex: 0 0 130px;
+                        min-width: 130px;
+                        color: variables.$color-gray-500;
+                        font-weight: 400;
+                        line-height: 1.5;
                     }
 
                     .info-value {
-                        color: variables.$color-gray-900;
-                        font-weight: 500;
+                        flex: 1;
+                        text-align: right;
+                        color: var(--color-text-primary, variables.$color-gray-900);
+                        font-weight: 600;
+                        line-height: 1.5;
+                        overflow-wrap: break-word;
 
                         .sub-code {
-                            color: variables.$color-gray-500;
+                            color: variables.$color-gray-400;
                             font-size: variables.$font-size-xs;
+                            font-weight: normal;
                         }
                     }
 
-                    &.highlight-row {
-                        padding: variables.$spacing-xs 0;
-                        border-bottom: 1px dashed variables.$color-gray-200;
-                        margin-bottom: variables.$spacing-xs;
+                    &.wage-row {
+                        .wage-value-group {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-end;
+                            gap: 2px;
 
-                        .wage-value {
-                            font-size: variables.$font-size-lg;
-                            font-weight: 700;
-                            color: variables.$color-gray-900;
+                            .wage-amount {
+                                font-size: variables.$font-size-lg;
+                                font-weight: 700;
+                                color: var(--color-text-primary, variables.$color-gray-900);
+                                line-height: 1.2;
+                            }
 
                             .wage-frequency {
                                 font-size: variables.$font-size-xs;
-                                font-weight: normal;
-                                color: variables.$color-gray-500;
+                                font-weight: 400;
+                                color: variables.$color-gray-400;
                             }
                         }
                     }
@@ -234,6 +363,7 @@
 
                 .contract-notes-text {
                     margin: 0;
+                    padding-top: variables.$spacing-xs;
                     font-family: variables.$font-sans;
                     font-size: variables.$font-size-sm;
                     color: variables.$color-gray-700;
@@ -243,6 +373,7 @@
 
                 .empty-notes-text {
                     margin: 0;
+                    padding-top: variables.$spacing-xs;
                     font-family: variables.$font-sans;
                     font-size: variables.$font-size-sm;
                     color: variables.$color-gray-400;

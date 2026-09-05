@@ -12,11 +12,20 @@
     background-color: variables.$color-white;
     border-top-left-radius: inherit;
     border-top-right-radius: inherit;
-    gap: 16px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
 
     .table-tabs-list {
         display: flex;
-        overflow-x: auto;
+        overflow: auto hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
         flex: 1;
         gap: 8px;
 
@@ -48,7 +57,7 @@
         &::after {
             content: '';
             position: absolute;
-            bottom: -1px;
+            bottom: 0;
             left: 0;
             right: 0;
             height: 2.5px;

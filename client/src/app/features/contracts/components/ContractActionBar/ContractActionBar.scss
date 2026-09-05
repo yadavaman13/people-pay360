@@ -10,6 +10,11 @@
         display: inline-flex;
         align-items: center;
         gap: variables.$spacing-xs;
+        border-radius: variables.$radius-small;
+        font-weight: 500;
+        font-family: variables.$font-sans;
+
+        @include variables.transition-ease;
     }
 
     .activate-btn {
@@ -18,16 +23,31 @@
         color: variables.$color-white;
 
         &:hover:not(:disabled) {
-            background-color: variables.$color-success-border;
+            background-color: color-mix(in srgb, variables.$color-success 85%, black);
+            transform: translateY(-1px);
+            box-shadow: variables.$shadow-sm;
         }
     }
 
     .cancel-btn {
-        color: variables.$color-warning-dark;
-        border-color: variables.$color-warning-border;
+        background-color: color-mix(
+            in srgb,
+            variables.$color-danger 6%,
+            var(--color-bg-card, variables.$color-white)
+        );
+        color: variables.$color-danger;
+        border-color: color-mix(in srgb, variables.$color-danger 28%, transparent);
 
         &:hover:not(:disabled) {
-            background-color: variables.$color-warning-light;
+            background-color: color-mix(
+                in srgb,
+                variables.$color-danger 12%,
+                var(--color-bg-card, variables.$color-white)
+            );
+            border-color: variables.$color-danger;
+            color: variables.$color-danger-dark;
+            transform: translateY(-1px);
+            box-shadow: variables.$shadow-sm;
         }
     }
 

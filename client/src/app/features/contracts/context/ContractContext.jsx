@@ -5,6 +5,13 @@ export const ContractContext = createContext(null);
 const initialState = {
     contracts: [],
     selectedContract: null,
+    counts: {
+        all: 0,
+        ACTIVE: 0,
+        DRAFT: 0,
+        EXPIRED: 0,
+        CANCELLED: 0,
+    },
     pagination: {
         total: 0,
         page: 1,
@@ -18,7 +25,7 @@ const initialState = {
         page: 1,
         limit: 20,
     },
-    loading: false,
+    loading: true,
     error: null,
 };
 
@@ -29,6 +36,7 @@ export const CONTRACT_ACTIONS = {
     SET_SELECTED_CONTRACT: 'SET_SELECTED_CONTRACT',
     SET_FILTERS: 'SET_FILTERS',
     RESET_FILTERS: 'RESET_FILTERS',
+    SET_COUNTS: 'SET_COUNTS',
     UPDATE_CONTRACT_IN_LIST: 'UPDATE_CONTRACT_IN_LIST',
     REMOVE_CONTRACT_FROM_LIST: 'REMOVE_CONTRACT_FROM_LIST',
 };
@@ -86,22 +94,50 @@ function contractReducer(state, action) {
                     limit: 20,
                 },
             };
+        case CONTRACT_ACTIONS.SET_COUNTS:
+            return {
+                ...state,
+                counts: {
+                    ...state.counts,
+                    ...action.payload,
+                },
+            };
         case CONTRACT_ACTIONS.UPDATE_CONTRACT_IN_LIST: {
             const updated = action.payload;
+            const existing = state.contracts.find((c) => c.id === updated.id);
             const nextContracts = state.contracts.map((c) => (c.id === updated.id ? updated : c));
+            const nextCounts = { ...state.counts };
+            if (existing && existing.status !== updated.status) {
+                if (nextCounts[existing.status] !== undefined) {
+                    nextCounts[existing.status] = Math.max(0, nextCounts[existing.status] - 1);
+                }
+                if (nextCounts[updated.status] !== undefined) {
+                    nextCounts[updated.status] = (nextCounts[updated.status] || 0) + 1;
+                }
+            }
             return {
                 ...state,
                 contracts: nextContracts,
+                counts: nextCounts,
                 selectedContract:
                     state.selectedContract?.id === updated.id ? updated : state.selectedContract,
             };
         }
         case CONTRACT_ACTIONS.REMOVE_CONTRACT_FROM_LIST: {
             const idToRemove = action.payload;
+            const existing = state.contracts.find((c) => c.id === idToRemove);
+            const nextCounts = {
+                ...state.counts,
+                all: Math.max(0, state.counts.all - 1),
+            };
+            if (existing && nextCounts[existing.status] !== undefined) {
+                nextCounts[existing.status] = Math.max(0, nextCounts[existing.status] - 1);
+            }
             const nextContracts = state.contracts.filter((c) => c.id !== idToRemove);
             return {
                 ...state,
                 contracts: nextContracts,
+                counts: nextCounts,
                 pagination: {
                     ...state.pagination,
                     total: Math.max(0, state.pagination.total - 1),

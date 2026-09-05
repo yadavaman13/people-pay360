@@ -1,9 +1,9 @@
 import Button from '@/components/Shared/Buttons/Button/Button';
 import './Pagination.scss';
 
-function Pagination({ currentPage, totalPages, onPageChange, className = '' }) {
+function Pagination({ currentPage, totalPages, onPageChange, disabled = false, className = '' }) {
     const handlePageClick = (page) => {
-        if (page !== currentPage && page >= 1 && page <= totalPages) {
+        if (!disabled && page !== currentPage && page >= 1 && page <= totalPages) {
             onPageChange(page);
         }
     };
@@ -42,11 +42,13 @@ function Pagination({ currentPage, totalPages, onPageChange, className = '' }) {
     const pageNumbers = getPageNumbers();
 
     return (
-        <div className={`shared-pagination-container ${className}`}>
+        <div
+            className={`shared-pagination-container ${disabled ? 'is-disabled' : ''} ${className}`}
+        >
             <Button
                 preset="prev"
                 onClick={() => handlePageClick(currentPage - 1)}
-                disabled={currentPage === 1}
+                disabled={disabled || currentPage === 1}
             />
 
             <div className="pagination-pages-list">
@@ -64,6 +66,7 @@ function Pagination({ currentPage, totalPages, onPageChange, className = '' }) {
                             type="button"
                             className={`pagination-number-btn ${currentPage === page ? 'active' : ''}`}
                             onClick={() => handlePageClick(page)}
+                            disabled={disabled}
                             aria-label={`Go to page ${page}`}
                             aria-current={currentPage === page ? 'page' : undefined}
                         >
@@ -76,7 +79,7 @@ function Pagination({ currentPage, totalPages, onPageChange, className = '' }) {
             <Button
                 preset="next"
                 onClick={() => handlePageClick(currentPage + 1)}
-                disabled={currentPage === totalPages}
+                disabled={disabled || currentPage === totalPages}
             />
         </div>
     );

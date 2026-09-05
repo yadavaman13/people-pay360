@@ -15,6 +15,38 @@ export async function listContracts(params = {}) {
 }
 
 /**
+ * Fetch total and per-status contract counts once for filter pills.
+ */
+export async function getContractCounts() {
+    const statuses = ['ACTIVE', 'DRAFT', 'EXPIRED', 'CANCELLED'];
+    try {
+        const [allRes, ...statusResponses] = await Promise.all([
+            listContracts({ limit: 1 }),
+            ...statuses.map((status) => listContracts({ limit: 1, status })),
+        ]);
+
+        const allPayload = allRes.data || allRes;
+        const counts = {
+            all: allPayload?.total ?? 0,
+        };
+        statuses.forEach((status, idx) => {
+            const payload = statusResponses[idx].data || statusResponses[idx];
+            counts[status] = payload?.total ?? 0;
+        });
+
+        return counts;
+    } catch {
+        return {
+            all: 0,
+            ACTIVE: 0,
+            DRAFT: 0,
+            EXPIRED: 0,
+            CANCELLED: 0,
+        };
+    }
+}
+
+/**
  * Get contract details by ID.
  * @param {string} id
  */

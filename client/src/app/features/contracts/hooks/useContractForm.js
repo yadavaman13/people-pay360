@@ -57,10 +57,15 @@ export function useContractForm({ mode = 'create', contractId = null } = {}) {
 
     const [salaryStructures, setSalaryStructures] = useState([]);
     const [workingSchedules, setWorkingSchedules] = useState([]);
-    const [employees, setEmployees] = useState([]);
 
     const { success, error: toastError } = useToast();
     const abortControllerRef = useRef(null);
+    // toastError gets a new reference every render — keep it in a ref
+    // so it never appears in useEffect deps and causes an infinite loop.
+    const toastErrorRef = useRef(toastError);
+    useEffect(() => {
+        toastErrorRef.current = toastError;
+    });
 
     // Fetch dropdown options and contract detail if in edit mode
     useEffect(() => {
@@ -75,23 +80,19 @@ export function useContractForm({ mode = 'create', contractId = null } = {}) {
                 const requests = [
                     contractsService.listSalaryStructures(),
                     contractsService.listWorkingSchedules(),
-                    contractsService.searchEmployees(''),
                 ];
 
                 if (mode === 'edit' && contractId) {
                     requests.push(contractsService.getContractById(contractId));
                 }
 
-                const [structuresRes, schedulesRes, employeesRes, contractRes] =
-                    await Promise.all(requests);
+                const [structuresRes, schedulesRes, contractRes] = await Promise.all(requests);
 
                 const structures = structuresRes.data || structuresRes || [];
                 const schedules = schedulesRes.data || schedulesRes || [];
-                const empList = employeesRes.data || employeesRes || [];
 
                 setSalaryStructures(Array.isArray(structures) ? structures : []);
                 setWorkingSchedules(Array.isArray(schedules) ? schedules : []);
-                setEmployees(Array.isArray(empList) ? empList : []);
 
                 if (mode === 'edit' && contractRes) {
                     const c = contractRes.data || contractRes;
@@ -116,7 +117,7 @@ export function useContractForm({ mode = 'create', contractId = null } = {}) {
                 }
                 const msg =
                     err.response?.data?.message || err.message || 'Failed to load form data';
-                toastError(msg);
+                toastErrorRef.current(msg);
             } finally {
                 setLoadingDependencies(false);
             }
@@ -129,7 +130,7 @@ export function useContractForm({ mode = 'create', contractId = null } = {}) {
                 abortControllerRef.current.abort();
             }
         };
-    }, [mode, contractId, toastError]);
+    }, [mode, contractId]);
 
     const handleFieldChange = useCallback((fieldName, value) => {
         setForm((prev) => ({
@@ -150,8 +151,8 @@ export function useContractForm({ mode = 'create', contractId = null } = {}) {
     const validate = () => {
         const nextErrors = {};
 
-        if (mode === 'create' && !form.employeeId) {
-            nextErrors.employeeId = 'Please select an employee';
+        if (mode === 'create' && !form.employeeId?.trim()) {
+            nextErrors.employeeId = 'Employee ID is required';
         }
 
         if (!form.contractName || form.contractName.trim().length < 3) {
@@ -304,7 +305,6 @@ export function useContractForm({ mode = 'create', contractId = null } = {}) {
         loadingDependencies,
         salaryStructures,
         workingSchedules,
-        employees,
         handleFieldChange,
         handleSubmit,
         validate,

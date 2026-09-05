@@ -17,11 +17,20 @@ export function useContractDetail(contractId) {
     const { success, error: toastError } = useToast();
     const abortControllerRef = useRef(null);
 
+    // Keep dispatch in a ref so fetchContract does NOT need `context` as a dep.
+    // Without this, dispatching SET_SELECTED_CONTRACT mutates context → recreates
+    // fetchContract → triggers useEffect → infinite re-fetch loop on every render.
+    const dispatchRef = useRef(context?.dispatch);
+    useEffect(() => {
+        dispatchRef.current = context?.dispatch;
+    });
+
     const contract =
         context?.selectedContract?.id === contractId ? context.selectedContract : localContract;
 
     const fetchContract = useCallback(async () => {
-        if (!contractId) return;
+        // Guard: skip if no id or if the id is a route keyword like 'new' / 'edit'
+        if (!contractId || contractId === 'new' || contractId === 'edit') return;
 
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
@@ -35,8 +44,8 @@ export function useContractDetail(contractId) {
             const res = await contractsService.getContractById(contractId);
             const contractData = res.data || res;
             setLocalContract(contractData);
-            if (context?.dispatch) {
-                context.dispatch({
+            if (dispatchRef.current) {
+                dispatchRef.current({
                     type: CONTRACT_ACTIONS.SET_SELECTED_CONTRACT,
                     payload: contractData,
                 });
@@ -51,7 +60,16 @@ export function useContractDetail(contractId) {
         } finally {
             setLoading(false);
         }
-    }, [contractId, context]);
+    }, [contractId]); // Only contractId — NOT context, to prevent infinite re-fetch loop
+
+    // Reset local state when contractId changes so no stale data flashes from
+    // a previously viewed contract while the new fetch is in-flight.
+    useEffect(() => {
+        setLocalContract(null);
+        setError(null);
+        // Only enter loading state for real contract IDs
+        setLoading(contractId !== 'new' && contractId !== 'edit' && Boolean(contractId));
+    }, [contractId]);
 
     useEffect(() => {
         fetchContract();
@@ -60,7 +78,7 @@ export function useContractDetail(contractId) {
                 abortControllerRef.current.abort();
             }
         };
-    }, [contractId, fetchContract]);
+    }, [fetchContract]);
 
     const handleActivate = async (id = contractId) => {
         setActionLoading(true);
@@ -68,8 +86,8 @@ export function useContractDetail(contractId) {
             const res = await contractsService.activateContract(id);
             const updated = res.data || res;
             success(res.message || 'Contract activated successfully');
-            if (context?.dispatch) {
-                context.dispatch({
+            if (dispatchRef.current) {
+                dispatchRef.current({
                     type: CONTRACT_ACTIONS.UPDATE_CONTRACT_IN_LIST,
                     payload: updated,
                 });
@@ -94,8 +112,8 @@ export function useContractDetail(contractId) {
             const res = await contractsService.cancelContract(id);
             const updated = res.data || res;
             success(res.message || 'Contract cancelled successfully');
-            if (context?.dispatch) {
-                context.dispatch({
+            if (dispatchRef.current) {
+                dispatchRef.current({
                     type: CONTRACT_ACTIONS.UPDATE_CONTRACT_IN_LIST,
                     payload: updated,
                 });
@@ -116,8 +134,8 @@ export function useContractDetail(contractId) {
         try {
             const res = await contractsService.deleteContract(id);
             success(res.message || 'Contract deleted successfully');
-            if (context?.dispatch) {
-                context.dispatch({
+            if (dispatchRef.current) {
+                dispatchRef.current({
                     type: CONTRACT_ACTIONS.REMOVE_CONTRACT_FROM_LIST,
                     payload: id,
                 });

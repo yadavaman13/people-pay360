@@ -25,12 +25,14 @@
     }
 
     &.size-sm {
-        padding: 2px variables.$spacing-xs;
-        font-size: variables.$font-size-xxs;
+        padding: 3px 8px;
+        font-size: variables.$font-size-xs;
+        font-weight: 500;
+        border-radius: variables.$radius-large;
 
         .status-dot {
-            width: 4px;
-            height: 4px;
+            width: 5px;
+            height: 5px;
         }
     }
 
