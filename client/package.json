@@ -7,7 +7,12 @@
         "dev": "vite",
         "build": "vite build",
         "lint": "eslint .",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "lint:fix": "eslint . --fix",
+        "stylelint": "stylelint \"src/**/*.scss\"",
+        "stylelint:fix": "stylelint \"src/**/*.scss\" --fix",
+        "format:check": "prettier . --check",
+        "format:write": "prettier . --write"
     },
     "dependencies": {
         "axios": "^1.19.0",
@@ -25,10 +30,15 @@
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^6.0.3",
         "eslint": "^10.6.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-react-hooks": "^7.1.1",
+        "eslint-plugin-react-refresh": "^0.5.3",
         "globals": "^17.7.0",
         "prettier": "^3.9.6",
         "sass": "^1.83.0",
         "sass-embedded": "^1.100.0",
+        "stylelint-config-standard-scss": "^17.0.0",
+        "stylelint-declaration-strict-value": "^1.11.1",
         "vite": "^8.1.1"
     }
 }
