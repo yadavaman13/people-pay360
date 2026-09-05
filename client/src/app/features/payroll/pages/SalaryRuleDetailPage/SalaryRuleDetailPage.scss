@@ -1,0 +1,139 @@
+@use '@/styles/variables' as variables;
+
+.salary-rule-detail-page {
+    display: flex;
+    flex-direction: column;
+    padding: variables.$spacing-md variables.$spacing-xl;
+    gap: variables.$spacing-lg;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: variables.$font-sans;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md;
+        gap: variables.$spacing-md;
+    }
+
+    &.is-loading {
+        min-height: 60vh;
+    }
+
+    .detail-loading-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: variables.$spacing-xxl 0;
+        flex: 1;
+    }
+
+    .page-breadcrumbs {
+        margin-bottom: variables.$spacing-xs;
+    }
+
+    .salary-rule-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: variables.$spacing-md;
+        flex-wrap: wrap;
+
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-xs;
+
+            .title-row {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-sm;
+
+                .back-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: none;
+                    border: 1px solid variables.$color-gray-300;
+                    border-radius: variables.$radius-small;
+                    padding: 4px;
+                    color: variables.$color-gray-700;
+                    cursor: pointer;
+
+                    @include variables.transition-ease;
+
+                    &:hover {
+                        background-color: variables.$color-gray-100;
+                        color: variables.$color-gray-900;
+                    }
+                }
+
+                .header-title {
+                    font-size: variables.$font-size-xxl;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    margin: 0;
+                    letter-spacing: -0.02em;
+                }
+            }
+
+            .header-subtitle {
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-500;
+                margin: 0;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+
+            .edit-rule-btn,
+            .save-rule-btn {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+                font-weight: 600;
+            }
+
+            .delete-rule-btn,
+            .cancel-rule-btn {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+            }
+        }
+    }
+
+    .page-error-alert {
+        margin-bottom: variables.$spacing-xs;
+    }
+
+    .dialog-body-content {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-md;
+        padding: variables.$spacing-sm 0;
+
+        p {
+            margin: 0;
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-800;
+            line-height: 1.5;
+        }
+
+        .dialog-subtext {
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-500;
+        }
+
+        .dialog-actions-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: variables.$spacing-sm;
+            margin-top: variables.$spacing-sm;
+        }
+    }
+}
