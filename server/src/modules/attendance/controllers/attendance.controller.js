@@ -37,6 +37,21 @@ export async function getAttendanceById(req, res, next) {
     }
 }
 
+export async function getTodayStatus(req, res, next) {
+    try {
+        const result = await attendanceService.getTodayStatus(req.user, req.query.employeeId);
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Today attendance status fetched successfully',
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function checkIn(req, res, next) {
     try {
         const record = await attendanceService.checkIn(req.user, req.body);

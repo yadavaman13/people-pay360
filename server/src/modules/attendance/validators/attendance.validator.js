@@ -28,6 +28,12 @@ export const checkOutValidator = [
     validateRequest,
 ];
 
+export const checkOutSelfValidator = [
+    body('employeeId').optional().isUUID().withMessage('employeeId must be a valid UUID'),
+    body('notes').optional({ nullable: true }).isString().withMessage('notes must be a string'),
+    validateRequest,
+];
+
 export const manualCorrectionValidator = [
     param('id').isUUID().withMessage('Valid attendance record UUID is required'),
     body('correctionReason')
