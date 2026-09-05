@@ -9,8 +9,8 @@ import {
     index,
     uniqueIndex,
     check,
-    sql,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { ruleCategoryEnum, computationTypeEnum } from './enums.schema.js';
 
 /**

@@ -9,8 +9,8 @@ import {
     index,
     uniqueIndex,
     check,
-    sql,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 /**
  * working_schedules
@@ -101,17 +101,11 @@ export const scheduleLines = pgTable(
         scheduleIdIdx: index('schedule_lines_schedule_id_idx').on(table.scheduleId),
 
         // DB-level CHECK constraints (enforce business rules at storage layer).
-        dayOfWeekCheck: check(
-            'chk_day_of_week_range',
-            sql`${table.dayOfWeek} BETWEEN 0 AND 6`,
-        ),
+        dayOfWeekCheck: check('chk_day_of_week_range', sql`${table.dayOfWeek} BETWEEN 0 AND 6`),
         timeOrderCheck: check(
             'chk_schedule_time_order',
             sql`${table.startTime} < ${table.endTime}`,
         ),
-        breakMinutesCheck: check(
-            'chk_break_minutes_non_negative',
-            sql`${table.breakMinutes} >= 0`,
-        ),
+        breakMinutesCheck: check('chk_break_minutes_non_negative', sql`${table.breakMinutes} >= 0`),
     }),
 );

@@ -8,8 +8,8 @@ import {
     numeric,
     index,
     check,
-    sql,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { employees } from './employees.schema.js';
 import { departments } from './departments.schema.js';
 import { jobPositions } from './job_positions.schema.js';
@@ -126,18 +126,11 @@ export const contracts = pgTable(
         // This is a partial exclusion (WHERE status = 'ACTIVE') so cancelled/expired
         // contracts do not block new ones.
         //
-        // ⚠️  drizzle-kit may not emit EXCLUDE constraints in generated SQL.
-        //     If missing from ./drizzle/*.sql, run this manually ONCE:
-        //
+        // Run manually via migration SQL or psql:
         //   ALTER TABLE contracts ADD CONSTRAINT contracts_no_overlap_active
         //   EXCLUDE USING gist (
         //     employee_id WITH =,
         //     daterange(start_date, COALESCE(end_date, '9999-12-31'::date), '[)') WITH &&
         //   ) WHERE (status = 'ACTIVE');
-        //
-        noOverlapActiveContracts: sql`EXCLUDE USING gist (
-            employee_id WITH =,
-            daterange(start_date, COALESCE(end_date, '9999-12-31'::date), '[)') WITH &&
-        ) WHERE (status = 'ACTIVE')`,
     }),
 );

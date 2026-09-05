@@ -4,6 +4,7 @@ export * from './messages.schema.js';
 export * from './files.schema.js';
 export * from './chunks.schema.js';
 export * from './rag_files.schema.js';
+export * from './payments.schema.js';
 
 // PeoplePay360 HR & Payroll Core Schema
 export * from './enums.schema.js';

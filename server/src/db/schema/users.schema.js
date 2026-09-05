@@ -35,6 +35,7 @@ export const users = pgTable(
         lastName: text('last_name').notNull(),
         email: text('email').unique().notNull(),
         password: text('password'),
+        googleId: text('google_id').unique(),
         profileImage: text('profile_image').default(
             'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
         ),
