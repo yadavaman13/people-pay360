@@ -1,14 +1,4 @@
-import {
-    pgTable,
-    uuid,
-    text,
-    boolean,
-    timestamp,
-    date,
-    numeric,
-    index,
-    check,
-} from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, date, numeric, index, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { employees } from './employees.schema.js';
 import { departments } from './departments.schema.js';

@@ -1,11 +1,4 @@
-import {
-    pgTable,
-    uuid,
-    text,
-    boolean,
-    timestamp,
-    index,
-} from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, boolean, timestamp, index } from 'drizzle-orm/pg-core';
 
 /**
  * departments
