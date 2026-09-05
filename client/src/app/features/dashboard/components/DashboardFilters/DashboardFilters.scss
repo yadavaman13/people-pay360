@@ -1,0 +1,257 @@
+@use '@/styles/variables' as v;
+
+.dashboard-filters {
+    display: flex;
+    flex-direction: column;
+    gap: v.$spacing-sm;
+    padding: v.$spacing-md v.$spacing-lg;
+    background-color: var(--color-white);
+    border-radius: v.$radius-large;
+    box-shadow: v.$shadow-sm;
+    border: 1px solid var(--color-gray-200);
+}
+
+// ─── Filter Rows ─────────────────────────────────────────────────────────────
+.dashboard-filters-row {
+    display: flex;
+    align-items: center;
+    gap: v.$spacing-sm;
+    flex-wrap: wrap;
+
+    &--secondary {
+        padding-top: v.$spacing-xs;
+        border-top: 1px solid var(--color-gray-100);
+    }
+}
+
+// ─── Date Preset Pills ────────────────────────────────────────────────────────
+.dashboard-filters-presets {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+}
+
+.filter-preset-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--color-gray-300);
+    background: var(--color-gray-50);
+    border-radius: v.$radius-small;
+    font-size: v.$font-size-xs;
+    font-family: v.$font-sans;
+    font-weight: 500;
+    color: var(--color-gray-600);
+    cursor: pointer;
+
+    @include v.transition-ease;
+
+    &.is-active {
+        background-color: var(--color-blue-accent);
+        border-color: var(--color-blue-accent);
+        color: var(--color-white);
+        font-weight: 600;
+    }
+
+    &:hover:not(.is-active) {
+        background-color: var(--color-gray-100);
+        color: var(--color-gray-900);
+        border-color: var(--color-gray-400);
+    }
+}
+
+// ─── Right Controls ───────────────────────────────────────────────────────────
+.dashboard-filters-controls {
+    display: flex;
+    align-items: center;
+    gap: v.$spacing-xs;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.filter-count-badge {
+    flex-shrink: 0;
+}
+
+.filter-reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border: 1px solid var(--color-gray-300);
+    background: transparent;
+    border-radius: v.$radius-small;
+    font-size: v.$font-size-xs;
+    font-family: v.$font-sans;
+    font-weight: 500;
+    color: var(--color-gray-600);
+    cursor: pointer;
+
+    @include v.transition-ease;
+
+    &:hover {
+        border-color: var(--color-danger-border);
+        color: var(--color-danger);
+        background-color: var(--color-danger-light);
+    }
+}
+
+// ─── Custom Date Range ────────────────────────────────────────────────────────
+.dashboard-filters-custom-range {
+    display: flex;
+    align-items: center;
+    gap: v.$spacing-sm;
+}
+
+.filter-date-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.filter-date-label,
+.filter-select-label {
+    font-size: v.$font-size-xxs;
+    font-weight: 600;
+    color: var(--color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: v.$font-sans;
+}
+
+.filter-date-input {
+    padding: 5px 10px;
+    border: 1px solid var(--color-gray-300);
+    border-radius: v.$radius-small;
+    font-size: v.$font-size-xs;
+    font-family: v.$font-sans;
+    color: var(--color-gray-900);
+    background-color: var(--color-white);
+
+    @include v.transition-ease;
+
+    &:focus {
+        outline: none;
+        border-color: var(--color-blue-accent);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-blue-accent) 20%, transparent);
+    }
+}
+
+.filter-date-separator {
+    color: var(--color-gray-400);
+    font-size: v.$font-size-md;
+    margin-top: 16px;
+}
+
+// ─── Department Select ────────────────────────────────────────────────────────
+.filter-select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.filter-select {
+    padding: 5px 10px;
+    border: 1px solid var(--color-gray-300);
+    border-radius: v.$radius-small;
+    font-size: v.$font-size-xs;
+    font-family: v.$font-sans;
+    color: var(--color-gray-900);
+    background-color: var(--color-white);
+    min-width: 160px;
+    cursor: pointer;
+
+    @include v.transition-ease;
+
+    &:focus {
+        outline: none;
+        border-color: var(--color-blue-accent);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-blue-accent) 20%, transparent);
+    }
+}
+
+// ─── Employee Type Segments ───────────────────────────────────────────────────
+.filter-segment-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.filter-segment-btns {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-gray-100);
+    border-radius: v.$radius-small;
+    padding: 2px;
+    gap: 2px;
+}
+
+.filter-segment-btn {
+    padding: 4px 10px;
+    border: none;
+    background: transparent;
+    border-radius: calc(v.$radius-small - 2px);
+    font-size: v.$font-size-xs;
+    font-family: v.$font-sans;
+    font-weight: 500;
+    color: var(--color-gray-600);
+    cursor: pointer;
+
+    @include v.transition-ease;
+
+    &.is-active {
+        background-color: var(--color-white);
+        color: var(--color-gray-900);
+        box-shadow: v.$shadow-sm;
+        font-weight: 600;
+    }
+
+    &:hover:not(.is-active) {
+        background-color: var(--color-gray-200);
+    }
+}
+
+// ─── Last Updated ─────────────────────────────────────────────────────────────
+.filter-last-updated {
+    font-size: v.$font-size-xxs;
+    color: var(--color-gray-400);
+    font-family: v.$font-sans;
+    margin: 0;
+    margin-left: auto;
+}
+
+// ─── Spin Animation ──────────────────────────────────────────────────────────
+.spin-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ─── Mobile ───────────────────────────────────────────────────────────────────
+@include v.mobile {
+    .dashboard-filters {
+        padding: v.$spacing-sm;
+    }
+
+    .dashboard-filters-row {
+        gap: v.$spacing-xs;
+    }
+
+    .dashboard-filters-controls {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .filter-preset-btn {
+        padding: 4px 8px;
+        font-size: v.$font-size-xxs;
+    }
+}

@@ -1,0 +1,29 @@
+@use '@/styles/variables' as v;
+
+.base-chart-container {
+    position: relative;
+    width: 100%;
+    border-radius: v.$radius-medium;
+    overflow: hidden;
+
+    &.is-loading,
+    &.is-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: color-mix(in srgb, var(--color-gray-100) 50%, transparent);
+    }
+}
+
+.base-chart-loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: v.$spacing-sm;
+}
+
+.base-chart-loading-text {
+    font-size: v.$font-size-sm;
+    color: var(--color-gray-500);
+    font-family: v.$font-sans;
+}
