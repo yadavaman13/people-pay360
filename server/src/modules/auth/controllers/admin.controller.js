@@ -135,6 +135,42 @@ export async function adminCleanupUsers(req, res, next) {
     }
 }
 
+/**
+ * Create a new user (Admin only)
+ */
+export async function adminCreateUser(req, res, next) {
+    try {
+        const { firstName, lastName, email, role } = req.body;
+        const { user, emailFailed } = await userService.adminCreateUser({
+            firstName,
+            lastName,
+            email,
+            role,
+        });
+
+        if (emailFailed) {
+            return res.status(502).json({
+                success: false,
+                emailDeliveryFailed: true,
+                message:
+                    'User created but credentials email failed to deliver. The user can use password reset.',
+                user,
+            });
+        }
+
+        return sendResponse({
+            res,
+            statusCode: 201,
+            message:
+                "User created successfully. Login credentials have been sent to the user's email.",
+            success: true,
+            user,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export {
     getMe,
     updateProfile,

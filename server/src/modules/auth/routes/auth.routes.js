@@ -1,10 +1,8 @@
 import { Router } from 'express';
-import passport from 'passport';
 import * as authController from '../controllers/auth.controller.js';
 import { protect, rateLimiter } from '../middleware/auth.middleware.js';
-import envConfig from '../../../config/env.config.js';
+import { sendResponse } from '../../../utils/response.utlis.js';
 import {
-    registerValidator,
     loginValidator,
     changePasswordValidator,
     forgotPasswordValidator,
@@ -20,7 +18,14 @@ const router = Router();
 const authRateLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, maxRequests: 6 }); //rate limiting
 
 // Public Routes
-router.post('/register', authRateLimiter, registerValidator, authController.register);
+router.post('/register', (req, res) => {
+    return sendResponse({
+        res,
+        statusCode: 410,
+        message: 'Public registration is not available. Contact your administrator.',
+        success: false,
+    });
+});
 router.post(
     '/send-verification-otp',
     authRateLimiter,
@@ -54,64 +59,6 @@ router.post(
     verifyRecoverAccountValidator,
     authController.verifyAccountRecovery,
 );
-// Google OAuth routes
-router.get('/google', (req, res, next) => {
-    const state = JSON.stringify({ mode: 'login' });
-    res.cookie('google_oauth_mode', 'login', {
-        httpOnly: true,
-        sameSite: 'lax',
-        maxAge: 10 * 60 * 1000,
-    });
-    passport.authenticate('google', {
-        scope: ['profile', 'email'],
-        session: false,
-        state,
-    })(req, res, next);
-});
-
-router.get('/google/register', (req, res, next) => {
-    const role = (req.query.role || 'USER').toUpperCase();
-    const state = JSON.stringify({ mode: 'register', role });
-    res.cookie('google_oauth_mode', 'register', {
-        httpOnly: true,
-        sameSite: 'lax',
-        maxAge: 10 * 60 * 1000,
-    });
-    res.cookie('google_oauth_role', role, {
-        httpOnly: true,
-        sameSite: 'lax',
-        maxAge: 10 * 60 * 1000,
-    });
-    passport.authenticate('google', {
-        scope: ['profile', 'email'],
-        session: false,
-        state,
-    })(req, res, next);
-});
-
-router.get('/google/callback', (req, res, next) => {
-    passport.authenticate('google', { session: false }, (err, user, info) => {
-        if (err) {
-            console.error('Google OAuth callback error:', err);
-            return res.redirect(`${envConfig.CLIENT_ORIGIN}/login?error=google_auth_failed`);
-        }
-        if (!user) {
-            if (info?.message === 'no_account') {
-                return res.redirect(`${envConfig.CLIENT_ORIGIN}/login?error=no_google_account`);
-            }
-            if (info?.message === 'account_exists') {
-                return res.redirect(`${envConfig.CLIENT_ORIGIN}/login?error=google_account_exists`);
-            }
-            if (info?.message === 'account_deleted') {
-                return res.redirect(`${envConfig.CLIENT_ORIGIN}/login?error=account_deleted`);
-            }
-            return res.redirect(`${envConfig.CLIENT_ORIGIN}/login?error=google_auth_failed`);
-        }
-        req.user = user;
-        req.authInfo = info;
-        return authController.googleCallback(req, res, next);
-    })(req, res, next);
-});
 
 // Authenticated Routes
 router.use(protect);

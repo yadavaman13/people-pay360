@@ -9,7 +9,6 @@ import { pdfRouter } from './modules/pdf/index.js';
 import { payrollValidationRouter } from './modules/validation/index.js';
 import { payslipDocumentRouter } from './modules/payslips/index.js';
 import { errorHandler } from './modules/auth/middleware/errorHandler.js';
-import passport from './config/passport.config.js';
 
 import { scheduleRouter } from './modules/schedules/index.js';
 import { attendanceRouter } from './modules/attendance/index.js';
@@ -29,7 +28,6 @@ app.use(
     }),
 );
 app.use(morgan('combined'));
-app.use(passport.initialize());
 
 //dev-1
 app.use('/api/auth', authRouter);

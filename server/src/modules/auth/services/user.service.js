@@ -3,10 +3,15 @@ import {
     getUserById,
     updateUser,
     softDeleteUser,
-    hardDeleteUser,
     listUsers,
+    getUserByEmail,
+    getDeletedUserByEmail,
+    createUser,
 } from '../../../dao/user.dao.js';
 import { AppError } from '../utils/appError.js';
+import { generateTempPassword } from '../../../utils/password.utils.js';
+import { sendEmail } from '../../../services/mail/mail.service.js';
+import { accountCreatedEmailTemplate } from '../../../templates/email.template.js';
 
 /**
  * Update current user profile
@@ -74,23 +79,6 @@ export async function deleteAccount(userId, password) {
 }
 
 /**
- * Hard delete Google-authenticated user account permanently (no recovery)
- * @param {string} userId
- */
-export async function deleteGoogleAccount(userId) {
-    const user = await getUserById(userId, true);
-    if (!user) {
-        throw new AppError('User not found', 404);
-    }
-
-    const deletedUser = await hardDeleteUser(userId);
-    if (!deletedUser) {
-        throw new AppError('User not found or already deleted', 404);
-    }
-    return deletedUser;
-}
-
-/**
  * Get user by id (Admin helper)
  * @param {string} id
  */
@@ -116,7 +104,7 @@ export async function adminListUsers(includeDeleted = false) {
  * @param {string} newRole
  */
 export async function adminUpdateRole(targetUserId, newRole) {
-    const formattedRole = newRole ? String(newRole).toUpperCase() : 'USER';
+    const formattedRole = newRole ? String(newRole).toUpperCase() : 'EMPLOYEE';
     const user = await updateUser(targetUserId, { role: formattedRole });
     if (!user) {
         throw new AppError('User not found', 404);
@@ -134,4 +122,72 @@ export async function adminDeleteUser(targetUserId) {
         throw new AppError('User not found or already deleted', 404);
     }
     return user;
+}
+
+/**
+ * Create user account by Admin
+ * @param {object} param0 { firstName, lastName, email, role }
+ */
+export async function adminCreateUser({ firstName, lastName, email, role }) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check duplicate active user
+    const existingUser = await getUserByEmail(normalizedEmail);
+    if (existingUser) {
+        throw new AppError('Email is already registered', 409);
+    }
+
+    // Check duplicate soft-deleted user
+    const deletedUser = await getDeletedUserByEmail(normalizedEmail);
+    if (deletedUser) {
+        throw new AppError('Email belongs to a deleted account. Use account recovery.', 409);
+    }
+
+    const tempPassword = generateTempPassword();
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(tempPassword, salt);
+
+    const user = await createUser({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: normalizedEmail,
+        password: hashedPassword,
+        role,
+        emailVerified: true,
+        isActive: true,
+        isDeleted: false,
+    });
+
+    let emailFailed = false;
+    try {
+        await sendEmail({
+            to: normalizedEmail,
+            subject: 'Welcome to PeoplePay360 — Your Account Details',
+            html: accountCreatedEmailTemplate({
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: user.role,
+                temporaryPassword: tempPassword,
+            }),
+        });
+    } catch (err) {
+        console.error('Failed to send account creation email:', err);
+        emailFailed = true;
+    }
+
+    return {
+        user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            isActive: user.isActive,
+            emailVerified: user.emailVerified,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        },
+        emailFailed,
+    };
 }

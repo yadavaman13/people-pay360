@@ -86,7 +86,6 @@ const envConfig = {
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
     GOOGLE_SENDER_EMAIL: process.env.GOOGLE_SENDER_EMAIL,
-    GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
 
     //  Ai models keys
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,

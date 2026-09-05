@@ -7,12 +7,7 @@ import Dialog from '@/components/Shared/Feedback/Dialog';
 import { Drawer, NotificationFeed } from '@/components/Shared/Feedback/Drawer';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
-import {
-    Home as HomeIcon,
-    TrendingUp as AnalyticsIcon,
-    Bot as BotIcon,
-    Map as MapIcon,
-} from 'lucide-react';
+import { Home as HomeIcon, Users as UsersIcon } from 'lucide-react';
 import './DashboardLayout.scss';
 
 function DashboardLayout({ onLogout }) {
@@ -46,20 +41,16 @@ function DashboardLayout({ onLogout }) {
             label: 'Home',
             icon: <HomeIcon />,
         },
-        {
-            label: 'AI',
-            icon: <BotIcon />,
-        },
-        {
-            label: 'Maps Showcase',
-            icon: <MapIcon />,
-            path: `/dashboard/${roleSegment}/maps/showcase`,
-        },
-        {
-            label: 'Analytics',
-            subTabs: ['Insight', 'Reports'],
-            icon: <AnalyticsIcon />,
-        },
+        ...(roleSegment === 'admin'
+            ? [
+                  {
+                      label: 'Users',
+                      icon: <UsersIcon />,
+                      path: `/dashboard/admin/users`,
+                      roles: ['ADMIN'],
+                  },
+              ]
+            : []),
     ];
 
     const handleToggleSidebar = () => {

@@ -19,9 +19,7 @@ function SidebarSubTabs({ subTabs, parentLabel, onSubTabClick }) {
         }
 
         const segment = sub.toLowerCase();
-        if (parentLabel === 'Analytics') {
-            navigate(`/dashboard/${roleSegment}/analytics/${segment}`);
-        } else if (parentLabel === 'Settings') {
+        if (parentLabel === 'Settings') {
             navigate(`/dashboard/${roleSegment}/settings/${segment}`);
         }
     };

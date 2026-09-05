@@ -26,8 +26,8 @@ export const registerValidator = [
         .optional()
         .trim()
         .toUpperCase()
-        .isIn(['USER', 'ADMIN'])
-        .withMessage('Role must be either USER or ADMIN'),
+        .isIn(['EMPLOYEE', 'HR_MANAGER', 'HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN'])
+        .withMessage('Role must be a valid PeoplePay360 role'),
     validateRequest,
 ];
 

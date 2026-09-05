@@ -25,7 +25,6 @@ export async function getMe(req, res, next) {
                 emailVerified: user.emailVerified,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
-                isGoogleUser: !!user.googleId,
             },
         });
     } catch (error) {
@@ -107,43 +106,6 @@ export async function deleteAccount(req, res, next) {
             res,
             statusCode: 200,
             message: 'Account deleted successfully',
-            success: true,
-        });
-    } catch (error) {
-        next(error);
-    }
-}
-
-/**
- * Hard delete own Google user account permanently (no password required)
- */
-export async function deleteGoogleAccount(req, res, next) {
-    try {
-        const user = req.user;
-        if (!user.googleId && user.password !== null) {
-            return sendResponse({
-                res,
-                statusCode: 403,
-                message: 'This action is only available for Google authenticated accounts.',
-                success: false,
-            });
-        }
-
-        await userService.deleteGoogleAccount(user.id);
-        res.clearCookie('token');
-
-        // Invalidate Redis user cache
-        const cacheKey = `user:${user.id}`;
-        try {
-            await redis.del(cacheKey);
-        } catch (cacheError) {
-            console.error('Redis cache delete error in deleteGoogleAccount:', cacheError);
-        }
-
-        return sendResponse({
-            res,
-            statusCode: 200,
-            message: 'Account deleted permanently',
             success: true,
         });
     } catch (error) {

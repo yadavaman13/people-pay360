@@ -18,6 +18,5 @@ router.patch('/profile', updateProfileValidator, userController.updateProfile);
 router.patch('/profile/avatar', upload.single('avatar'), userController.uploadAvatar);
 router.patch('/change-password', changePasswordValidator, userController.changePassword);
 router.delete('/me', deleteAccountValidator, userController.deleteAccount);
-router.delete('/me/google', userController.deleteGoogleAccount);
 
 export default router;

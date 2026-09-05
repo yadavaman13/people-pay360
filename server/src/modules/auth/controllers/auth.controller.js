@@ -1,7 +1,5 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import redis from '../../../config/cache.config.js';
-import envConfig from '../../../config/env.config.js';
 
 import {
     getUserByEmail,
@@ -12,7 +10,7 @@ import {
     recoverUser,
 } from '../../../dao/user.dao.js';
 
-import { sendResponse, sendTokenResponse, setTokenCookie } from '../../../utils/response.utlis.js';
+import { sendResponse, sendTokenResponse } from '../../../utils/response.utlis.js';
 import { sendEmail } from '../../../services/mail/mail.service.js';
 import {
     issueOtp,
@@ -221,14 +219,12 @@ export async function login(req, res, next) {
             }
         }
 
-        if (user.googleId && !user.password) {
+        if (!user.password) {
             return sendResponse({
                 res,
-                statusCode: 400,
+                statusCode: 401,
+                message: 'Incorrect password.',
                 success: false,
-                isGoogleUser: true,
-                message:
-                    'This account is registered with Google Sign-In. Please sign in using Google.',
             });
         }
 
@@ -493,17 +489,6 @@ export async function forgotPassword(req, res, next) {
             });
         }
 
-        if (user.googleId && !user.password) {
-            return sendResponse({
-                res,
-                statusCode: 400,
-                success: false,
-                isGoogleUser: true,
-                message:
-                    'This email is registered with Google Sign-In. Password reset is not available for Google accounts. Please sign in using Google.',
-            });
-        }
-
         const otpResult = await issueOtp({
             email,
             purpose: OTP_PURPOSES.FORGOT_PASSWORD,
@@ -633,17 +618,6 @@ export async function resetPassword(req, res, next) {
                 statusCode: 400,
                 success: false,
                 message: 'No valid account exists for this email.',
-            });
-        }
-
-        if (user.googleId && !user.password) {
-            return sendResponse({
-                res,
-                statusCode: 400,
-                success: false,
-                isGoogleUser: true,
-                message:
-                    'This email is registered with Google Sign-In. Password reset is not available for Google accounts. Please sign in using Google.',
             });
         }
 
@@ -783,7 +757,6 @@ export async function getMe(req, res, next) {
                 emailVerified: user.emailVerified,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
-                isGoogleUser: !!user.googleId,
             },
         });
     } catch (error) {
@@ -1034,36 +1007,6 @@ export async function verifyAccountRecovery(req, res, next) {
             success: true,
             message: 'Account recovered successfully! You can now login.',
         });
-    } catch (error) {
-        next(error);
-    }
-}
-
-/**
- * Handle Google OAuth login callback and redirect to client
- */
-export async function googleCallback(req, res, next) {
-    try {
-        if (!req.user) {
-            return res.redirect(
-                `${envConfig.CLIENT_ORIGIN}/login?error=Google authentication failed`,
-            );
-        }
-
-        // Clear temporary OAuth flow cookies
-        res.clearCookie('google_oauth_mode');
-        res.clearCookie('google_oauth_role');
-
-        const token = jwt.sign(
-            { id: req.user.id, email: req.user.email, role: req.user.role },
-            envConfig.JWT_SECRET,
-            { expiresIn: '1d' },
-        );
-
-        setTokenCookie(res, token, false);
-
-        // Redirect to frontend dashboard or home
-        return res.redirect(`${envConfig.CLIENT_ORIGIN}/`);
     } catch (error) {
         next(error);
     }

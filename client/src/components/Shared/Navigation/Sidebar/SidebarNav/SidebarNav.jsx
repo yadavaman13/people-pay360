@@ -73,17 +73,11 @@ function SidebarNav({
             case 'Home':
                 navigate(`/dashboard/${roleSegment}/home`);
                 break;
-            case 'AI':
-                navigate(`/dashboard/${roleSegment}/ai`);
-                break;
-            case 'Maps Showcase':
-                navigate(`/dashboard/${roleSegment}/maps/showcase`);
-                break;
-            case 'Analytics':
-                navigate(`/dashboard/${roleSegment}/analytics/insight`);
-                break;
             case 'Settings':
                 navigate(`/dashboard/${roleSegment}/settings/general`);
+                break;
+            case 'Users':
+                navigate('/dashboard/admin/users');
                 break;
             default:
                 navigate(`/dashboard/${roleSegment}`);

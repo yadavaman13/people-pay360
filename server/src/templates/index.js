@@ -15,5 +15,6 @@ export {
     forgotPasswordOtpEmailTemplate,
     recoverAccountOtpEmailTemplate,
     accountRecoveredEmailTemplate,
+    accountCreatedEmailTemplate,
     payslipEmailTemplate,
 } from './email.template.js';
