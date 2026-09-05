@@ -86,6 +86,7 @@ export const markPaidValidator = [
 ];
 
 export const listPayrunsValidator = [
+    query('search').optional().trim(),
     query('status')
         .optional()
         .trim()

@@ -33,6 +33,7 @@ function AdvancedTable({
     tabFilterKey = 'status',
     showTabs = null, // auto-detected from tabs.length if null
     searchable = false,
+    searchTerm: controlledSearchTerm = null,
     searchPlaceholder = 'Search records...',
     searchPlaceholderPrefix = 'Search by ',
     searchOptions = null,
@@ -102,7 +103,15 @@ function AdvancedTable({
 
     const effectiveItemsPerPageLabel =
         itemsPerPageLabel || (activeView === 'grid' ? 'Cards per page' : 'Rows per page');
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState(
+        typeof controlledSearchTerm === 'string' ? controlledSearchTerm : '',
+    );
+
+    useEffect(() => {
+        if (typeof controlledSearchTerm === 'string' && controlledSearchTerm !== searchTerm) {
+            setSearchTerm(controlledSearchTerm);
+        }
+    }, [controlledSearchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
     const [activeTab, setActiveTab] = useState('all');
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
