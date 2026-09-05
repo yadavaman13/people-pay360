@@ -209,3 +209,85 @@ export const applicableContractValidator = [
         }),
     validateRequest,
 ];
+
+/**
+ * Validator for GET /api/employees/:id/attendance query params
+ */
+export const listEmployeeAttendanceValidator = [
+    query('dateFrom')
+        .optional()
+        .isISO8601()
+        .withMessage('dateFrom must be a valid ISO 8601 date (YYYY-MM-DD)'),
+    query('dateTo')
+        .optional()
+        .isISO8601()
+        .withMessage('dateTo must be a valid ISO 8601 date (YYYY-MM-DD)'),
+    query('status')
+        .optional()
+        .toUpperCase()
+        .isIn(['PRESENT', 'ABSENT', 'HALF_DAY', 'LATE', 'ON_LEAVE'])
+        .withMessage('status must be one of PRESENT, ABSENT, HALF_DAY, LATE, ON_LEAVE'),
+    query('page')
+        .optional()
+        .isInt({ min: 1 })
+        .toInt()
+        .withMessage('page must be a positive integer'),
+    query('limit')
+        .optional()
+        .isInt({ min: 1, max: 200 })
+        .toInt()
+        .withMessage('limit must be between 1 and 200'),
+    validateRequest,
+];
+
+/**
+ * Validator for GET /api/employees/:id/time-off query params
+ */
+export const listEmployeeTimeOffValidator = [
+    query('status')
+        .optional()
+        .toUpperCase()
+        .isIn(['PENDING', 'APPROVED', 'REFUSED', 'CANCELLED'])
+        .withMessage('status must be one of PENDING, APPROVED, REFUSED, CANCELLED'),
+    query('startDate')
+        .optional()
+        .isISO8601()
+        .withMessage('startDate must be a valid ISO 8601 date (YYYY-MM-DD)'),
+    query('endDate')
+        .optional()
+        .isISO8601()
+        .withMessage('endDate must be a valid ISO 8601 date (YYYY-MM-DD)'),
+    query('page')
+        .optional()
+        .isInt({ min: 1 })
+        .toInt()
+        .withMessage('page must be a positive integer'),
+    query('limit')
+        .optional()
+        .isInt({ min: 1, max: 200 })
+        .toInt()
+        .withMessage('limit must be between 1 and 200'),
+    validateRequest,
+];
+
+/**
+ * Validator for GET /api/employees/:id/allocations query params
+ */
+export const listEmployeeAllocationsValidator = [
+    query('status')
+        .optional()
+        .toUpperCase()
+        .isIn(['PENDING', 'APPROVED', 'REFUSED', 'EXPIRED'])
+        .withMessage('status must be one of PENDING, APPROVED, REFUSED, EXPIRED'),
+    query('page')
+        .optional()
+        .isInt({ min: 1 })
+        .toInt()
+        .withMessage('page must be a positive integer'),
+    query('limit')
+        .optional()
+        .isInt({ min: 1, max: 200 })
+        .toInt()
+        .withMessage('limit must be between 1 and 200'),
+    validateRequest,
+];

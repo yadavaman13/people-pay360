@@ -38,6 +38,16 @@ export const adminUpdateRoleValidator = [
     validateRequest,
 ];
 
+export const adminUpdateStatusValidator = [
+    body('isActive')
+        .notEmpty()
+        .withMessage('isActive is required')
+        .isBoolean()
+        .withMessage('isActive must be a boolean (true or false)')
+        .toBoolean(),
+    validateRequest,
+];
+
 export const adminCreateUserValidator = [
     body('firstName').trim().notEmpty().withMessage('First Name is required'),
     body('lastName').trim().notEmpty().withMessage('Last Name is required'),

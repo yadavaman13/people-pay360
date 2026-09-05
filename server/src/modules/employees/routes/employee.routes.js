@@ -8,6 +8,9 @@ import {
     listEmployeesValidator,
     forPayrunValidator,
     applicableContractValidator,
+    listEmployeeAttendanceValidator,
+    listEmployeeTimeOffValidator,
+    listEmployeeAllocationsValidator,
 } from '../validators/employee.validator.js';
 
 const router = Router();
@@ -56,6 +59,21 @@ router.get(
     '/:id/contracts/applicable',
     applicableContractValidator,
     employeeRelatedController.getApplicableContract,
+);
+router.get(
+    '/:id/attendance',
+    listEmployeeAttendanceValidator,
+    employeeRelatedController.getEmployeeAttendance,
+);
+router.get(
+    '/:id/time-off',
+    listEmployeeTimeOffValidator,
+    employeeRelatedController.getEmployeeTimeOff,
+);
+router.get(
+    '/:id/allocations',
+    listEmployeeAllocationsValidator,
+    employeeRelatedController.getEmployeeAllocations,
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
