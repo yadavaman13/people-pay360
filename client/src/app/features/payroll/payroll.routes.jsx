@@ -1,5 +1,7 @@
 import { Banknote } from 'lucide-react';
+import { Navigate } from 'react-router';
 import { PayrollProvider } from './context/payroll.context';
+import PayrollDashboardPage from '../dashboard/pages/PayrollDashboardPage';
 import PayrunsListPage from './pages/PayrunsListPage/PayrunsListPage';
 import PayrunDetailPage from './pages/PayrunDetailPage/PayrunDetailPage';
 import PayslipsListPage from './pages/PayslipsListPage/PayslipsListPage';
@@ -13,14 +15,22 @@ export default {
     // Navigation Metadata for the Sidebar and Topbar Breadcrumbs
     navItem: {
         label: 'Payroll',
-        path: '/dashboard/employee/payroll/payruns',
+        path: '/dashboard/user/payroll/dashboard',
         icon: <Banknote size={18} />,
         roles: ['ADMIN', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'],
-        subTabs: ['Payruns', 'Payslips', 'Salary Structures'],
+        subTabs: ['Dashboard', 'Payruns', 'Payslips', 'Salary Structures'],
     },
 
     // Auto-discovered Feature Routes
     routes: [
+        {
+            path: 'payroll',
+            element: <Navigate to="dashboard" replace />,
+        },
+        {
+            path: 'payroll/dashboard',
+            element: <PayrollDashboardPage />,
+        },
         {
             path: 'payroll/payruns',
             element: (

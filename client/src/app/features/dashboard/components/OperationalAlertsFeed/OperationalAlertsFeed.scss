@@ -1,0 +1,214 @@
+@use '@/styles/variables' as v;
+
+.alerts-feed-card {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+.alerts-feed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: v.$spacing-sm;
+    border-bottom: 1px solid var(--color-gray-200);
+    flex-shrink: 0;
+}
+
+.alerts-feed-header-left {
+    display: flex;
+    align-items: center;
+    gap: v.$spacing-sm;
+}
+
+.alerts-feed-title {
+    font-size: v.$font-size-md;
+    font-weight: 600;
+    color: var(--color-gray-900);
+}
+
+.alerts-feed-summary-badge {
+    flex-shrink: 0;
+}
+
+.alerts-feed-refresh-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--color-gray-200);
+    border-radius: v.$radius-small;
+    background: transparent;
+    color: var(--color-gray-500);
+    cursor: pointer;
+
+    @include v.transition-ease;
+
+    flex-shrink: 0;
+
+    &:hover:not(:disabled) {
+        background: var(--color-gray-100);
+        color: var(--color-gray-900);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+// ─── Content ─────────────────────────────────────────────────────────────────
+.alerts-feed-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-top: v.$spacing-sm;
+
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-gray-300);
+        border-radius: 2px;
+    }
+}
+
+.alerts-feed-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+}
+
+// ─── Alert List ───────────────────────────────────────────────────────────────
+.alerts-feed-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: v.$spacing-xs;
+}
+
+.alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: v.$spacing-sm;
+    padding: v.$spacing-sm v.$spacing-sm;
+    border-radius: v.$radius-small;
+    border: 1px solid transparent;
+
+    @include v.transition-ease;
+
+    &--blocker {
+        background-color: color-mix(in srgb, var(--color-danger-light) 60%, transparent);
+        border-color: var(--color-danger-border);
+    }
+
+    &--warning {
+        background-color: color-mix(in srgb, var(--color-warning-light) 60%, transparent);
+        border-color: var(--color-warning-border);
+    }
+
+    &--info {
+        background-color: color-mix(in srgb, var(--color-blue-light) 40%, transparent);
+        border-color: var(--color-blue-border);
+    }
+
+    &--ok {
+        background-color: var(--color-success-light);
+        border-color: var(--color-success-border);
+    }
+}
+
+.alert-item-icon {
+    flex-shrink: 0;
+    padding-top: 1px;
+}
+
+.alert-item-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-item-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: v.$spacing-xs;
+    flex-wrap: wrap;
+}
+
+.alert-item-title {
+    font-size: v.$font-size-sm;
+    font-weight: 600;
+    color: var(--color-gray-900);
+    font-family: v.$font-sans;
+    line-height: 1.4;
+}
+
+.alert-item-badge {
+    flex-shrink: 0;
+}
+
+.alert-item-detail {
+    font-size: v.$font-size-xs;
+    color: var(--color-gray-600);
+    margin: 2px 0 v.$spacing-xs;
+    font-family: v.$font-sans;
+    line-height: 1.5;
+}
+
+.alert-item-meta {
+    display: flex;
+    align-items: center;
+    gap: v.$spacing-xs;
+    flex-wrap: wrap;
+}
+
+.alert-meta-chip {
+    font-size: v.$font-size-xxs;
+    color: var(--color-gray-500);
+    background-color: var(--color-gray-100);
+    padding: 2px 6px;
+    border-radius: v.$radius-tiny;
+    font-family: v.$font-sans;
+    font-weight: 500;
+}
+
+.alert-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: v.$font-size-xxs;
+    font-weight: 600;
+    color: var(--color-blue-accent);
+    font-family: v.$font-sans;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+// ─── Animations ──────────────────────────────────────────────────────────────
+.spin-anim {
+    animation: spin-anim 1s linear infinite;
+}
+
+@keyframes spin-anim {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 
-const PAGE_SIZE_STANDARDS = [5, 10, 15, 25, 50];
+const PAGE_SIZE_STANDARDS = [5, 10, 15, 20, 25, 50];
 
 export function useTablePagination({
     initialRowsPerPage = 5,
@@ -24,30 +24,30 @@ export function useTablePagination({
     }, [totalRows, serverSide, rowsPerPage]);
 
     const rowsOptions = useMemo(() => {
-        if (totalRows === 0) return [];
         const opts = [];
         const customSet = new Set(PAGE_SIZE_STANDARDS);
-        if (!customSet.has(rowsPerPage) && rowsPerPage !== totalRows) {
+        if (!customSet.has(rowsPerPage)) {
             opts.push({
                 value: rowsPerPage,
                 label: String(rowsPerPage),
-                disabled: !serverSide && rowsPerPage >= totalRows,
+                disabled: false,
             });
         }
         PAGE_SIZE_STANDARDS.forEach((n) => {
-            opts.push(
-                !serverSide && n >= totalRows
+            const isDisabled = !serverSide && totalRows > 0 && n >= totalRows;
+            opts.push({
+                value: n,
+                label: String(n),
+                disabled: isDisabled,
+                ...(isDisabled
                     ? {
-                          value: n,
-                          label: String(n),
-                          disabled: true,
                           description: `Only ${totalRows} row${totalRows !== 1 ? 's' : ''} available`,
                       }
-                    : { value: n, label: String(n) },
-            );
+                    : {}),
+            });
         });
         opts.sort((a, b) => a.value - b.value);
-        if (showAllOption) {
+        if (showAllOption && totalRows > 0) {
             opts.push({
                 value: totalRows,
                 label: `Show all ${totalRows}`,

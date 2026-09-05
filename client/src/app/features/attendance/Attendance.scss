@@ -92,105 +92,208 @@
 
     // ── Quick Punch Widget ──────────────────────────────────────────────────
     .quick-punch-widget {
-        background: variables.$color-white;
-        border: 1px solid variables.$color-gray-200;
-        border-left: 4px solid variables.$color-primary;
+        background: var(--color-bg-card, variables.$color-white);
+        border: 1px solid var(--color-border-subtle, variables.$color-gray-200);
         border-radius: variables.$radius-large;
         padding: variables.$spacing-lg;
-        box-shadow: none;
+        box-shadow:
+            0 1px 3px 0 rgb(0 0 0 / 3%),
+            0 1px 2px -1px rgb(0 0 0 / 3%);
         transition:
             border-color 0.2s ease,
             box-shadow 0.2s ease;
 
+        &:hover {
+            border-color: var(--color-border-strong, variables.$color-gray-300);
+            box-shadow: 0 4px 12px 0 rgb(0 0 0 / 4%);
+        }
+
         &.is-checked-in {
-            border-left-color: variables.$color-success;
+            border-color: color-mix(
+                in srgb,
+                var(--color-success, variables.$color-success) 35%,
+                var(--color-border-subtle, variables.$color-gray-200)
+            );
+
+            .widget-status-badge .badge-status-dot {
+                animation: pulse-green 2s infinite;
+            }
         }
 
         .widget-content-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: minmax(280px, 1.1fr) minmax(320px, 1.3fr);
             gap: variables.$spacing-xl;
-            align-items: center;
+            align-items: flex-start;
 
-            @media (width <= 900px) {
+            @media (width <= 880px) {
                 grid-template-columns: 1fr;
-                gap: variables.$spacing-md;
+                gap: variables.$spacing-lg;
             }
         }
 
         .punch-timer-section {
             display: flex;
             flex-direction: column;
-            gap: variables.$spacing-sm;
+            gap: variables.$spacing-xs;
 
-            .status-indicator-row {
+            .widget-profile-row {
                 display: flex;
                 align-items: center;
-                gap: variables.$spacing-xs;
+                gap: variables.$spacing-sm;
+                margin-bottom: 4px;
 
-                .pulse-dot {
-                    width: 10px;
-                    height: 10px;
-                    border-radius: 50%;
-                    background-color: variables.$color-danger;
+                .profile-details {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
 
-                    &.active {
-                        background-color: variables.$color-success;
-                        box-shadow: 0 0 0 0 rgb(16 185 129 / 70%);
-                        animation: pulse-green 2s infinite;
+                    .name-badge-row {
+                        display: flex;
+                        align-items: center;
+                        gap: variables.$spacing-xs;
+
+                        .widget-user-name {
+                            margin: 0;
+                            font-size: variables.$font-size-md;
+                            font-weight: 700;
+                            line-height: 1.2;
+                            color: var(--color-text-primary, variables.$color-gray-900);
+                        }
+
+                        .widget-status-badge {
+                            padding: 2px 8px;
+                            font-size: variables.$font-size-xxs;
+                            font-weight: 600;
+                        }
                     }
-                }
 
-                .status-label {
-                    font-size: variables.$font-size-sm;
-                    font-weight: 600;
-                    color: variables.$color-gray-700;
+                    .widget-user-meta {
+                        font-size: variables.$font-size-xs;
+                        font-weight: 500;
+                        color: var(--color-text-secondary, variables.$color-gray-500);
+                    }
                 }
             }
 
-            .timer-clock {
-                font-family:
-                    'JetBrains Mono',
-                    monospace,
-                    -apple-system,
-                    BlinkMacSystemFont;
-                font-size: variables.$font-size-display-sm;
-                font-weight: 700;
-                color: variables.$color-gray-900;
-                letter-spacing: 0.05em;
-                line-height: 1.1;
+            .stopwatch-display {
+                display: inline-flex;
+                align-items: baseline;
+                gap: 2px;
+                font-family: 'Plus Jakarta Sans', var(--font-sans), sans-serif;
+                margin-top: 4px;
+                user-select: none;
+
+                .stopwatch-segment {
+                    display: inline-flex;
+                    align-items: baseline;
+                    gap: 1px;
+
+                    .stopwatch-val {
+                        font-size: variables.$font-size-display-sm;
+                        font-weight: 800;
+                        font-variant-numeric: tabular-nums;
+                        letter-spacing: -0.03em;
+                        line-height: 1.1;
+                        color: var(--color-text-primary, variables.$color-gray-900);
+                    }
+
+                    .stopwatch-unit {
+                        font-size: variables.$font-size-xs;
+                        font-weight: 600;
+                        color: var(--color-text-muted, variables.$color-gray-400);
+                        text-transform: lowercase;
+                        margin-left: 2px;
+                    }
+                }
+
+                .stopwatch-sep {
+                    font-size: variables.$font-size-xxl;
+                    font-weight: 300;
+                    color: var(--color-border-strong, variables.$color-gray-300);
+                    margin: 0 4px;
+                    line-height: 1;
+                    align-self: center;
+                }
             }
 
             .timer-caption {
                 font-size: variables.$font-size-xs;
-                color: variables.$color-gray-500;
+                color: var(--color-text-secondary, variables.$color-gray-500);
+                margin: 0;
+                line-height: 1.4;
             }
         }
 
         .punch-action-section {
             display: flex;
             flex-direction: column;
-            gap: variables.$spacing-md;
+            gap: variables.$spacing-sm;
 
-            .shift-meta-pills {
+            .shift-meta-strip {
                 display: flex;
+                align-items: center;
                 flex-wrap: wrap;
                 gap: variables.$spacing-xs;
 
-                .meta-pill {
+                .meta-chip {
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
-                    padding: 2px variables.$spacing-sm;
-                    background-color: variables.$color-gray-100;
-                    border-radius: 9999px;
+                    padding: 3px 8px;
+                    background-color: var(--color-bg-subtle, variables.$color-gray-50);
+                    border: 1px solid var(--color-border-subtle, variables.$color-gray-200);
+                    border-radius: variables.$radius-tiny;
                     font-size: variables.$font-size-xs;
-                    color: variables.$color-gray-700;
+                    font-weight: 500;
+                    color: var(--color-text-secondary, variables.$color-gray-600);
+                    line-height: 1.3;
+
+                    .meta-icon {
+                        color: var(--color-text-muted, variables.$color-gray-400);
+                        flex-shrink: 0;
+                    }
                 }
             }
 
             .notes-input-wrapper {
                 width: 100%;
+
+                .form-group {
+                    margin-bottom: 0;
+
+                    .form-label {
+                        display: none;
+                    }
+
+                    .form-input {
+                        height: 38px;
+                        padding: 8px 12px;
+                        background-color: var(--color-bg-subtle, variables.$color-gray-50);
+                        border: 1px solid var(--color-border-subtle, variables.$color-gray-200);
+                        border-radius: variables.$radius-small;
+                        font-size: variables.$font-size-xs;
+                        color: var(--color-text-primary, variables.$color-gray-900);
+                        transition:
+                            border-color 0.15s ease,
+                            background-color 0.15s ease;
+
+                        &::placeholder {
+                            color: var(--color-text-muted, variables.$color-gray-400);
+                            font-size: variables.$font-size-xs;
+                        }
+
+                        &:focus {
+                            background-color: var(--color-bg-card, variables.$color-white);
+                            border-color: var(--color-primary, variables.$color-black);
+                        }
+
+                        &:disabled {
+                            opacity: 0.5;
+                            cursor: not-allowed;
+                        }
+                    }
+                }
             }
 
             .punch-button-cluster {
@@ -199,9 +302,19 @@
                 gap: variables.$spacing-sm;
 
                 .punch-submit-btn {
-                    min-width: 150px;
-                    height: 44px;
+                    flex: 1;
+                    height: 38px;
+                    font-size: variables.$font-size-xs;
                     font-weight: 600;
+                    border-radius: variables.$radius-small;
+
+                    &:disabled,
+                    &.is-disabled {
+                        opacity: 0.45;
+                        background-color: var(--color-bg-subtle, variables.$color-gray-100);
+                        color: var(--color-text-muted, variables.$color-gray-400);
+                        border: 1px solid var(--color-border-subtle, variables.$color-gray-200);
+                    }
                 }
             }
         }

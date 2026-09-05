@@ -156,9 +156,16 @@ export const listContractsValidator = [
     query('employeeId').optional().isUUID().withMessage('employeeId must be a valid UUID'),
     query('status')
         .optional()
-        .toUpperCase()
-        .isIn(['DRAFT', 'ACTIVE', 'CANCELLED', 'EXPIRED'])
-        .withMessage('Status must be one of DRAFT, ACTIVE, CANCELLED, EXPIRED'),
+        .custom((val) => {
+            const rawList = Array.isArray(val) ? val : String(val).split(',');
+            const statuses = rawList.map((s) => String(s).trim().toUpperCase()).filter(Boolean);
+            const valid = ['DRAFT', 'ACTIVE', 'CANCELLED', 'EXPIRED'];
+            const allOk = statuses.length > 0 && statuses.every((s) => valid.includes(s));
+            if (!allOk) {
+                throw new Error('Status must be one or more of DRAFT, ACTIVE, CANCELLED, EXPIRED');
+            }
+            return true;
+        }),
     query('departmentId').optional().isUUID().withMessage('departmentId must be a valid UUID'),
     validateRequest,
 ];
