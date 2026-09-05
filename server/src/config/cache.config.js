@@ -50,4 +50,5 @@ redis.on('error', (err) => {
     console.error('Redis error:', err.message);
 });
 
+export { redis };
 export default redis;
