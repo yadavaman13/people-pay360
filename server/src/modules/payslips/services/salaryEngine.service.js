@@ -159,6 +159,7 @@ export function computePayslip({
 
     // Initial context available to rules
     const context = {
+        WAGE: wage,
         CONTRACT_WAGE: wage,
         PERIOD_DAYS: periodDays,
         WORKED_DAYS: workedDays,

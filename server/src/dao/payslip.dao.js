@@ -64,7 +64,7 @@ export async function findPayslips({ payrunId, employeeId, status, page = 1, lim
                 lastName: employees.lastName,
                 email: employees.email,
                 departmentName: departments.name,
-                jobTitle: jobPositions.name,
+                jobTitle: jobPositions.title,
                 // Payrun
                 payrunName: payruns.name,
             })
@@ -128,7 +128,7 @@ export async function findPayslipById(id) {
             lastName: employees.lastName,
             email: employees.email,
             departmentName: departments.name,
-            jobTitle: jobPositions.name,
+            jobTitle: jobPositions.title,
             structureName: salaryStructures.name,
         })
         .from(payslips)

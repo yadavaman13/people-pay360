@@ -1,13 +1,6 @@
 import { pgTable, uuid, text, boolean, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
 
 /**
- * Role Enum — Option A: keep existing 'role_enum' PostgreSQL type name.
- *
- * Changes from original:
- *   - 'USER' REMOVED → replaced by 'EMPLOYEE' (same semantic meaning for auth layer)
- *   - Added: 'HR_MANAGER', 'HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER'
- *   - 'ADMIN' kept unchanged
- *
  * Hierarchy (highest → lowest privilege):
  *   ADMIN > HR_PAYROLL_MANAGER > HR_PAYROLL_USER > HR_MANAGER > EMPLOYEE
  *

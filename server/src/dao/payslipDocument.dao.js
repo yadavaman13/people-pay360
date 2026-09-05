@@ -47,7 +47,7 @@ export async function getPayslipByIdWithDetails(payslipId) {
             hireDate: employees.hireDate,
             // Department & Designation
             departmentName: departments.name,
-            jobTitle: jobPositions.name,
+            jobTitle: jobPositions.title,
             // Structure
             structureName: salaryStructures.name,
             // Bank details
@@ -125,7 +125,7 @@ export async function getPayslipsByPayrunId(payrunId) {
             email: employees.email,
             // Dept
             departmentName: departments.name,
-            jobTitle: jobPositions.name,
+            jobTitle: jobPositions.title,
         })
         .from(payslips)
         .innerJoin(employees, eq(payslips.employeeId, employees.id))
