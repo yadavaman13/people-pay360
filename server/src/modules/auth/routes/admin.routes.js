@@ -4,6 +4,7 @@ import * as adminController from '../controllers/admin.controller.js';
 import { protect, restrictTo } from '../middleware/auth.middleware.js';
 import {
     adminCreateUserValidator,
+    adminListUsersQueryValidator,
     adminUpdateRoleValidator,
     updateProfileValidator,
     deleteAccountValidator,
@@ -19,7 +20,7 @@ router.use(restrictTo('ADMIN'));
 
 // Admin User Management Routes
 router.post('/users', adminCreateUserValidator, adminController.adminCreateUser);
-router.get('/users', adminController.adminListUsers);
+router.get('/users', adminListUsersQueryValidator, adminController.adminListUsers);
 router.post('/users/cleanup', adminController.adminCleanupUsers);
 router.get('/users/:id', adminController.adminGetUserById);
 router.patch('/users/:id/role', adminUpdateRoleValidator, adminController.adminUpdateRole);

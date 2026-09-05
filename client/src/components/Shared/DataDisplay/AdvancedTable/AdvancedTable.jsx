@@ -62,6 +62,7 @@ function AdvancedTable({
     showRowsPerPage = false,
     showResultsCount = false,
     showPagination = true,
+    showAllOption = false,
     enableContextMenu = false,
     showScrollButtons = false,
     className = '',
@@ -183,7 +184,10 @@ function AdvancedTable({
     const effectiveFilterConfig = useMemo(() => {
         const rawConfig =
             Array.isArray(filterConfig) && filterConfig.length > 0
-                ? filterConfig
+                ? filterConfig.map((fc) => ({
+                      type: 'select',
+                      ...fc,
+                  }))
                 : effectiveColumns
                       .filter(
                           (col) =>
@@ -278,14 +282,21 @@ function AdvancedTable({
     const columnUniqueValues = useMemo(() => {
         const map = {};
         effectiveFilterConfig.forEach((fc) => {
-            if (fc.type === 'select') {
-                map[fc.key] = [
-                    ...new Set(
-                        internalData
-                            .map((r) => r[fc.key])
-                            .filter((v) => v !== null && v !== undefined && v !== '' && v !== '-'),
-                    ),
-                ].sort((a, b) => String(a).localeCompare(String(b)));
+            const filterType = fc.type || 'select';
+            if (filterType === 'select') {
+                if (Array.isArray(fc.options) && fc.options.length > 0) {
+                    map[fc.key] = fc.options;
+                } else {
+                    map[fc.key] = [
+                        ...new Set(
+                            internalData
+                                .map((r) => r[fc.key])
+                                .filter(
+                                    (v) => v !== null && v !== undefined && v !== '' && v !== '-',
+                                ),
+                        ),
+                    ].sort((a, b) => String(a).localeCompare(String(b)));
+                }
             }
         });
         return map;
@@ -460,6 +471,7 @@ function AdvancedTable({
         processedData,
         totalCount,
         serverSide,
+        showAllOption,
     });
 
     // ── Selection hook ────────────────────────────────────────────────────────
@@ -545,9 +557,16 @@ function AdvancedTable({
     // ── Notify parent of table change ─────────────────────────────────────────
     useEffect(() => {
         if (onTableChange) {
-            onTableChange({ page: currentPage, rowsPerPage, searchTerm, activeTab, sortConfig });
+            onTableChange({
+                page: currentPage,
+                rowsPerPage,
+                searchTerm,
+                activeTab,
+                sortConfig,
+                columnFilters,
+            });
         }
-    }, [currentPage, rowsPerPage, searchTerm, activeTab, sortConfig, onTableChange]);
+    }, [currentPage, rowsPerPage, searchTerm, activeTab, sortConfig, columnFilters, onTableChange]);
 
     // ── Sort handlers ─────────────────────────────────────────────────────────
     const handleSort = (columnKey, sortable) => {

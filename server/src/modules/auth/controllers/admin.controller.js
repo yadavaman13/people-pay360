@@ -7,14 +7,39 @@ import { sendResponse } from '../../../utils/response.utlis.js';
  */
 export async function adminListUsers(req, res, next) {
     try {
-        const includeDeleted = req.query.includeDeleted === 'true';
-        const rawUsers = await userService.adminListUsers(includeDeleted);
+        const {
+            page = 1,
+            limit = 10,
+            search,
+            sortBy = 'createdAt',
+            sortDir = 'desc',
+            role,
+            isActive,
+            emailVerified,
+            includeDeleted,
+        } = req.query;
 
-        const users = rawUsers.map((user) => ({
+        const safePage = Math.max(1, parseInt(page, 10) || 1);
+        const safeLimit = Math.max(1, Math.min(100, parseInt(limit, 10) || 10));
+
+        const result = await userService.adminListUsers({
+            page: safePage,
+            limit: safeLimit,
+            search,
+            sortBy,
+            sortDir,
+            role,
+            isActive,
+            emailVerified,
+            includeDeleted: includeDeleted === 'true' || includeDeleted === true,
+        });
+
+        const users = (result.users || []).map((user) => ({
             id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
+            profileImage: user.profileImage,
             role: user.role,
             isActive: user.isActive,
             isDeleted: user.isDeleted,
@@ -24,12 +49,21 @@ export async function adminListUsers(req, res, next) {
             updatedAt: user.updatedAt,
         }));
 
+        const totalCount = result.totalCount || 0;
+        const totalPages = Math.ceil(totalCount / safeLimit) || 1;
+
         return sendResponse({
             res,
             statusCode: 200,
             message: 'Users retrieved successfully',
             success: true,
             users,
+            pagination: {
+                page: safePage,
+                limit: safeLimit,
+                totalCount,
+                totalPages,
+            },
         });
     } catch (error) {
         next(error);

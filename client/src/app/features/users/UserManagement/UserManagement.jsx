@@ -1,18 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useContext } from 'react';
+import { UsersContext } from '../context/users.context';
 import { useUsers } from '../hooks';
 import CreateUserModal from './CreateUserModal/CreateUserModal';
+import AdvancedTable from '@/components/Shared/DataDisplay/AdvancedTable/AdvancedTable';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import Badge from '@/components/Shared/DataDisplay/Badge/Badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/Shared/Feedback/Alert/Alert';
-import {
-    UserPlus,
-    Search,
-    Users,
-    CheckCircle2,
-    AlertTriangle,
-    RefreshCw,
-    Shield,
-} from 'lucide-react';
+import { UserPlus, Users, CheckCircle2, AlertTriangle } from 'lucide-react';
 import './UserManagement.scss';
 
 const ROLE_DISPLAY_MAP = {
@@ -25,19 +19,16 @@ const ROLE_DISPLAY_MAP = {
 
 function UserManagement() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const {
-        filteredUsers,
-        loading,
-        error,
-        searchQuery,
-        setSearchQuery,
-        roleFilter,
-        setRoleFilter,
-        notification,
-        setNotification,
-        fetchUsers,
-        handleUserCreated,
-    } = useUsers();
+
+    // 1. Read Path: Read state directly from UsersContext per FEATURE_DEVELOPMENT_GUIDE.md
+    const { users, totalCount, loading, error, notification } = useContext(UsersContext);
+
+    // 2. Action Path: Call useUsers for action handlers only
+    const { loadUsers, handleTableChange, handleUserCreated, dismissNotification } = useUsers();
+
+    useEffect(() => {
+        loadUsers();
+    }, [loadUsers]);
 
     const formatDate = (dateString) => {
         if (!dateString) return '—';
@@ -48,6 +39,121 @@ function UserManagement() {
             year: 'numeric',
         });
     };
+
+    // Augmented dataset for searching and sorting in AdvancedTable
+    const tableData = useMemo(() => {
+        return users.map((u) => {
+            const fullName = `${u.firstName || ''} ${u.lastName || ''}`.trim() || '—';
+            const roleName = ROLE_DISPLAY_MAP[u.role] || u.role;
+            const statusName = u.isActive ? 'Active' : 'Inactive';
+            const verifiedName = u.emailVerified ? 'Verified' : 'Pending';
+
+            return {
+                ...u,
+                fullName,
+                roleName,
+                statusName,
+                verifiedName,
+            };
+        });
+    }, [users]);
+
+    const columns = useMemo(
+        () => [
+            {
+                key: 'fullName',
+                label: 'User',
+                sortable: true,
+                render: (_val, row) => {
+                    const initials =
+                        `${(row.firstName || '')[0] || ''}${(row.lastName || '')[0] || ''}`.toUpperCase();
+                    return (
+                        <div className="user-name-cell">
+                            <div className="avatar-circle">{initials}</div>
+                            <div className="name-details">
+                                <span className="full-name">{row.fullName}</span>
+                            </div>
+                        </div>
+                    );
+                },
+            },
+            {
+                key: 'email',
+                label: 'Email',
+                sortable: true,
+                render: (val) => <span className="user-email-cell">{val}</span>,
+            },
+            {
+                key: 'roleName',
+                label: 'Role',
+                sortable: true,
+                render: (val) => (
+                    <span className="user-role-cell">
+                        <span className="role-text">{val}</span>
+                    </span>
+                ),
+            },
+            {
+                key: 'statusName',
+                label: 'Status',
+                sortable: true,
+                render: (_val, row) => (
+                    <Badge variant={row.isActive ? 'success' : 'neutral'} type="light">
+                        {row.statusName}
+                    </Badge>
+                ),
+            },
+            {
+                key: 'verifiedName',
+                label: 'Email Verified',
+                sortable: true,
+                render: (_val, row) => (
+                    <span
+                        className={`verification-tag ${row.emailVerified ? 'verified' : 'unverified'}`}
+                    >
+                        {row.verifiedName}
+                    </span>
+                ),
+            },
+            {
+                key: 'createdAt',
+                label: 'Created At',
+                sortable: true,
+                render: (val) => <span className="date-cell">{formatDate(val)}</span>,
+            },
+        ],
+        [],
+    );
+
+    const filterConfig = useMemo(
+        () => [
+            {
+                key: 'roleName',
+                label: 'Role',
+                type: 'select',
+                options: [
+                    'Admin',
+                    'HR Payroll Manager',
+                    'HR Manager',
+                    'HR Payroll User',
+                    'Employee',
+                ],
+            },
+            {
+                key: 'statusName',
+                label: 'Status',
+                type: 'select',
+                options: ['Active', 'Inactive'],
+            },
+            {
+                key: 'verifiedName',
+                label: 'Email Verified',
+                type: 'select',
+                options: ['Verified', 'Pending'],
+            },
+        ],
+        [],
+    );
 
     return (
         <div className="user-management-page">
@@ -64,16 +170,6 @@ function UserManagement() {
                 </div>
 
                 <div className="header-actions">
-                    <Button
-                        variant="secondary"
-                        size="md"
-                        onClick={fetchUsers}
-                        disabled={loading}
-                        className="refresh-btn"
-                    >
-                        <RefreshCw size={16} className={loading ? 'spinning' : ''} />
-                    </Button>
-
                     <Button
                         variant="primary"
                         size="md"
@@ -105,7 +201,7 @@ function UserManagement() {
                             <button
                                 type="button"
                                 className="banner-dismiss"
-                                onClick={() => setNotification(null)}
+                                onClick={dismissNotification}
                             >
                                 &times;
                             </button>
@@ -121,115 +217,27 @@ function UserManagement() {
                 </Alert>
             )}
 
-            <div className="user-filters-bar">
-                <div className="search-input-box">
-                    <Search size={16} className="search-icon" />
-                    <input
-                        type="text"
-                        placeholder="Search by name or email..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="search-field"
-                    />
-                    {searchQuery && (
-                        <button
-                            type="button"
-                            className="search-clear"
-                            onClick={() => setSearchQuery('')}
-                        >
-                            &times;
-                        </button>
-                    )}
-                </div>
-
-                <div className="role-filter-box">
-                    <select
-                        value={roleFilter}
-                        onChange={(e) => setRoleFilter(e.target.value)}
-                        className="role-filter-select"
-                    >
-                        <option value="ALL">All Roles</option>
-                        <option value="EMPLOYEE">Employee</option>
-                        <option value="HR_MANAGER">HR Manager</option>
-                        <option value="HR_PAYROLL_USER">HR Payroll User</option>
-                        <option value="HR_PAYROLL_MANAGER">HR Payroll Manager</option>
-                        <option value="ADMIN">Administrator</option>
-                    </select>
-                </div>
-            </div>
-
-            <div className="users-table-card">
-                {loading ? (
-                    <div className="table-state-wrapper">
-                        <RefreshCw size={28} className="spinning text-muted" />
-                        <p>Loading user accounts...</p>
-                    </div>
-                ) : filteredUsers.length === 0 ? (
-                    <div className="table-state-wrapper">
-                        <Shield size={36} className="text-muted" />
-                        <h3>No users found</h3>
-                        <p>
-                            {searchQuery || roleFilter !== 'ALL'
-                                ? 'No accounts match the current filter criteria.'
-                                : 'No user accounts available. Create your first user account.'}
-                        </p>
-                    </div>
-                ) : (
-                    <div className="table-scroll-container">
-                        <table className="users-table">
-                            <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Email Verified</th>
-                                    <th>Created At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredUsers.map((u) => {
-                                    const roleLabel = ROLE_DISPLAY_MAP[u.role] || u.role;
-                                    const initials =
-                                        `${(u.firstName || '')[0] || ''}${(u.lastName || '')[0] || ''}`.toUpperCase();
-
-                                    return (
-                                        <tr key={u.id}>
-                                            <td className="user-name-cell">
-                                                <div className="avatar-circle">{initials}</div>
-                                                <div className="name-details">
-                                                    <span className="full-name">
-                                                        {u.firstName} {u.lastName}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="user-email-cell">{u.email}</td>
-                                            <td className="user-role-cell">
-                                                <span className="role-text">{roleLabel}</span>
-                                            </td>
-                                            <td>
-                                                <Badge
-                                                    variant={u.isActive ? 'success' : 'neutral'}
-                                                    type="light"
-                                                >
-                                                    {u.isActive ? 'Active' : 'Inactive'}
-                                                </Badge>
-                                            </td>
-                                            <td>
-                                                <span
-                                                    className={`verification-tag ${u.emailVerified ? 'verified' : 'unverified'}`}
-                                                >
-                                                    {u.emailVerified ? 'Verified' : 'Pending'}
-                                                </span>
-                                            </td>
-                                            <td className="date-cell">{formatDate(u.createdAt)}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+            <div className="user-table-wrapper">
+                <AdvancedTable
+                    columns={columns}
+                    data={tableData}
+                    loading={loading}
+                    serverSide={true}
+                    totalCount={totalCount}
+                    onTableChange={handleTableChange}
+                    searchable={true}
+                    searchPlaceholder="Search users by name, email, or role..."
+                    showColumnSorting={true}
+                    showSortDropdown={true}
+                    showFilter={true}
+                    filterConfig={filterConfig}
+                    showRefresh={true}
+                    onRefresh={() => loadUsers()}
+                    showRowsPerPage={true}
+                    showResultsCount={true}
+                    showSerialNumber={false}
+                    initialRowsPerPage={10}
+                />
             </div>
 
             <CreateUserModal

@@ -3,7 +3,7 @@ import {
     getUserById,
     updateUser,
     softDeleteUser,
-    listUsers,
+    listUsersWithPagination,
     getUserByEmail,
     getDeletedUserByEmail,
     createUser,
@@ -91,11 +91,11 @@ export async function adminGetUserById(id) {
 }
 
 /**
- * List users (Admin helper)
- * @param {boolean} includeDeleted
+ * List users with pagination and search (Admin helper)
+ * @param {object} [params]
  */
-export async function adminListUsers(includeDeleted = false) {
-    return listUsers(includeDeleted);
+export async function adminListUsers(params = {}) {
+    return listUsersWithPagination(params);
 }
 
 /**
