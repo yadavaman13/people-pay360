@@ -71,6 +71,9 @@ function DashboardLayout({ onLogout }) {
             path: `/dashboard/user/attendance`,
             roles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER', 'EMPLOYEE'],
         },
+        ...dynamicNavItems.filter(
+            (item) => !['Users', 'Home', 'Settings', 'Attendance'].includes(item.label),
+        ),
     ];
 
     const handleToggleSidebar = () => {

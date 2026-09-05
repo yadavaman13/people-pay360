@@ -152,14 +152,6 @@ function PayrunsListPage() {
                 )}
             </div>
 
-            {/* Useful Note matching Wireframe specification */}
-            <div className="payruns-list-page__note">
-                <p>
-                    <strong>Useful note:</strong> each Payrun represents one payroll period and
-                    groups the payslips generated for that period.
-                </p>
-            </div>
-
             {/* Server Pagination */}
             {pagination.totalPages > 1 && (
                 <div className="payruns-list-page__pagination">

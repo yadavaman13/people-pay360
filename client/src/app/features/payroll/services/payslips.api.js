@@ -1,10 +1,20 @@
 import axios from 'axios';
 import { downloadPdfFromApi } from '@/utils/pdfDownload';
+import { fetchPayruns, fetchPayrunWarnings as fetchWarningsByPayrun } from './payroll.api';
 
 const payslipApiInstance = axios.create({
     baseURL: '/api/payslips',
     withCredentials: true,
 });
+
+/**
+ * Fetch paginated payslips with optional payrun, employee, and status filters
+ * @param {object} [params={}] - { payrunId, employeeId, status, page, limit }
+ */
+export async function fetchPayslips(params = {}) {
+    const response = await payslipApiInstance.get('/', { params });
+    return response.data;
+}
 
 /**
  * Fetch all payslips for a given payrun ID
@@ -15,6 +25,22 @@ export async function fetchPayslipsByPayrun(payrunId) {
         params: { payrunId },
     });
     return response.data;
+}
+
+/**
+ * Fetch payrun list for period dropdown options
+ * @param {object} [params={ limit: 50 }]
+ */
+export async function fetchPayrunsForDropdown(params = { limit: 50 }) {
+    return await fetchPayruns(params);
+}
+
+/**
+ * Fetch warnings for a specific payrun to cross-reference employee warnings
+ * @param {string} payrunId
+ */
+export async function fetchPayrunWarnings(payrunId) {
+    return await fetchWarningsByPayrun(payrunId);
 }
 
 /**

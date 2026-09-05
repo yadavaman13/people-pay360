@@ -61,25 +61,6 @@
         gap: variables.$spacing-md;
     }
 
-    &__note {
-        background-color: variables.$color-gray-50;
-        border: 1px solid variables.$color-gray-200;
-        border-radius: variables.$radius-medium;
-        padding: variables.$spacing-md variables.$spacing-lg;
-        margin-bottom: variables.$spacing-xl;
-
-        p {
-            margin: 0;
-            font-size: variables.$font-size-sm;
-            color: variables.$color-gray-600;
-            line-height: 1.5;
-
-            strong {
-                color: variables.$color-gray-800;
-            }
-        }
-    }
-
     &__pagination {
         display: flex;
         justify-content: center;
@@ -88,10 +69,6 @@
 
     @include variables.mobile {
         padding: variables.$spacing-md variables.$spacing-sm variables.$spacing-xl;
-
-        &__note {
-            padding: variables.$spacing-sm variables.$spacing-md;
-        }
 
         &__empty {
             padding: variables.$spacing-lg variables.$spacing-md;

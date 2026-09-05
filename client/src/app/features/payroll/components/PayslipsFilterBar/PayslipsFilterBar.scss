@@ -1,0 +1,84 @@
+@use '@/styles/variables' as variables;
+
+.payslips-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: variables.$spacing-md;
+    width: 100%;
+    margin-bottom: variables.$spacing-lg;
+
+    &__new {
+        flex-shrink: 0;
+
+        .payslips-filter-bar__btn-new {
+            min-width: 90px;
+            height: 40px;
+            font-weight: 600;
+        }
+    }
+
+    &__search {
+        flex: 1;
+        max-width: 480px;
+
+        .payslips-filter-bar__search-input {
+            width: 100%;
+        }
+    }
+
+    &__period {
+        width: 220px;
+        min-width: 180px;
+        flex-shrink: 0;
+
+        .payslips-filter-bar__period-dropdown {
+            width: 100%;
+        }
+    }
+
+    @include variables.tablet {
+        flex-wrap: wrap;
+
+        &__new {
+            order: 1;
+        }
+
+        &__period {
+            order: 2;
+            margin-left: auto;
+        }
+
+        &__search {
+            order: 3;
+            flex: 1 1 100%;
+            max-width: 100%;
+            margin-top: variables.$spacing-xs;
+        }
+    }
+
+    @include variables.mobile {
+        flex-direction: column;
+        align-items: stretch;
+        gap: variables.$spacing-sm;
+        margin-bottom: variables.$spacing-md;
+
+        &__new,
+        &__search,
+        &__period {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+
+            .payslips-filter-bar__btn-new {
+                width: 100%;
+                min-height: 48px;
+            }
+
+            .payslips-filter-bar__search-input,
+            .payslips-filter-bar__period-dropdown {
+                width: 100%;
+                min-height: 44px;
+            }
+        }
+    }
+}

@@ -1,0 +1,149 @@
+@use '@/styles/variables' as variables;
+
+.payslips-mobile-card {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-medium;
+    padding: variables.$spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-sm;
+    cursor: pointer;
+    min-height: 48px;
+    box-sizing: border-box;
+    box-shadow: variables.$shadow-sm;
+
+    @include variables.transition-ease;
+
+    &:hover {
+        border-color: variables.$color-primary;
+        box-shadow: variables.$shadow-md;
+    }
+
+    &:active {
+        background-color: variables.$color-gray-50;
+        border-color: variables.$color-primary;
+        transform: scale(0.99);
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: variables.$spacing-sm;
+    }
+
+    &__emp-title {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .emp-name {
+            font-size: variables.$font-size-md;
+            font-weight: 700;
+            color: variables.$color-gray-900;
+            line-height: 1.3;
+        }
+
+        .emp-code {
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-500;
+        }
+    }
+
+    &__badge-wrapper {
+        flex-shrink: 0;
+    }
+
+    &__warning-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .warning-icon {
+            margin-right: 4px;
+        }
+    }
+
+    &__meta-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-500;
+        border-top: 1px dashed variables.$color-gray-200;
+        padding-top: variables.$spacing-xs;
+        gap: variables.$spacing-xs;
+
+        .period-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            .calendar-icon {
+                color: variables.$color-gray-500;
+            }
+        }
+
+        .structure-chip {
+            background-color: variables.$color-gray-100;
+            padding: 2px 8px;
+            border-radius: variables.$radius-tiny;
+            color: variables.$color-gray-700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
+        }
+    }
+
+    &__metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        background-color: variables.$color-gray-50;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-small;
+        padding: variables.$spacing-sm;
+        gap: variables.$spacing-xs;
+        text-align: center;
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .metric-label {
+                font-size: variables.$font-size-xxs;
+                text-transform: uppercase;
+                color: variables.$color-gray-500;
+                letter-spacing: 0.05em;
+            }
+
+            .metric-value {
+                font-size: variables.$font-size-sm;
+                font-weight: 600;
+                color: variables.$color-gray-800;
+
+                &--net {
+                    color: variables.$color-success;
+                    font-weight: 700;
+                }
+            }
+        }
+    }
+
+    &__footer {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: variables.$spacing-xs;
+
+        .card-cta {
+            font-size: variables.$font-size-xs;
+            color: variables.$color-primary;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+    }
+}
