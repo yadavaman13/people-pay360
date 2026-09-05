@@ -55,6 +55,7 @@ export async function createContract(data, user) {
         jobPositionId: data.jobPositionId || employee.jobPositionId || null,
         workingScheduleId: data.workingScheduleId || employee.workingScheduleId || null,
         status,
+        maxPunchesPerDay: data.maxPunchesPerDay !== undefined ? Number(data.maxPunchesPerDay) : 3,
         notes: data.notes || null,
         createdBy: user.id,
     };
@@ -147,6 +148,7 @@ export async function updateContract(id, updateData, _user) {
         'jobPositionId',
         'workingScheduleId',
         'status',
+        'maxPunchesPerDay',
         'notes',
     ];
 
@@ -156,6 +158,8 @@ export async function updateContract(id, updateData, _user) {
                 sanitized[f] = String(updateData[f]);
             } else if (f === 'status' && updateData[f]) {
                 sanitized[f] = updateData[f].toUpperCase();
+            } else if (f === 'maxPunchesPerDay') {
+                sanitized[f] = Number(updateData[f]);
             } else {
                 sanitized[f] = updateData[f];
             }

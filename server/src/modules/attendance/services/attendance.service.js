@@ -1,6 +1,7 @@
 import * as attendanceDao from '../../../dao/attendance.dao.js';
 import * as scheduleDao from '../../../dao/schedule.dao.js';
 import * as employeeDao from '../../../dao/employee.dao.js';
+import * as contractDao from '../../../dao/contract.dao.js';
 import { AppError } from '../../../utils/appError.js';
 
 /**
@@ -89,16 +90,47 @@ async function evaluateAttendanceStatus(employee, checkInTime, checkOutTime, wor
 }
 
 /**
- * Check In (Supports initial or subsequent check-in on the same calendar day)
+ * Resolve maximum allowed daily punches for an employee based on their applicable contract
+ * Default fallback is 3.
+ */
+export async function resolveMaxDailyPunches(employeeId, dateStr) {
+    try {
+        const contract =
+            (await contractDao.getApplicableContract(employeeId, dateStr, dateStr)) ||
+            (await contractDao.findActiveContractByEmployee(employeeId));
+        if (
+            contract &&
+            contract.maxPunchesPerDay !== undefined &&
+            contract.maxPunchesPerDay !== null
+        ) {
+            return Number(contract.maxPunchesPerDay);
+        }
+    } catch {
+        // Fallback gracefully on query error
+    }
+    return 3;
+}
+
+/**
+ * Check In (Supports initial or subsequent check-in on the same calendar day up to contract max limit)
  */
 export async function checkIn(user, body = {}) {
     const employee = await resolveEmployeeForUser(user, body.employeeId);
     const today = getTodayDateString();
     const now = new Date();
 
+    const maxPunches = await resolveMaxDailyPunches(employee.id, today);
+
     const existingRecord = await attendanceDao.findAttendanceByDate(employee.id, today);
 
     if (!existingRecord) {
+        if (maxPunches < 1) {
+            throw new AppError(
+                'Daily punch limit reached for your contract (maximum allowed: 0).',
+                403,
+            );
+        }
+
         // Initial check-in of the day: create parent attendance_records and first child punch
         const initialStatus = await evaluateAttendanceStatus(employee, now, null, 0);
 
@@ -119,7 +151,16 @@ export async function checkIn(user, body = {}) {
         return attendanceDao.findAttendanceById(newRecord.id);
     }
 
-    // Record already exists for today: check if there is an active (open) punch
+    // Record already exists for today: check how many punches were used so far
+    const punches = await attendanceDao.findPunchesByRecordId(existingRecord.id);
+    if (punches.length >= maxPunches) {
+        throw new AppError(
+            `Daily punch limit reached for your contract (maximum allowed: ${maxPunches}). Further check-ins are not permitted today.`,
+            403,
+        );
+    }
+
+    // Check if there is an active (open) punch
     const activePunch = await attendanceDao.findActivePunch(existingRecord.id);
     if (activePunch) {
         throw new AppError(
@@ -237,6 +278,7 @@ export async function checkOut(attendanceId, user, body = {}) {
 export async function getTodayStatus(user, explicitEmployeeId) {
     const employee = await resolveEmployeeForUser(user, explicitEmployeeId);
     const today = getTodayDateString();
+    const maxPunches = await resolveMaxDailyPunches(employee.id, today);
 
     const record = await attendanceDao.findAttendanceByDate(employee.id, today);
     if (!record) {
@@ -245,6 +287,10 @@ export async function getTodayStatus(user, explicitEmployeeId) {
             isCurrentlyCheckedIn: false,
             attendanceDate: today,
             totalWorkedHours: 0,
+            maxPunchesPerDay: maxPunches,
+            punchesUsed: 0,
+            remainingPunches: maxPunches,
+            canCheckIn: maxPunches > 0,
             activePunch: null,
             currentSessionMinutes: 0,
             punches: [],
@@ -252,6 +298,8 @@ export async function getTodayStatus(user, explicitEmployeeId) {
         };
     }
 
+    const punchesUsed = record.punches ? record.punches.length : 0;
+    const remainingPunches = Math.max(0, maxPunches - punchesUsed);
     const activePunch = record.activePunch;
     let currentSessionMinutes = 0;
     if (activePunch) {
@@ -268,6 +316,10 @@ export async function getTodayStatus(user, explicitEmployeeId) {
         isCurrentlyCheckedIn: record.isCurrentlyCheckedIn,
         attendanceDate: today,
         totalWorkedHours: Number(record.workedHours || 0),
+        maxPunchesPerDay: maxPunches,
+        punchesUsed,
+        remainingPunches,
+        canCheckIn: !record.isCurrentlyCheckedIn && remainingPunches > 0,
         activePunch,
         currentSessionMinutes,
         punches: record.punches,
