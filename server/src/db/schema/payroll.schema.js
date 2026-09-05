@@ -9,8 +9,8 @@ import {
     index,
     uniqueIndex,
     check,
-    sql,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { users } from './users.schema.js';
 import { employees } from './employees.schema.js';
 import { contracts } from './contracts.schema.js';

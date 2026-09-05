@@ -1,13 +1,5 @@
-import {
-    pgTable,
-    uuid,
-    text,
-    boolean,
-    timestamp,
-    index,
-    uniqueIndex,
-    sql,
-} from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, boolean, timestamp, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { employees } from './employees.schema.js';
 import { bankAccountTypeEnum } from './enums.schema.js';
 

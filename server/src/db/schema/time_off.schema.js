@@ -9,8 +9,8 @@ import {
     integer,
     index,
     check,
-    sql,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { employees } from './employees.schema.js';
 import { users } from './users.schema.js';
 import { allocationStatusEnum, requestStatusEnum } from './enums.schema.js';
