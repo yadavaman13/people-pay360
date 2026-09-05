@@ -33,8 +33,26 @@ export const adminUpdateRoleValidator = [
         .notEmpty()
         .withMessage('Role is required')
         .toUpperCase()
-        .isIn(['USER', 'ADMIN'])
-        .withMessage('Role must be either USER or ADMIN'),
+        .isIn(['EMPLOYEE', 'HR_MANAGER', 'HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN'])
+        .withMessage('Role must be a valid PeoplePay360 role'),
+    validateRequest,
+];
+
+export const adminCreateUserValidator = [
+    body('firstName').trim().notEmpty().withMessage('First Name is required'),
+    body('lastName').trim().notEmpty().withMessage('Last Name is required'),
+    body('email').trim().isEmail().normalizeEmail().withMessage('A valid email is required'),
+    body('role')
+        .trim()
+        .notEmpty()
+        .withMessage('Role is required')
+        .toUpperCase()
+        .isIn(['EMPLOYEE', 'HR_MANAGER', 'HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN'])
+        .withMessage('Role must be a valid PeoplePay360 role'),
+    // Security: explicitly reject sensitive fields from body
+    body('password').not().exists().withMessage('Password must not be provided'),
+    body('isActive').not().exists().withMessage('isActive must not be provided'),
+    body('emailVerified').not().exists().withMessage('emailVerified must not be provided'),
     validateRequest,
 ];
 

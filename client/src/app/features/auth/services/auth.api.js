@@ -10,13 +10,16 @@ const userApiInstance = axios.create({
     withCredentials: true,
 });
 
-export async function register({ firstName, lastName, email, password, profileImage, role }) {
-    const response = await authApiInstance.post('/register', {
+export const adminApiInstance = axios.create({
+    baseURL: '/api/admin',
+    withCredentials: true,
+});
+
+export async function adminCreateUser({ firstName, lastName, email, role }) {
+    const response = await adminApiInstance.post('/users', {
         firstName,
         lastName,
         email,
-        password,
-        profileImage,
         role,
     });
     return response.data;

@@ -2,6 +2,11 @@ import envConfig from '../../../config/env.config.js';
 import { sendResponse } from '../../../utils/response.utlis.js';
 
 export function errorHandler(err, req, res, _next) {
+    if (err.code === '23505') {
+        err.statusCode = 409;
+        err.message = 'A record with this unique value already exists.';
+    }
+
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 

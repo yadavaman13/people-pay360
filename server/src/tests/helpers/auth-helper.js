@@ -15,7 +15,7 @@ export function generateTestUserData(prefix = 'test_user') {
         lastName: 'User',
         email: `${prefix}_${timestamp}_${random}@peoplepay360.io`,
         password: 'Password@123',
-        role: 'USER',
+        role: 'EMPLOYEE',
     };
 }
 
@@ -37,7 +37,7 @@ export async function createAndLoginTestUser(overrides = {}) {
             lastName: payload.lastName,
             email: payload.email,
             password: hashedPassword,
-            role: payload.role ? String(payload.role).toUpperCase() : 'USER',
+            role: payload.role ? String(payload.role).toUpperCase() : 'EMPLOYEE',
             isActive: true,
             emailVerified: true,
         })

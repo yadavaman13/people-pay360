@@ -28,7 +28,7 @@ import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
 
 const routeModules = import.meta.glob('./features/**/*.routes.jsx', { eager: true });
 
-const DEFAULT_TAB = { activeTab: 'Analytics', activeSubTab: 'Insight' };
+const DEFAULT_TAB = { activeTab: 'Home', activeSubTab: '' };
 
 function formatSegmentToTitle(segment) {
     if (!segment) return '';

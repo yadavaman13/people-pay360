@@ -196,10 +196,6 @@ function LoginForm() {
         navigate('/reset-password');
     };
 
-    const handleSignUp = () => {
-        navigate('/register');
-    };
-
     return (
         <div className="form-panel">
             <div className="form-wrapper">
@@ -280,7 +276,7 @@ function LoginForm() {
                     </Button>
                 </form>
 
-                <SignupPrompt onSignUp={handleSignUp} />
+                <SignupPrompt />
 
                 <Dialog
                     isOpen={isRecoveryModalOpen}

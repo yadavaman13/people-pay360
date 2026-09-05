@@ -1,5 +1,4 @@
 import LoginLayout from './login/LoginLayout/LoginLayout';
-import RegisterLayout from './register/RegisterLayout/RegisterLayout';
 
 export default {
     publicRoutes: [
@@ -14,10 +13,6 @@ export default {
         {
             path: 'recover-account',
             element: <LoginLayout />,
-        },
-        {
-            path: 'register',
-            element: <RegisterLayout />,
         },
     ],
 };

@@ -1,3 +1,5 @@
+import { escapeHtml } from './utils/escapeHtml.js';
+
 const baseStyles = `font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fafafb; padding: 20px; color: #111827; margin: 0;`;
 const cardStyles = `max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);`;
 const headerStyles = `background-color: #111827; color: #ffffff; padding: 30px; text-align: center;`;
@@ -148,6 +150,77 @@ export const accountRecoveredEmailTemplate = () => {
         </div>
         <div class="footer">
           <p>&copy; ${new Date().getFullYear()} PeoplePay360 . All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+export const accountCreatedEmailTemplate = ({
+    firstName,
+    lastName,
+    email,
+    role,
+    temporaryPassword,
+}) => {
+    const roleLabels = {
+        EMPLOYEE: 'Employee',
+        HR_MANAGER: 'HR Manager',
+        HR_PAYROLL_USER: 'HR Payroll User',
+        HR_PAYROLL_MANAGER: 'HR Payroll Manager',
+        ADMIN: 'Administrator',
+    };
+
+    const safeFirstName = escapeHtml(firstName);
+    const safeLastName = escapeHtml(lastName);
+    const safeEmail = escapeHtml(email);
+    const safeRole = escapeHtml(roleLabels[role] || role);
+    const safePassword = escapeHtml(temporaryPassword);
+
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Welcome to PeoplePay360 — Your Account Details</title>
+      <style>
+        ${emailStyles}
+        .cred-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .cred-table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; font-size: 15px; }
+        .cred-table td.label { font-weight: 600; color: #374151; width: 40%; }
+        .cred-table td.val { color: #111827; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>PeoplePay360</h1>
+        </div>
+        <div class="content">
+          <p>Hello ${safeFirstName} ${safeLastName},</p>
+          <p>Your PeoplePay360 account has been created by an administrator. Here are your account details and login credentials:</p>
+          
+          <table class="cred-table">
+            <tr>
+              <td class="label">Login Email:</td>
+              <td class="val">${safeEmail}</td>
+            </tr>
+            <tr>
+              <td class="label">Assigned Role:</td>
+              <td class="val">${safeRole}</td>
+            </tr>
+          </table>
+
+          <p style="margin-bottom: 8px; font-weight: 600; color: #374151;">Temporary Password:</p>
+          <div class="otp-box" style="font-size: 24px; letter-spacing: 2px;">${safePassword}</div>
+
+          <p>Please use these credentials to log in to your account.</p>
+          <p class="note"><strong>Security Notice:</strong> This is a temporary password. For your security, you are strongly advised to change your password immediately after logging in.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} PeoplePay360. All rights reserved.</p>
         </div>
       </div>
     </body>

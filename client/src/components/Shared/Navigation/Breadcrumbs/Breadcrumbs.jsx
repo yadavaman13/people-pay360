@@ -4,7 +4,6 @@ import {
     // Briefcase as ProjectsIcon,
     // CheckSquare as TasksIcon,
     // Settings as SettingsIcon,
-    // TrendingUp as AnalyticsIcon,
 } from 'lucide-react';
 import './Breadcrumbs.scss';
 
@@ -28,8 +27,6 @@ function Breadcrumbs({
     //     switch (tabName) {
     //         case 'Home':
     //             return <HomeIcon size={size} strokeWidth={stroke} />;
-    //         case 'Analytics':
-    //             return <AnalyticsIcon size={size} strokeWidth={stroke} />;
     //         case 'Projects':
     //             return <ProjectsIcon size={size} strokeWidth={stroke} />;
     //         case 'Tasks':

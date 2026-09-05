@@ -103,23 +103,25 @@ export const useAuth = () => {
         }
     };
 
-    const handleRegister = async ({ firstName, lastName, email, password, role, profileImage }) => {
+    const handleRegister = async () => {
+        const message = 'Public registration is disabled. Contact your administrator.';
+        setError(message);
+        throw new Error(message);
+    };
+
+    const handleAdminCreateUser = async ({ firstName, lastName, email, role }) => {
         setError(null);
         try {
-            const data = await authService.register({
+            const data = await authService.adminCreateUser({
                 firstName,
                 lastName,
                 email,
-                password,
                 role,
-                profileImage,
             });
-            const userData = data.user || data.data?.user || null;
-            setUser(userData);
             return data;
         } catch (err) {
-            console.error('Error in handleRegister:', err);
-            setError(err.response?.data?.message || err.message || 'Registration failed');
+            console.error('Error in handleAdminCreateUser:', err);
+            setError(err.response?.data?.message || err.message || 'User creation failed');
             throw err;
         }
     };
@@ -249,6 +251,7 @@ export const useAuth = () => {
         handleSendVerificationOtp,
         handleVerifyEmail,
         handleRegister,
+        handleAdminCreateUser,
         handleUpdateProfile,
         handleUploadAvatar,
         handleRequestPasswordReset,

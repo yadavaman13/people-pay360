@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import * as authController from '../controllers/auth.controller.js';
 import { protect, rateLimiter } from '../middleware/auth.middleware.js';
+import { sendResponse } from '../../../utils/response.utlis.js';
 import {
-    registerValidator,
     loginValidator,
     changePasswordValidator,
     forgotPasswordValidator,
@@ -18,7 +18,14 @@ const router = Router();
 const authRateLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, maxRequests: 6 }); //rate limiting
 
 // Public Routes
-router.post('/register', authRateLimiter, registerValidator, authController.register);
+router.post('/register', (req, res) => {
+    return sendResponse({
+        res,
+        statusCode: 410,
+        message: 'Public registration is not available. Contact your administrator.',
+        success: false,
+    });
+});
 router.post(
     '/send-verification-otp',
     authRateLimiter,
