@@ -28,7 +28,6 @@ export const users = pgTable(
         lastName: text('last_name').notNull(),
         email: text('email').unique().notNull(),
         password: text('password'),
-        googleId: text('google_id').unique(),
         profileImage: text('profile_image').default(
             'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
         ),
@@ -41,7 +40,6 @@ export const users = pgTable(
         isActive: boolean('is_active').default(true).notNull(),
 
         // Soft-delete: 15-day recovery window for local accounts.
-        // Google accounts bypass recovery and are hard-deleted.
         isDeleted: boolean('is_deleted').default(false).notNull(),
         deletedAt: timestamp('deleted_at', { withTimezone: true }),
         recoveryExpiresAt: timestamp('recovery_expires_at', { withTimezone: true }),
@@ -52,7 +50,6 @@ export const users = pgTable(
     (table) => {
         return {
             emailIdx: index('users_email_idx').on(table.email),
-            googleIdIdx: index('users_google_id_idx').on(table.googleId),
             roleIdx: index('users_role_idx').on(table.role),
             isDeletedIdx: index('users_is_deleted_idx').on(table.isDeleted),
             deletedAtIdx: index('users_deleted_at_idx').on(table.deletedAt),

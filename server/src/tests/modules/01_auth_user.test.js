@@ -50,24 +50,19 @@ describe('01: Auth & Admin User Management API', () => {
     });
 
     describe('Public Registration Disabled', () => {
-        it('POST /api/auth/register should return 410 Gone', async () => {
-            const payload = {
-                firstName: 'Test',
-                lastName: 'User',
-                email: 'public_register@company.com',
-                password: 'Password123!',
-            };
-
-            const res = await request(app).post('/api/auth/register').send(payload);
+        it('should return 410 Gone for public registration', async () => {
+            const res = await request(app).post('/api/auth/register').send({
+                email: 'public@example.com',
+                password: 'Password@123',
+            });
 
             docLogger.record({
-                scenario: 'Public Registration Disabled (410 Gone)',
+                scenario: 'Public Registration Attempt',
                 method: 'POST',
                 endpoint: '/api/auth/register',
-                requestBody: payload,
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Self-service registration is disabled; users must be created by administrators.',
+                notes: 'HRMS enterprise policies disable public self-registration. Admin provisioning required.',
             });
 
             expect(res.status).toBe(410);
@@ -77,21 +72,19 @@ describe('01: Auth & Admin User Management API', () => {
 
     describe('Authentication Endpoints', () => {
         it('POST /api/auth/login should reject invalid credentials (401)', async () => {
-            const payload = {
-                email: 'nonexistent@peoplepay360.io',
-                password: 'WrongPassword@123',
-            };
-
-            const res = await request(app).post('/api/auth/login').send(payload);
+            const res = await request(app).post('/api/auth/login').send({
+                email: employeeUser.user.email,
+                password: 'WrongPassword@999',
+            });
 
             docLogger.record({
-                scenario: 'Login with Invalid Credentials (Failure)',
+                scenario: 'Login with Invalid Password',
                 method: 'POST',
                 endpoint: '/api/auth/login',
-                requestBody: payload,
+                requestBody: { email: employeeUser.user.email, password: '***' },
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Returns 401 when email or password is incorrect.',
+                notes: 'Authentication rejection for invalid password.',
             });
 
             expect(res.status).toBe(401);
@@ -99,42 +92,37 @@ describe('01: Auth & Admin User Management API', () => {
         });
 
         it('POST /api/auth/login should authenticate successfully and set cookie (200)', async () => {
-            const testCredentials = generateTestUserData('login_test');
-            await createAndLoginTestUser(testCredentials);
-
-            const payload = {
-                email: testCredentials.email,
-                password: testCredentials.password,
-            };
-
-            const res = await request(app).post('/api/auth/login').send(payload);
+            const res = await request(app).post('/api/auth/login').send({
+                email: employeeUser.user.email,
+                password: employeeUser.rawPassword,
+            });
 
             docLogger.record({
-                scenario: 'User Login (Success)',
+                scenario: 'Login Success (Session Cookie Issued)',
                 method: 'POST',
                 endpoint: '/api/auth/login',
-                requestBody: payload,
+                requestBody: { email: employeeUser.user.email, password: '***' },
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Authenticates user and returns user profile alongside HTTP-only session cookie.',
+                notes: 'Sets HTTP-only JWT token cookie upon successful authentication.',
             });
 
             expect(res.status).toBe(200);
             expect(res.body.success).toBe(true);
-            expect(res.body.user).toBeDefined();
-            expect(res.body.user.email).toBe(testCredentials.email.toLowerCase());
+            expect(res.body.user || res.body.data?.user).toBeDefined();
+            expect(res.headers['set-cookie']).toBeDefined();
         });
 
         it('GET /api/auth/get-me should return 401 when unauthenticated', async () => {
             const res = await request(app).get('/api/auth/get-me');
 
             docLogger.record({
-                scenario: 'Get Current User Unauthenticated (Failure)',
+                scenario: 'Get Profile Unauthenticated',
                 method: 'GET',
                 endpoint: '/api/auth/get-me',
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Protected route returns 401 when auth cookie/token is absent.',
+                notes: 'Protected session endpoints return 401 when session cookie is absent.',
             });
 
             expect(res.status).toBe(401);
@@ -147,35 +135,34 @@ describe('01: Auth & Admin User Management API', () => {
                 .set('Cookie', employeeUser.cookie);
 
             docLogger.record({
-                scenario: 'Get Current User Profile (Success)',
+                scenario: 'Get Current Authenticated Profile',
                 method: 'GET',
                 endpoint: '/api/auth/get-me',
-                headers: { Cookie: 'token=JWT_COOKIE_VALUE' },
+                headers: { Cookie: 'token=JWT_SESSION_TOKEN' },
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Returns the currently logged-in user profile details.',
+                notes: 'Returns current authenticated user identity record.',
             });
 
             expect(res.status).toBe(200);
             expect(res.body.success).toBe(true);
-            expect(res.body.user.email).toBe(employeeUser.user.email.toLowerCase());
+            const profile = res.body.user || res.body.data?.user;
+            expect(profile.email).toBe(employeeUser.user.email);
         });
 
         it('POST /api/auth/logout should clear session (200)', async () => {
-            const logoutUser = await createAndLoginTestUser({ role: 'EMPLOYEE' });
-
             const res = await request(app)
                 .post('/api/auth/logout')
-                .set('Cookie', logoutUser.cookie);
+                .set('Cookie', employeeUser.cookie);
 
             docLogger.record({
-                scenario: 'User Logout (Success)',
+                scenario: 'Logout Session',
                 method: 'POST',
                 endpoint: '/api/auth/logout',
-                headers: { Cookie: 'token=JWT_COOKIE_VALUE' },
+                headers: { Cookie: 'token=JWT_SESSION_TOKEN' },
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Clears authentication cookies and blacklists session token in Redis.',
+                notes: 'Terminates user session and blacklists token.',
             });
 
             expect(res.status).toBe(200);
@@ -185,30 +172,24 @@ describe('01: Auth & Admin User Management API', () => {
 
     describe('Admin User Provisioning & RBAC', () => {
         it('POST /api/admin/users should return 403 when called by non-admin', async () => {
+            const nonAdmin = await createAndLoginTestUser({ role: 'EMPLOYEE' });
             const res = await request(app)
                 .post('/api/admin/users')
-                .set('Cookie', employeeUser.cookie)
+                .set('Cookie', nonAdmin.cookie)
                 .send({
-                    firstName: 'Alice',
-                    lastName: 'Smith',
-                    email: `alice_${Date.now()}@company.com`,
-                    role: 'EMPLOYEE',
+                    firstName: 'Unauthorized',
+                    lastName: 'Attempt',
+                    email: `unauth_${Date.now()}@company.com`,
+                    role: 'HR_MANAGER',
                 });
 
             docLogger.record({
-                scenario: 'Create User by Non-Admin (Forbidden 403)',
+                scenario: 'Admin User Creation by Non-Admin (Forbidden)',
                 method: 'POST',
                 endpoint: '/api/admin/users',
-                headers: { Cookie: 'token=EMPLOYEE_COOKIE' },
-                requestBody: {
-                    firstName: 'Alice',
-                    lastName: 'Smith',
-                    email: 'alice@company.com',
-                    role: 'EMPLOYEE',
-                },
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Non-admin users cannot provision accounts.',
+                notes: 'RBAC restriction prevents regular employees from provisioning user accounts.',
             });
 
             expect(res.status).toBe(403);
@@ -217,9 +198,9 @@ describe('01: Auth & Admin User Management API', () => {
 
         it('POST /api/admin/users should provision new user when called by ADMIN (201)', async () => {
             const payload = {
-                firstName: 'Clara',
-                lastName: 'Oswald',
-                email: `clara_${Date.now()}_${Math.floor(Math.random() * 10000)}@peoplepay360.io`,
+                firstName: 'Hr',
+                lastName: 'Specialist',
+                email: `hr_specialist_${Date.now()}@company.com`,
                 role: 'HR_PAYROLL_USER',
             };
 
@@ -229,84 +210,86 @@ describe('01: Auth & Admin User Management API', () => {
                 .send(payload);
 
             docLogger.record({
-                scenario: 'Admin Create New User (Success 201)',
+                scenario: 'Admin Provisions New HR User',
                 method: 'POST',
                 endpoint: '/api/admin/users',
-                headers: { Cookie: 'token=ADMIN_COOKIE' },
+                headers: { Cookie: 'token=ADMIN_JWT_SESSION' },
                 requestBody: payload,
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Admin provisions new organization user with randomized initial temporary password.',
+                notes: 'ADMIN provisions a new user with auto-generated temporary password and welcome email.',
             });
 
             expect(res.status).toBe(201);
             expect(res.body.success).toBe(true);
-            expect(res.body.user).toBeDefined();
-            createdUserId = res.body.user.id;
+            const created = res.body.user || res.body.data;
+            expect(created.email).toBe(payload.email);
+            expect(created.role).toBe('HR_PAYROLL_USER');
+            createdUserId = created.id;
         });
 
         it('GET /api/admin/users should list registered users (200)', async () => {
-            const res = await request(app).get('/api/admin/users').set('Cookie', adminUser.cookie);
+            const res = await request(app)
+                .get('/api/admin/users?page=1&limit=10')
+                .set('Cookie', adminUser.cookie);
 
             docLogger.record({
-                scenario: 'Admin List Users (Success 200)',
+                scenario: 'List System Users',
                 method: 'GET',
                 endpoint: '/api/admin/users',
-                headers: { Cookie: 'token=ADMIN_COOKIE' },
+                queryParams: { page: '1', limit: '10' },
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Lists all organizational accounts with role and status metadata.',
+                notes: 'Paginated user management directory.',
             });
 
             expect(res.status).toBe(200);
             expect(res.body.success).toBe(true);
-            expect(Array.isArray(res.body.users)).toBe(true);
+            const list = res.body.users || res.body.data;
+            expect(Array.isArray(list)).toBe(true);
+            expect(list.length).toBeGreaterThan(0);
         });
 
         it('GET /api/admin/users/:id should return single user details (200)', async () => {
-            if (!createdUserId) return;
-
             const res = await request(app)
                 .get(`/api/admin/users/${createdUserId}`)
                 .set('Cookie', adminUser.cookie);
 
             docLogger.record({
-                scenario: 'Admin Get User By ID (Success 200)',
+                scenario: 'Get Single User Details',
                 method: 'GET',
-                endpoint: `/api/admin/users/${createdUserId}`,
-                headers: { Cookie: 'token=ADMIN_COOKIE' },
+                endpoint: `/api/admin/users/:id`,
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Retrieves user details by unique UUID identifier.',
+                notes: 'Fetches detailed profile information for a specific user ID.',
             });
 
             expect(res.status).toBe(200);
             expect(res.body.success).toBe(true);
-            expect(res.body.user.id).toBe(createdUserId);
+            const single = res.body.user || res.body.data;
+            expect(single.id).toBe(createdUserId);
         });
 
         it('PATCH /api/admin/users/:id/role should update role (200)', async () => {
-            if (!createdUserId) return;
-
-            const payload = { role: 'HR_PAYROLL_MANAGER' };
             const res = await request(app)
                 .patch(`/api/admin/users/${createdUserId}/role`)
                 .set('Cookie', adminUser.cookie)
-                .send(payload);
+                .send({ role: 'HR_PAYROLL_MANAGER' });
 
             docLogger.record({
-                scenario: 'Admin Update User Role (Success 200)',
+                scenario: 'Admin Updates User Role',
                 method: 'PATCH',
-                endpoint: `/api/admin/users/${createdUserId}/role`,
-                headers: { Cookie: 'token=ADMIN_COOKIE' },
-                requestBody: payload,
+                endpoint: `/api/admin/users/:id/role`,
+                requestBody: { role: 'HR_PAYROLL_MANAGER' },
                 statusCode: res.status,
                 responseBody: res.body,
-                notes: 'Updates user RBAC role in accordance with authorized hierarchy.',
+                notes: 'Promotes user to HR_PAYROLL_MANAGER and invalidates cache.',
             });
 
             expect(res.status).toBe(200);
             expect(res.body.success).toBe(true);
+            const updated = res.body.user || res.body.data;
+            expect(updated.role).toBe('HR_PAYROLL_MANAGER');
         });
     });
 });
