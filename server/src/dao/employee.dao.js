@@ -107,6 +107,45 @@ export async function findEmployeeByCode(code) {
 }
 
 /**
+ * Find employee by name, employee code, or id
+ * @param {string} identifier
+ */
+export async function findEmployeeByNameOrIdentifier(identifier) {
+    if (!identifier || typeof identifier !== 'string') return null;
+    const term = identifier.trim();
+    if (!term) return null;
+
+    // Check if UUID
+    const isUuid =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(term);
+    if (isUuid) {
+        const byId = await findEmployeeById(term);
+        if (byId) return byId;
+    }
+
+    // Check exact code
+    const byCode = await findEmployeeByCode(term);
+    if (byCode) return byCode;
+
+    // Check full name or partial name
+    const [byName] = await db
+        .select()
+        .from(employees)
+        .where(
+            or(
+                sql`lower(trim(concat(${employees.firstName}, ' ', coalesce(${employees.lastName}, '')))) = lower(${term})`,
+                ilike(employees.firstName, term),
+                ilike(employees.lastName, term),
+                ilike(employees.firstName, `%${term}%`),
+                ilike(employees.lastName, `%${term}%`),
+            ),
+        )
+        .limit(1);
+
+    return byName || null;
+}
+
+/**
  * Create a new employee record
  * @param {object} data
  * @param {object} [tx=db] Optional transaction client

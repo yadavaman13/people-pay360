@@ -22,14 +22,84 @@ function TableSkeletonRows({
                     )}
                     <td className="advanced-table-body-cell badge-column-cell"></td>
                     {effectiveColumns.map((col, cIdx) => {
+                        if (typeof col.skeletonRender === 'function') {
+                            return (
+                                <td
+                                    key={`skel-col-${col.key || cIdx}`}
+                                    className="advanced-table-body-cell"
+                                    style={col.width ? { width: col.width } : undefined}
+                                >
+                                    {col.skeletonRender(rIdx)}
+                                </td>
+                            );
+                        }
+
+                        // Employee column with avatar circle + 2 lines of text
+                        if (col.key === 'employeeName' || col.key === 'employee') {
+                            return (
+                                <td
+                                    key={`skel-col-${col.key || cIdx}`}
+                                    className="advanced-table-body-cell"
+                                    style={col.width ? { width: col.width } : undefined}
+                                >
+                                    <div className="skeleton-employee-cell">
+                                        <div className="skeleton-avatar" />
+                                        <div className="skeleton-employee-text">
+                                            <div
+                                                className="skeleton-cell-bar skeleton-title"
+                                                style={{ width: `${95 + ((rIdx * 17) % 35)}px` }}
+                                            />
+                                            <div
+                                                className="skeleton-cell-bar skeleton-subtitle"
+                                                style={{ width: `${48 + ((rIdx * 11) % 25)}px` }}
+                                            />
+                                        </div>
+                                    </div>
+                                </td>
+                            );
+                        }
+
+                        // Status badge column
+                        if (col.key === 'status') {
+                            return (
+                                <td
+                                    key={`skel-col-${col.key || cIdx}`}
+                                    className="advanced-table-body-cell"
+                                    style={col.width ? { width: col.width } : undefined}
+                                >
+                                    <div className="skeleton-badge-pill" />
+                                </td>
+                            );
+                        }
+
+                        // Action buttons column
+                        if (col.key === 'actions' || col.key === 'action') {
+                            return (
+                                <td
+                                    key={`skel-col-${col.key || cIdx}`}
+                                    className="advanced-table-body-cell"
+                                    style={col.width ? { width: col.width } : undefined}
+                                >
+                                    <div className="skeleton-action-icon" />
+                                </td>
+                            );
+                        }
+
+                        // Dynamic width based on column key
+                        const barWidth =
+                            col.key === 'wage' || col.key === 'wageFormatted'
+                                ? `${85 + ((rIdx * 11) % 25)}px`
+                                : col.key === 'periodString' || col.key === 'period'
+                                  ? `${115 + ((rIdx * 13) % 30)}px`
+                                  : `${((cIdx * 19 + rIdx * 29 + 37) % 35) + 50}%`;
+
                         return (
-                            <td key={`skel-col-${col.key}`} className="advanced-table-body-cell">
-                                <div
-                                    className="skeleton-cell-bar"
-                                    style={{
-                                        width: `${((cIdx * 19 + rIdx * 29 + 37) % 45) + 40}%`,
-                                    }}
-                                />
+                            <td
+                                key={`skel-col-${col.key || cIdx}`}
+                                className="advanced-table-body-cell"
+                                style={col.width ? { width: col.width } : undefined}
+                            >
+                                <div className="skeleton-cell-bar" style={{ width: barWidth }} />
                             </td>
                         );
                     })}

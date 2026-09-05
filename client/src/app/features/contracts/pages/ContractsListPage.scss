@@ -1,0 +1,167 @@
+@use '@/styles/variables' as variables;
+
+.contracts-list-page {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-lg;
+    padding: variables.$spacing-lg;
+    width: 100%;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md;
+        gap: variables.$spacing-md;
+    }
+
+    .contracts-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: variables.$spacing-md;
+
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-xs;
+
+            .title-row {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-sm;
+
+                .header-icon {
+                    color: variables.$color-blue-accent;
+                }
+
+                .header-title {
+                    margin: 0;
+                    font-size: variables.$font-size-xxl;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    font-family: variables.$font-sans;
+                }
+            }
+
+            .header-subtitle {
+                margin: 0;
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-600;
+                font-family: variables.$font-sans;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+
+            .create-contract-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+            }
+        }
+    }
+
+    .error-alert-wrapper {
+        margin-bottom: variables.$spacing-xs;
+
+        .retry-btn {
+            margin-top: variables.$spacing-sm;
+        }
+    }
+
+    .contracts-table-controls-left {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        flex-wrap: wrap;
+
+        .search-filter-col {
+            min-width: 260px;
+            max-width: 320px;
+
+            @include variables.mobile {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .contract-search-bar {
+                width: 100%;
+            }
+        }
+
+        .clear-filters-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: variables.$spacing-xs;
+            color: variables.$color-gray-600;
+
+            &:hover {
+                color: variables.$color-danger;
+            }
+        }
+    }
+
+    .contracts-table-card {
+        background-color: variables.$color-white;
+        border-radius: variables.$radius-large;
+        border: 1px solid variables.$color-gray-200;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+
+        .advanced-table-component {
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+
+            .table-tabs-container {
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    width: 0;
+                    height: 0;
+                }
+            }
+
+            .table-tabs-list {
+                overflow-y: hidden;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    width: 0;
+                    height: 0;
+                }
+            }
+        }
+
+        .contracts-loading-state {
+            padding: variables.$spacing-xxl;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contracts-empty-state {
+            padding: variables.$spacing-xxl;
+        }
+
+        .contracts-pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: variables.$spacing-md variables.$spacing-lg;
+            border-top: 1px solid variables.$color-gray-200;
+
+            &.is-loading {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+        }
+    }
+}

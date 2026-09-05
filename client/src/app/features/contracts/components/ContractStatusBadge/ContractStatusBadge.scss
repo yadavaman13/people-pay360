@@ -1,0 +1,83 @@
+@use '@/styles/variables' as variables;
+
+.contract-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: variables.$spacing-xs;
+    padding: variables.$spacing-xs variables.$spacing-sm;
+    border-radius: variables.$radius-medium;
+    font-family: variables.$font-sans;
+    font-size: variables.$font-size-xs;
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid transparent;
+    width: fit-content;
+    white-space: nowrap;
+
+    @include variables.transition-ease;
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    &.size-sm {
+        padding: 3px 8px;
+        font-size: variables.$font-size-xs;
+        font-weight: 500;
+        border-radius: variables.$radius-large;
+
+        .status-dot {
+            width: 5px;
+            height: 5px;
+        }
+    }
+
+    &.size-md {
+        padding: variables.$spacing-xs variables.$spacing-sm;
+        font-size: variables.$font-size-xs;
+    }
+
+    &[data-status='ACTIVE'] {
+        background-color: variables.$color-success-light;
+        color: variables.$color-success;
+        border-color: variables.$color-success-border;
+
+        .status-dot {
+            background-color: variables.$color-success;
+        }
+    }
+
+    &[data-status='DRAFT'] {
+        background-color: variables.$color-gray-100;
+        color: variables.$color-gray-600;
+        border-color: variables.$color-gray-300;
+
+        .status-dot {
+            background-color: variables.$color-gray-500;
+        }
+    }
+
+    &[data-status='EXPIRED'] {
+        background-color: variables.$color-warning-light;
+        color: variables.$color-warning;
+        border-color: variables.$color-warning-border;
+
+        .status-dot {
+            background-color: variables.$color-warning;
+        }
+    }
+
+    &[data-status='CANCELLED'] {
+        background-color: variables.$color-danger-light;
+        color: variables.$color-danger;
+        border-color: variables.$color-danger-border;
+
+        .status-dot {
+            background-color: variables.$color-danger;
+        }
+    }
+}

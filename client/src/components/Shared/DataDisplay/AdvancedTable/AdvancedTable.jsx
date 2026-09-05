@@ -24,6 +24,55 @@ import Dialog from '@/components/Shared/Feedback/Dialog';
 import './AdvancedTable.scss';
 
 /**
+ * Utility: sort table rows based on column key, direction, and column configuration
+ */
+function sortTableData(dataList, sortConfig, effectiveColumns = []) {
+    if (!sortConfig?.key || !sortConfig?.direction || !Array.isArray(dataList)) {
+        return dataList;
+    }
+    const { key, direction } = sortConfig;
+    const isAsc = direction === 'asc';
+    const targetCol = effectiveColumns.find((c) => c.key === key);
+
+    return [...dataList].sort((a, b) => {
+        if (typeof targetCol?.sortComparator === 'function') {
+            return isAsc ? targetCol.sortComparator(a, b) : targetCol.sortComparator(b, a);
+        }
+
+        let valA =
+            typeof targetCol?.sortValue === 'function' ? targetCol.sortValue(a[key], a) : a[key];
+        let valB =
+            typeof targetCol?.sortValue === 'function' ? targetCol.sortValue(b[key], b) : b[key];
+
+        const isAEmpty = valA === undefined || valA === null || valA === '';
+        const isBEmpty = valB === undefined || valB === null || valB === '';
+
+        if (isAEmpty && isBEmpty) return 0;
+        if (isAEmpty) return isAsc ? 1 : -1;
+        if (isBEmpty) return isAsc ? -1 : 1;
+
+        // 1. Numeric & Currency comparison
+        const numA = typeof valA === 'number' ? valA : parseNumeric(valA);
+        const numB = typeof valB === 'number' ? valB : parseNumeric(valB);
+        if (numA !== null && numB !== null) {
+            return isAsc ? numA - numB : numB - numA;
+        }
+
+        // 2. Date comparison
+        const dateA = valA instanceof Date ? valA : parseDate(valA);
+        const dateB = valB instanceof Date ? valB : parseDate(valB);
+        if (dateA && dateB) {
+            return isAsc ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+        }
+
+        // 3. String comparison
+        const strA = String(valA).toLowerCase();
+        const strB = String(valB).toLowerCase();
+        return isAsc ? strA.localeCompare(strB) : strB.localeCompare(strA);
+    });
+}
+
+/**
  * AdvancedTable — Highly modular, configurable data table with minimal defaults.
  */
 function AdvancedTable({
@@ -31,7 +80,9 @@ function AdvancedTable({
     data = [],
     tabs = [],
     tabFilterKey = 'status',
+    activeTab: controlledActiveTab = null,
     showTabs = null, // auto-detected from tabs.length if null
+    onTabChange = null,
     searchable = false,
     searchPlaceholder = 'Search records...',
     searchPlaceholderPrefix = 'Search by ',
@@ -66,6 +117,9 @@ function AdvancedTable({
     enableContextMenu = false,
     showScrollButtons = false,
     className = '',
+    controlsLeft = null,
+    onSortChange = null,
+    defaultSort = null,
 
     // Column Visibility & Reorder props
     showColumnToggle = false,
@@ -103,8 +157,9 @@ function AdvancedTable({
     const effectiveItemsPerPageLabel =
         itemsPerPageLabel || (activeView === 'grid' ? 'Cards per page' : 'Rows per page');
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState('all');
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+    const [internalActiveTab, setInternalActiveTab] = useState('all');
+    const activeTab = controlledActiveTab !== null ? controlledActiveTab : internalActiveTab;
+    const [sortConfig, setSortConfig] = useState(defaultSort || { key: null, direction: null });
 
     // ── Internal Editable Table Data ─────────────────────────────────────────
     const [internalData, setInternalData] = useState(data);
@@ -328,7 +383,12 @@ function AdvancedTable({
     const isFilterActive = showFilter || filterable;
 
     const processedData = useMemo(() => {
-        if (serverSide) return internalData;
+        if (serverSide) {
+            if (sortConfig.key && sortConfig.direction) {
+                return sortTableData(internalData, sortConfig, effectiveColumns);
+            }
+            return internalData;
+        }
 
         let result = [...internalData];
 
@@ -405,38 +465,7 @@ function AdvancedTable({
         }
 
         // 6. Sorting
-        if (sortConfig.key && sortConfig.direction) {
-            const { key, direction } = sortConfig;
-            const isAsc = direction === 'asc';
-            result.sort((a, b) => {
-                let valA = a[key];
-                let valB = b[key];
-
-                if (valA === undefined || valA === null || valA === '') return isAsc ? 1 : -1;
-                if (valB === undefined || valB === null || valB === '') return isAsc ? -1 : 1;
-
-                // 1. Numeric & Currency comparison
-                const numA = parseNumeric(valA);
-                const numB = parseNumeric(valB);
-                if (numA !== null && numB !== null) {
-                    return isAsc ? numA - numB : numB - numA;
-                }
-
-                // 2. Date comparison
-                const dateA = parseDate(valA);
-                const dateB = parseDate(valB);
-                if (dateA && dateB) {
-                    return isAsc
-                        ? dateA.getTime() - dateB.getTime()
-                        : dateB.getTime() - dateA.getTime();
-                }
-
-                // 3. String comparison
-                const strA = String(valA).toLowerCase();
-                const strB = String(valB).toLowerCase();
-                return isAsc ? strA.localeCompare(strB) : strB.localeCompare(strA);
-            });
-        }
+        result = sortTableData(result, sortConfig, effectiveColumns);
 
         return result;
     }, [
@@ -572,17 +601,23 @@ function AdvancedTable({
     const handleSort = (columnKey, sortable) => {
         if (!sortable) return;
         setSortConfig((prev) => {
+            let next;
             if (prev.key === columnKey) {
-                if (prev.direction === 'asc') return { key: columnKey, direction: 'desc' };
-                return { key: null, direction: null };
+                if (prev.direction === 'asc') next = { key: columnKey, direction: 'desc' };
+                else next = { key: null, direction: null };
+            } else {
+                next = { key: columnKey, direction: 'asc' };
             }
-            return { key: columnKey, direction: 'asc' };
+            if (onSortChange) onSortChange(next);
+            return next;
         });
         setCurrentPage(1);
     };
 
     const handleSortDropdownChange = (key, direction) => {
-        setSortConfig({ key, direction });
+        const next = { key, direction };
+        setSortConfig(next);
+        if (onSortChange) onSortChange(next);
         setCurrentPage(1);
     };
 
@@ -607,12 +642,21 @@ function AdvancedTable({
     }, [effectiveTabs, internalData, tabFilterKey]);
 
     const tabsWithCounts = useMemo(
-        () => effectiveTabs.map((tab) => ({ ...tab, count: tabCounts[tab.id] })),
+        () =>
+            effectiveTabs.map((tab) => ({
+                ...tab,
+                count: tab.count !== undefined ? tab.count : (tabCounts[tab.id] ?? 0),
+            })),
         [effectiveTabs, tabCounts],
     );
 
     const handleTabClick = (tabId) => {
-        setActiveTab(tabId);
+        if (controlledActiveTab === null) {
+            setInternalActiveTab(tabId);
+        }
+        if (onTabChange) {
+            onTabChange(tabId);
+        }
         setCurrentPage(1);
     };
 
@@ -687,10 +731,13 @@ function AdvancedTable({
 
     const renderExportInHeader =
         showExport && (shouldRenderTabs || headerActions || showViewToggle);
-    const hasHeaderActions =
-        shouldRenderTabs || headerActions || renderExportInHeader || showViewToggle;
+    const hasAnyHeaderAction =
+        Boolean(renderExportInHeader && visibleColumns.length > 0) ||
+        Boolean(headerActions) ||
+        Boolean(viewToggleAction);
+    const hasHeaderActions = shouldRenderTabs || hasAnyHeaderAction;
 
-    const combinedHeaderActions = (
+    const combinedHeaderActions = hasAnyHeaderAction ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {renderExportInHeader && visibleColumns.length > 0 && (
                 <TableExportMenu
@@ -705,7 +752,7 @@ function AdvancedTable({
             {headerActions}
             {viewToggleAction}
         </div>
-    );
+    ) : null;
 
     // ─────────────────────────────────────────────────────────────────────────
     return (
@@ -722,6 +769,7 @@ function AdvancedTable({
 
             {/* Controls row */}
             <TableControls
+                controlsLeft={controlsLeft}
                 searchable={searchable}
                 searchTerm={searchTerm}
                 onSearchChange={handleSearchChange}
