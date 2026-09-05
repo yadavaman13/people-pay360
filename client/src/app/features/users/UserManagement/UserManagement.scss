@@ -314,6 +314,16 @@
             font-size: variables.$font-size-xs;
         }
 
+        .user-role-cell {
+            white-space: nowrap;
+
+            .role-text {
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                color: variables.$color-gray-800;
+            }
+        }
+
         .date-cell {
             color: variables.$color-gray-500;
             white-space: nowrap;

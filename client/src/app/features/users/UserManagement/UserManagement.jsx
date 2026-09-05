@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { adminListUsers } from '../services/users.api';
+import { useState } from 'react';
+import { useUsers } from '../hooks';
 import CreateUserModal from './CreateUserModal/CreateUserModal';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import Badge from '@/components/Shared/DataDisplay/Badge/Badge';
@@ -16,69 +16,28 @@ import {
 import './UserManagement.scss';
 
 const ROLE_DISPLAY_MAP = {
-    EMPLOYEE: { label: 'Employee', variant: 'neutral' },
-    HR_MANAGER: { label: 'HR Manager', variant: 'info' },
-    HR_PAYROLL_USER: { label: 'HR Payroll User', variant: 'teal' },
-    HR_PAYROLL_MANAGER: { label: 'HR Payroll Manager', variant: 'indigo' },
-    ADMIN: { label: 'Admin', variant: 'purple' },
+    EMPLOYEE: 'Employee',
+    HR_MANAGER: 'HR Manager',
+    HR_PAYROLL_USER: 'HR Payroll User',
+    HR_PAYROLL_MANAGER: 'HR Payroll Manager',
+    ADMIN: 'Admin',
 };
 
 function UserManagement() {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [roleFilter, setRoleFilter] = useState('ALL');
-    const [notification, setNotification] = useState(null);
-
-    const fetchUsers = async () => {
-        setLoading(true);
-        setError('');
-        try {
-            const data = await adminListUsers(false);
-            setUsers(data.users || []);
-        } catch (err) {
-            console.error('Failed to load users:', err);
-            setError(err.response?.data?.message || 'Failed to load users');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchUsers();
-    }, []);
-
-    const handleUserCreated = (newUser, emailFailed) => {
-        fetchUsers();
-        if (emailFailed) {
-            setNotification({
-                type: 'warning',
-                title: 'User Created (Email Failed)',
-                message: `Account created for ${newUser.firstName} ${newUser.lastName} (${newUser.email}), but credentials email failed to deliver. Instruct the user to use the Forgot Password flow.`,
-            });
-        } else {
-            setNotification({
-                type: 'success',
-                title: 'User Created Successfully',
-                message: `Account created for ${newUser.firstName} ${newUser.lastName}. Login credentials and temporary password were sent to ${newUser.email}.`,
-            });
-        }
-    };
-
-    const filteredUsers = useMemo(() => {
-        return users.filter((u) => {
-            const matchesSearch =
-                !searchQuery ||
-                `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                u.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-            const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
-
-            return matchesSearch && matchesRole;
-        });
-    }, [users, searchQuery, roleFilter]);
+    const {
+        filteredUsers,
+        loading,
+        error,
+        searchQuery,
+        setSearchQuery,
+        roleFilter,
+        setRoleFilter,
+        notification,
+        setNotification,
+        fetchUsers,
+        handleUserCreated,
+    } = useUsers();
 
     const formatDate = (dateString) => {
         if (!dateString) return '—';
@@ -230,10 +189,7 @@ function UserManagement() {
                             </thead>
                             <tbody>
                                 {filteredUsers.map((u) => {
-                                    const roleMeta = ROLE_DISPLAY_MAP[u.role] || {
-                                        label: u.role,
-                                        variant: 'neutral',
-                                    };
+                                    const roleLabel = ROLE_DISPLAY_MAP[u.role] || u.role;
                                     const initials =
                                         `${(u.firstName || '')[0] || ''}${(u.lastName || '')[0] || ''}`.toUpperCase();
 
@@ -248,14 +204,8 @@ function UserManagement() {
                                                 </div>
                                             </td>
                                             <td className="user-email-cell">{u.email}</td>
-                                            <td>
-                                                <Badge
-                                                    variant={roleMeta.variant}
-                                                    type="light"
-                                                    showDot={true}
-                                                >
-                                                    {roleMeta.label}
-                                                </Badge>
+                                            <td className="user-role-cell">
+                                                <span className="role-text">{roleLabel}</span>
                                             </td>
                                             <td>
                                                 <Badge
