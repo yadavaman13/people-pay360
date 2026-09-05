@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.husky
+coverage
+package-lock.json
+client/dist
+client/node_modules
+server/node_modules
