@@ -1,0 +1,19 @@
+{
+    "name": "apex-template-root",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Root configuration for workspace orchestrations and Git hooks",
+    "scripts": {
+        "prepare": "husky",
+        "format": "prettier . --write",
+        "format:write": "prettier . --write",
+        "format:check": "prettier . --check"
+    },
+    "devDependencies": {
+        "eslint": "^10.8.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^17.3.0",
+        "prettier": "^3.9.6",
+        "stylelint": "^17.14.1"
+    }
+}
