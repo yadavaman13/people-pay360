@@ -7,7 +7,7 @@ import Dialog from '@/components/Shared/Feedback/Dialog';
 import { Drawer, NotificationFeed } from '@/components/Shared/Feedback/Drawer';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useDerivedProfile } from '../../auth/hooks/useDerivedProfile';
-import { Home as HomeIcon, Users as UsersIcon } from 'lucide-react';
+import { Home as HomeIcon, Users as UsersIcon, Clock as ClockIcon } from 'lucide-react';
 import './DashboardLayout.scss';
 
 function DashboardLayout({ onLogout }) {
@@ -51,6 +51,12 @@ function DashboardLayout({ onLogout }) {
                   },
               ]
             : []),
+        {
+            label: 'Attendance',
+            icon: <ClockIcon />,
+            path: `/dashboard/user/attendance`,
+            roles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER', 'EMPLOYEE'],
+        },
     ];
 
     const handleToggleSidebar = () => {
