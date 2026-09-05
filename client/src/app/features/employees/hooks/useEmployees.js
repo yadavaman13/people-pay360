@@ -124,20 +124,61 @@ export function useEmployees() {
      * Handle table changes (pagination, sorting, filters) from AdvancedTable
      */
     const handleTableChange = useCallback(
-        ({ page, rowsPerPage, searchTerm, _sortConfig, _columnFilters }) => {
+        ({ page, rowsPerPage, searchTerm, sortConfig, columnFilters }) => {
             const trimmedSearch = typeof searchTerm === 'string' ? searchTerm.trim() : '';
 
-            if (trimmedSearch !== (latestParamsRef.current.search || '')) {
-                handleSearchChange(trimmedSearch);
+            // Map department filter if selected
+            let parsedDeptId;
+            if (columnFilters?.departmentName && columnFilters.departmentName.length > 0) {
+                const selectedDeptName = columnFilters.departmentName[0];
+                const foundDept = (context.metadata?.departments || []).find(
+                    (d) => d.name === selectedDeptName,
+                );
+                if (foundDept) parsedDeptId = foundDept.id;
+            }
+
+            // Map status filter if selected
+            let parsedStatus;
+            if (columnFilters?.status && columnFilters.status.length > 0) {
+                parsedStatus = columnFilters.status[0].toUpperCase();
+            }
+
+            const isSearchChanged = trimmedSearch !== (latestParamsRef.current.search || '');
+            const isFilterChanged =
+                parsedDeptId !== latestParamsRef.current.departmentId ||
+                parsedStatus !== latestParamsRef.current.status;
+
+            if (isSearchChanged) {
+                if (searchDebounceTimerRef.current) {
+                    clearTimeout(searchDebounceTimerRef.current);
+                }
+                searchDebounceTimerRef.current = setTimeout(() => {
+                    loadEmployees({
+                        page: 1,
+                        limit: rowsPerPage || latestParamsRef.current.limit || 12,
+                        search: trimmedSearch,
+                        departmentId: parsedDeptId,
+                        status: parsedStatus,
+                        sortBy: sortConfig?.key || undefined,
+                        sortDir: sortConfig?.direction || undefined,
+                    });
+                }, 300);
             } else {
+                if (searchDebounceTimerRef.current) {
+                    clearTimeout(searchDebounceTimerRef.current);
+                }
                 loadEmployees({
-                    page: page || 1,
+                    page: isFilterChanged ? 1 : page || 1,
                     limit: rowsPerPage || latestParamsRef.current.limit || 12,
                     search: trimmedSearch,
+                    departmentId: parsedDeptId,
+                    status: parsedStatus,
+                    sortBy: sortConfig?.key || undefined,
+                    sortDir: sortConfig?.direction || undefined,
                 });
             }
         },
-        [handleSearchChange, loadEmployees],
+        [context.metadata?.departments, loadEmployees],
     );
 
     /**

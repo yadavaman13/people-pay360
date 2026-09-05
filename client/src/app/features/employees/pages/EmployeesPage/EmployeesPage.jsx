@@ -158,13 +158,41 @@ function EmployeesPage() {
         [],
     );
 
+    // Filter configuration for AdvancedTable filter panel
+    const filterConfig = useMemo(() => {
+        const deptOptions = (metadata.departments || []).map((d) => d.name);
+        const positionOptions = (metadata.jobPositions || []).map((p) => p.title);
+
+        return [
+            {
+                key: 'departmentName',
+                label: 'Department',
+                type: 'select',
+                options: deptOptions.length > 0 ? deptOptions : ['General'],
+            },
+            {
+                key: 'jobPositionTitle',
+                label: 'Job Position',
+                type: 'select',
+                options: positionOptions,
+            },
+            {
+                key: 'status',
+                label: 'Status',
+                type: 'select',
+                options: ['ACTIVE', 'DRAFT', 'SUSPENDED'],
+            },
+        ];
+    }, [metadata.departments, metadata.jobPositions]);
+
     // Augmented data for AdvancedTable
     const tableData = useMemo(() => {
         return employees.map((emp) => ({
             ...emp,
             fullName: `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
-            jobPositionTitle: emp.jobPosition?.title || '',
-            departmentName: emp.department?.name || '',
+            jobPositionTitle: emp.jobPosition?.title || emp.jobTitle || '—',
+            departmentName: emp.department?.name || emp.departmentName || 'General',
+            status: (emp.status || 'ACTIVE').toUpperCase(),
         }));
     }, [employees]);
 
@@ -190,21 +218,18 @@ function EmployeesPage() {
                 </div>
             )}
 
-            {/* Header matching Image 1 & 2 */}
+            {/* Header with Title and View/Create Actions */}
             <div className="employees-page__header">
                 <div className="title-area">
                     <h1 className="main-title">Employees</h1>
                     <p className="subtitle">
                         {viewMode === 'kanban'
-                            ? 'Default view: Kanban'
-                            : 'List view for sort, filter and bulk scanning'}
+                            ? 'Default view: Kanban employee directory'
+                            : 'Enterprise table view for sort, filter and bulk scanning'}
                     </p>
                 </div>
-            </div>
 
-            {/* Action Bar matching Image 1 & 2 */}
-            <div className="employees-page__action-bar">
-                <div className="left-actions">
+                <div className="header-actions">
                     {canCreateEmployee && (
                         <Button
                             variant="primary"
@@ -216,72 +241,79 @@ function EmployeesPage() {
                         </Button>
                     )}
 
-                    <div className="search-box-wrapper">
-                        <Search className="search-icon" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Search employees..."
-                            value={searchInput}
-                            onChange={onSearchInputChange}
-                            className="search-input"
-                        />
-                        {searchInput && (
-                            <button
-                                type="button"
-                                className="search-clear-btn"
-                                onClick={() => {
-                                    setSearchInput('');
-                                    handleSearchChange('');
-                                }}
-                            >
-                                ✕
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Department Quick Filter */}
-                    <div className="department-filter">
-                        <select
-                            value={selectedDept}
-                            onChange={(e) => handleDeptFilter(e.target.value)}
-                            className="dept-select"
+                    {/* View Switcher: [ Kanban ] | [ List ] */}
+                    <div className="view-switcher-group" role="group" aria-label="View Mode">
+                        <button
+                            type="button"
+                            className={`switcher-btn ${viewMode === 'kanban' ? 'is-active' : ''}`}
+                            onClick={() => handleViewModeChange('kanban')}
+                            aria-pressed={viewMode === 'kanban'}
                         >
-                            <option value="">All Departments</option>
-                            {(metadata.departments || []).map((d) => (
-                                <option key={d.id} value={d.id}>
-                                    {d.name}
-                                </option>
-                            ))}
-                        </select>
+                            Kanban
+                        </button>
+                        <button
+                            type="button"
+                            className={`switcher-btn ${viewMode === 'list' ? 'is-active' : ''}`}
+                            onClick={() => handleViewModeChange('list')}
+                            aria-pressed={viewMode === 'list'}
+                        >
+                            List
+                        </button>
                     </div>
-
-                    {totalCount > 0 && (
-                        <div className="roster-count-badge">
-                            {totalCount} {totalCount === 1 ? 'Employee' : 'Employees'}
-                        </div>
-                    )}
-                </div>
-
-                {/* View Switcher: [ Kanban ] | [ List ] matching Image 1 & 2 */}
-                <div className="view-switcher-group" role="group" aria-label="View Mode">
-                    <button
-                        type="button"
-                        className={`switcher-btn ${viewMode === 'kanban' ? 'is-active' : ''}`}
-                        onClick={() => handleViewModeChange('kanban')}
-                        aria-pressed={viewMode === 'kanban'}
-                    >
-                        Kanban
-                    </button>
-                    <button
-                        type="button"
-                        className={`switcher-btn ${viewMode === 'list' ? 'is-active' : ''}`}
-                        onClick={() => handleViewModeChange('list')}
-                        aria-pressed={viewMode === 'list'}
-                    >
-                        List
-                    </button>
                 </div>
             </div>
+
+            {/* Kanban Controls Bar (only rendered when Kanban view is active) */}
+            {viewMode === 'kanban' && (
+                <div className="employees-page__action-bar">
+                    <div className="left-actions">
+                        <div className="search-box-wrapper">
+                            <Search className="search-icon" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search employees..."
+                                value={searchInput}
+                                onChange={onSearchInputChange}
+                                className="search-input"
+                            />
+                            {searchInput && (
+                                <button
+                                    type="button"
+                                    className="search-clear-btn"
+                                    onClick={() => {
+                                        setSearchInput('');
+                                        handleSearchChange('');
+                                    }}
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Department Quick Filter for Kanban */}
+                        <div className="department-filter">
+                            <select
+                                value={selectedDept}
+                                onChange={(e) => handleDeptFilter(e.target.value)}
+                                className="dept-select"
+                            >
+                                <option value="">All Departments</option>
+                                {(metadata.departments || []).map((d) => (
+                                    <option key={d.id} value={d.id}>
+                                        {d.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {totalCount > 0 && (
+                            <div className="roster-count-badge">
+                                {totalCount} {totalCount === 1 ? 'Employee' : 'Employees'}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* View Mode Content */}
             <div className="employees-page__content">
@@ -293,17 +325,30 @@ function EmployeesPage() {
                         onAddNew={canCreateEmployee ? handleAddNew : undefined}
                     />
                 ) : (
-                    <div className="list-view-container">
+                    <div className="employees-table-wrapper">
                         <AdvancedTable
                             data={tableData}
                             columns={listColumns}
                             loading={loading}
-                            showPagination={true}
+                            serverSide={true}
                             totalCount={totalCount}
                             onTableChange={handleTableChange}
+                            searchable={true}
+                            searchPlaceholder="Search employees by name, email, or code..."
+                            showColumnSorting={true}
+                            showSortDropdown={true}
+                            showFilter={true}
+                            filterConfig={filterConfig}
+                            showColumnToggle={true}
+                            showRefresh={true}
+                            onRefresh={() => loadEmployees()}
+                            showExport={true}
+                            showRowsPerPage={true}
+                            showResultsCount={true}
+                            showSerialNumber={false}
                             initialRowsPerPage={12}
                             onRowClick={(row) => handleCardClick(row)}
-                            className="employees-list-table"
+                            className="employees-advanced-table"
                         />
                     </div>
                 )}

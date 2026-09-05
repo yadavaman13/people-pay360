@@ -56,6 +56,11 @@
     }
 
     &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
         margin-bottom: 20px;
 
         .title-area {
@@ -71,6 +76,54 @@
                 margin: 4px 0 0;
                 font-size: variables.$font-size-md;
                 color: var(--color-text-secondary, #64748b);
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            .new-employee-btn {
+                width: auto;
+                flex-shrink: 0;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                padding: 9px 20px;
+                border-radius: 10px;
+            }
+
+            // View Switcher matching Image 1 & 2 wireframe
+            .view-switcher-group {
+                display: inline-flex;
+                align-items: center;
+                border: 1px solid var(--color-border-subtle, #cbd5e1);
+                border-radius: 10px;
+                padding: 3px;
+                background-color: variables.$color-gray-50;
+
+                .switcher-btn {
+                    background: transparent;
+                    border: none;
+                    padding: 7px 18px;
+                    font-size: variables.$font-size-sm;
+                    font-weight: 550;
+                    color: var(--color-text-secondary, #64748b);
+                    border-radius: 7px;
+                    cursor: pointer;
+                    transition: all 0.18s ease;
+
+                    &:hover {
+                        color: var(--color-text-primary, #0f172a);
+                    }
+
+                    &.is-active {
+                        background-color: variables.$color-blue-hover;
+                        color: variables.$color-blue-dark;
+                        box-shadow: 0 1px 3px rgb(37 99 235 / 12%);
+                        font-weight: 650;
+                    }
+                }
             }
         }
     }
@@ -89,15 +142,6 @@
             gap: 12px;
             flex: 1;
             max-width: 780px;
-
-            .new-employee-btn {
-                width: auto;
-                flex-shrink: 0;
-                font-weight: 700;
-                letter-spacing: 0.5px;
-                padding: 9px 20px;
-                border-radius: 10px;
-            }
 
             .search-box-wrapper {
                 position: relative;
@@ -187,52 +231,16 @@
                 border: 1px solid variables.$color-gray-200;
             }
         }
-
-        // View Switcher matching Image 1 & 2 wireframe
-        .view-switcher-group {
-            display: inline-flex;
-            align-items: center;
-            border: 1px solid var(--color-border-subtle, #cbd5e1);
-            border-radius: 10px;
-            padding: 3px;
-            background-color: variables.$color-gray-50;
-
-            .switcher-btn {
-                background: transparent;
-                border: none;
-                padding: 7px 18px;
-                font-size: variables.$font-size-sm;
-                font-weight: 550;
-                color: var(--color-text-secondary, #64748b);
-                border-radius: 7px;
-                cursor: pointer;
-                transition: all 0.18s ease;
-
-                &:hover {
-                    color: var(--color-text-primary, #0f172a);
-                }
-
-                &.is-active {
-                    background-color: variables.$color-blue-hover;
-                    color: variables.$color-blue-dark;
-                    box-shadow: 0 1px 3px rgb(37 99 235 / 12%);
-                    font-weight: 650;
-                }
-            }
-        }
     }
 
     &__content {
         flex: 1;
 
-        .list-view-container {
-            background-color: var(--color-surface, #fff);
-            border: 1px solid var(--color-border-subtle, #e2e8f0);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 1px 4px rgb(0 0 0 / 3%);
+        .employees-table-wrapper {
+            width: 100%;
+            border-radius: variables.$radius-medium;
 
-            .employees-list-table {
+            .employees-advanced-table {
                 cursor: pointer;
             }
 
