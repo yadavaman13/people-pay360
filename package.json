@@ -1,5 +1,5 @@
 {
-    "name": "apex-template-root",
+    "name": "people-pay-360",
     "private": true,
     "version": "1.0.0",
     "description": "Root configuration for workspace orchestrations and Git hooks",
