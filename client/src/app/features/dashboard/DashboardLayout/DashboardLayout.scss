@@ -12,14 +12,29 @@
 .dashboard-right-pane {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
+    max-height: 100vh;
     flex-grow: 1;
     min-width: 0;
     overflow: hidden auto;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gray-300) transparent;
 
     &::-webkit-scrollbar {
-        display: none; /* Chrome, Safari, Edge */
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-gray-300);
+        border-radius: 3px;
+
+        &:hover {
+            background-color: var(--color-gray-400);
+        }
     }
 }
 

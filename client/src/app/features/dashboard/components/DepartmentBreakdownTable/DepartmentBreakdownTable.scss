@@ -1,0 +1,189 @@
+@use '@/styles/variables' as v;
+
+.dept-breakdown-card {
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dept-breakdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: v.$spacing-sm;
+    border-bottom: 1px solid var(--color-gray-200);
+    flex-shrink: 0;
+}
+
+.dept-breakdown-title {
+    font-size: v.$font-size-md;
+    font-weight: 600;
+    color: var(--color-gray-900);
+}
+
+.dept-breakdown-actions {
+    display: flex;
+    align-items: center;
+    gap: v.$spacing-xs;
+}
+
+.dept-breakdown-content {
+    flex: 1;
+    overflow: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.dept-breakdown-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+}
+
+// ─── Table Wrapper ────────────────────────────────────────────────────────────
+.dept-breakdown-table-wrapper {
+    overflow-x: auto;
+    flex: 1;
+
+    &::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-gray-300);
+        border-radius: 2px;
+    }
+}
+
+.dept-breakdown-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: v.$font-sans;
+}
+
+// ─── Table Headers ────────────────────────────────────────────────────────────
+.dept-table-th {
+    padding: v.$spacing-sm v.$spacing-sm;
+    text-align: left;
+    background-color: var(--color-gray-50);
+    border-bottom: 1px solid var(--color-gray-200);
+    font-size: v.$font-size-xxs;
+    font-weight: 700;
+    color: var(--color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: v.$z-raised;
+
+    &.is-right {
+        text-align: right;
+    }
+
+    &.is-sortable {
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+            background-color: var(--color-gray-100);
+            color: var(--color-gray-900);
+        }
+    }
+
+    &.is-sorted {
+        color: var(--color-blue-accent);
+        background-color: color-mix(in srgb, var(--color-blue-accent) 5%, var(--color-gray-50));
+    }
+}
+
+.dept-table-th-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: inherit;
+}
+
+.sort-icon {
+    color: var(--color-gray-400);
+    flex-shrink: 0;
+
+    &--active {
+        color: var(--color-blue-accent);
+    }
+}
+
+// ─── Table Rows ───────────────────────────────────────────────────────────────
+.dept-table-row {
+    @include v.transition-ease;
+
+    &:hover {
+        background-color: var(--color-gray-50);
+    }
+
+    &:last-child .dept-table-td {
+        border-bottom: none;
+    }
+}
+
+.dept-table-td {
+    padding: v.$spacing-sm v.$spacing-sm;
+    border-bottom: 1px solid var(--color-gray-100);
+    font-size: v.$font-size-sm;
+    color: var(--color-gray-700);
+    vertical-align: middle;
+
+    &.is-right {
+        text-align: right;
+    }
+}
+
+// ─── Cell Variants ────────────────────────────────────────────────────────────
+.table-cell-currency {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 600;
+    font-size: v.$font-size-sm;
+    color: var(--color-gray-900);
+}
+
+.table-cell-number {
+    font-weight: 600;
+    font-size: v.$font-size-sm;
+    color: var(--color-gray-900);
+}
+
+.dept-name-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.dept-name {
+    font-weight: 600;
+    color: var(--color-gray-900);
+    font-size: v.$font-size-sm;
+}
+
+.dept-code {
+    font-size: v.$font-size-xxs;
+    color: var(--color-gray-400);
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 500;
+}
+
+// ─── Mobile ───────────────────────────────────────────────────────────────────
+@include v.mobile {
+    .dept-table-th,
+    .dept-table-td {
+        padding: v.$spacing-xs;
+        font-size: v.$font-size-xxs;
+    }
+}
