@@ -11,13 +11,8 @@ import {
 import { users } from './users.schema.js';
 import { departments } from './departments.schema.js';
 import { jobPositions } from './job_positions.schema.js';
+import { workingSchedules } from './working_schedules.schema.js';
 import { employeeStatusEnum } from './enums.schema.js';
-
-/**
- * working_schedules — forward-declared as a UUID reference here.
- * The full table is defined in working_schedules.schema.js.
- * Drizzle resolves the FK via the lazy () => workingSchedules.id arrow.
- */
 
 /**
  * employees
@@ -80,8 +75,9 @@ export const employees = pgTable(
         // REFERENCES employees(id) ON DELETE SET NULL — avoids Drizzle circular ref.
 
         // Assigned working schedule (nullable — assigned post-onboarding).
-        workingScheduleId: uuid('working_schedule_id'),
-        // NOTE: FK managed separately: REFERENCES working_schedules(id) ON DELETE SET NULL
+        workingScheduleId: uuid('working_schedule_id').references(() => workingSchedules.id, {
+            onDelete: 'set null',
+        }),
 
         // Lifecycle state machine: DRAFT → ACTIVE → SUSPENDED | ARCHIVED
         status: employeeStatusEnum('status').default('DRAFT').notNull(),
@@ -102,10 +98,7 @@ export const employees = pgTable(
         userIdIdx: uniqueIndex('employees_user_id_idx').on(table.userId),
 
         // Composite index for HR list views filtered by dept + status.
-        deptStatusIdx: index('employees_dept_status_idx').on(
-            table.departmentId,
-            table.status,
-        ),
+        deptStatusIdx: index('employees_dept_status_idx').on(table.departmentId, table.status),
 
         // Index for payroll queries: "get all active employees".
         statusIdx: index('employees_status_idx').on(table.status),

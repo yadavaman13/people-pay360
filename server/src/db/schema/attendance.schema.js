@@ -74,7 +74,7 @@ export const attendanceRecords = pgTable(
         status: attendanceStatusEnum('status').default('ABSENT').notNull(),
 
         // Manual correction audit trail.
-        isManuallyCorreted: boolean('is_manually_corrected').default(false).notNull(),
+        isManuallyCorrected: boolean('is_manually_corrected').default(false).notNull(),
         correctedBy: uuid('corrected_by').references(() => users.id, {
             onDelete: 'set null',
         }),
@@ -96,10 +96,7 @@ export const attendanceRecords = pgTable(
 
         // ── LOOKUP INDEXES ──────────────────────────────────────────────────────
         // Payroll period query: "get all attendance for employee in Sep 2026"
-        empDateIdx: index('attendance_emp_date_idx').on(
-            table.employeeId,
-            table.attendanceDate,
-        ),
+        empDateIdx: index('attendance_emp_date_idx').on(table.employeeId, table.attendanceDate),
 
         // Dashboard: "show today's attendance across all employees"
         dateIdx: index('attendance_date_idx').on(table.attendanceDate),

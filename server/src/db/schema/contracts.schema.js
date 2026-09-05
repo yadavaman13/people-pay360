@@ -15,6 +15,8 @@ import { departments } from './departments.schema.js';
 import { jobPositions } from './job_positions.schema.js';
 import { users } from './users.schema.js';
 import { contractStatusEnum } from './enums.schema.js';
+import { salaryStructures } from './salary.schema.js';
+import { workingSchedules } from './working_schedules.schema.js';
 
 /**
  * contracts
@@ -64,8 +66,9 @@ export const contracts = pgTable(
 
         // Salary structure assigned to this contract (used by payroll engine).
         // RESTRICT: cannot delete a salary structure that active contracts reference.
-        salaryStructureId: uuid('salary_structure_id').notNull(),
-        // NOTE: FK → salary_structures declared in schema.js to avoid circular import.
+        salaryStructureId: uuid('salary_structure_id')
+            .references(() => salaryStructures.id, { onDelete: 'restrict' })
+            .notNull(),
 
         // Contract validity window. Both are DATE (calendar, not timestamped).
         startDate: date('start_date').notNull(),
@@ -84,8 +87,9 @@ export const contracts = pgTable(
         }),
 
         // Working schedule for this specific contract (overrides employee default if set).
-        workingScheduleId: uuid('working_schedule_id'),
-        // NOTE: FK → working_schedules declared in schema.js to avoid circular import.
+        workingScheduleId: uuid('working_schedule_id').references(() => workingSchedules.id, {
+            onDelete: 'set null',
+        }),
 
         // Lifecycle: DRAFT → ACTIVE → EXPIRED | CANCELLED
         status: contractStatusEnum('status').default('DRAFT').notNull(),
