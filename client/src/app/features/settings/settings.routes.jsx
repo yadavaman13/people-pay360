@@ -3,11 +3,6 @@ import GeneralSettings from './GeneralSettings';
 import AccountSettings from './AccountSettings';
 
 export default {
-    navItem: {
-        label: 'Settings',
-        subTabs: ['General', 'Account'],
-        path: '/dashboard/user/settings',
-    },
     userRoutes: [
         {
             path: 'settings',

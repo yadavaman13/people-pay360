@@ -3,36 +3,41 @@
 .payrun-action-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: variables.$spacing-md;
-    padding: variables.$spacing-md 0;
+    justify-content: flex-end;
+    gap: variables.$spacing-sm;
+    padding: variables.$spacing-sm 0;
     margin-bottom: variables.$spacing-md;
-    flex-wrap: wrap;
+    width: 100%;
 
-    &__left {
+    &__actions {
         display: flex;
         align-items: center;
+        justify-content: flex-end;
         gap: variables.$spacing-sm;
-        flex-wrap: wrap;
-    }
-
-    &__right {
-        display: flex;
-        align-items: center;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         margin-left: auto;
+        max-width: 100%;
+        padding: 2px 0;
     }
 
     &__btn {
         font-weight: 600;
         letter-spacing: 0.01em;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     &__send-btn {
         font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     &__tooltip-trigger {
         display: inline-flex;
+        flex-shrink: 0;
     }
 
     &__paid-indicator {
@@ -46,35 +51,35 @@
         padding: variables.$spacing-xs variables.$spacing-md;
         border-radius: variables.$radius-small;
         border: 1px solid variables.$color-success-border;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     &__paid-icon {
         color: variables.$color-success;
     }
 
-    @include variables.mobile {
-        flex-direction: column;
-        align-items: stretch;
-        gap: variables.$spacing-sm;
-
-        &__left,
-        &__right {
-            width: 100%;
-            justify-content: stretch;
+    @include variables.tablet {
+        &__actions {
+            gap: variables.$spacing-xs;
         }
 
         &__btn,
         &__send-btn {
-            flex: 1 1 auto;
-            justify-content: center;
+            font-size: variables.$font-size-xs;
+            padding: variables.$spacing-xs variables.$spacing-sm;
+        }
+    }
+
+    @include variables.mobile {
+        &__actions {
+            gap: variables.$spacing-xs;
         }
 
-        &__tooltip-trigger {
-            flex: 1 1 auto;
-
-            .payrun-action-bar__btn {
-                width: 100%;
-            }
+        &__btn,
+        &__send-btn {
+            font-size: variables.$font-size-xs;
+            padding: variables.$spacing-xs variables.$spacing-sm;
         }
     }
 }

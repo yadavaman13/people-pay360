@@ -47,9 +47,24 @@ function PayrunWizardInner({ onClose, onSuccess, onStepChange, onSubmittingChang
     };
 
     const handleFormChange = (field, value) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+        setFormData((prev) => {
+            const updated = { ...prev, [field]: value };
+            // If periodStart changes to a date later than periodEnd, clear periodEnd
+            if (
+                field === 'periodStart' &&
+                updated.periodEnd &&
+                value &&
+                updated.periodEnd < value
+            ) {
+                updated.periodEnd = '';
+            }
+            return updated;
+        });
         if (formErrors[field]) {
             setFormErrors((prev) => ({ ...prev, [field]: '' }));
+        }
+        if (field === 'periodStart' && formErrors.periodEnd) {
+            setFormErrors((prev) => ({ ...prev, periodEnd: '' }));
         }
     };
 
@@ -195,7 +210,7 @@ function PayrunWizardModal({ isOpen, onClose, onSuccess }) {
     if (!isOpen) return null;
 
     const modalTitle = step === 1 ? 'New Pay Run' : 'Select Employee Records';
-    const modalSize = step === 1 ? 'md' : 'lg';
+    const modalSize = 'lg';
 
     return (
         <Dialog

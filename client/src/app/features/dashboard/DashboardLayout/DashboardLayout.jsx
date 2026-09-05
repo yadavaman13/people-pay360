@@ -53,6 +53,7 @@ function DashboardLayout({ onLogout }) {
         {
             label: 'Home',
             icon: <HomeIcon />,
+            path: `/dashboard/${roleSegment}/home`,
         },
         ...(roleSegment === 'admin'
             ? [
@@ -64,7 +65,7 @@ function DashboardLayout({ onLogout }) {
                   },
               ]
             : []),
-        ...dynamicNavItems.filter((item) => item.label !== 'Users'),
+        ...dynamicNavItems.filter((item) => !['Users', 'Home', 'Settings'].includes(item.label)),
     ];
 
     const handleToggleSidebar = () => {

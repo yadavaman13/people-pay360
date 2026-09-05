@@ -30,10 +30,13 @@
 
     &__wrapper {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
     }
 
     &__table {
         width: 100%;
+        min-width: 760px;
         border-collapse: collapse;
         text-align: left;
         font-size: variables.$font-size-sm;

@@ -51,7 +51,7 @@ function PayrunWizardStep1Scope({
                     />
                 </div>
 
-                <div className="payrun-wizard-step1__date-row">
+                <div className="payrun-wizard-step1__field-row">
                     <div className="payrun-wizard-step1__field">
                         <DatePicker
                             label="Period Start *"
@@ -61,6 +61,8 @@ function PayrunWizardStep1Scope({
                             error={errors.periodStart}
                             disabled={isLoading}
                             portal={true}
+                            align="left"
+                            showSelectedValue={false}
                         />
                     </div>
                     <div className="payrun-wizard-step1__field">
@@ -71,30 +73,37 @@ function PayrunWizardStep1Scope({
                             placeholder="DD-MM-YYYY"
                             error={errors.periodEnd}
                             disabled={isLoading}
+                            min={formData.periodStart}
                             portal={true}
+                            align="right"
+                            showSelectedValue={false}
                         />
                     </div>
                 </div>
 
-                <div className="payrun-wizard-step1__field">
-                    <InputField
-                        label="Payrun Name (Optional)"
-                        value={formData.name || ''}
-                        onChange={(e) => onChange('name', e.target.value)}
-                        placeholder="Auto-generated if left empty"
-                        disabled={isLoading}
-                    />
-                </div>
-
-                <div className="payrun-wizard-step1__field">
-                    <DatePicker
-                        label="Payment Date (Optional)"
-                        value={formData.paymentDate || ''}
-                        onChange={handleDateChange('paymentDate')}
-                        placeholder="DD-MM-YYYY"
-                        disabled={isLoading}
-                        portal={true}
-                    />
+                <div className="payrun-wizard-step1__field-row">
+                    <div className="payrun-wizard-step1__field">
+                        <InputField
+                            label="Payrun Name (Optional)"
+                            value={formData.name || ''}
+                            onChange={(e) => onChange('name', e.target.value)}
+                            placeholder="Auto-generated if left empty"
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div className="payrun-wizard-step1__field">
+                        <DatePicker
+                            label="Payment Date (Optional)"
+                            value={formData.paymentDate || ''}
+                            onChange={handleDateChange('paymentDate')}
+                            placeholder="DD-MM-YYYY"
+                            disabled={isLoading}
+                            min={formData.periodStart || undefined}
+                            portal={true}
+                            align="right"
+                            showSelectedValue={false}
+                        />
+                    </div>
                 </div>
             </div>
 

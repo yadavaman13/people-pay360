@@ -6,7 +6,8 @@
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: variables.$spacing-lg 0 variables.$spacing-xxl;
+    padding: variables.$spacing-lg variables.$spacing-md variables.$spacing-xxl;
+    box-sizing: border-box;
 
     &__back-nav {
         margin-bottom: variables.$spacing-md;
@@ -38,10 +39,11 @@
 
     &__title {
         margin: 0;
-        font-size: variables.$font-size-xxl;
+        font-size: clamp(1.35rem, 3.5vw, variables.$font-size-xxl);
         font-weight: 700;
         color: variables.$color-gray-900;
         letter-spacing: -0.02em;
+        overflow-wrap: break-word;
     }
 
     &__subtitle {

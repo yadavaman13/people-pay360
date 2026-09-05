@@ -1,8 +1,4 @@
 export default {
-    navItem: {
-        label: 'Home',
-        path: '/dashboard/user/home',
-    },
     userRoutes: [
         {
             path: 'home',

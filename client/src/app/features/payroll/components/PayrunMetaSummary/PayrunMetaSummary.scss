@@ -77,9 +77,10 @@
     }
 
     &__total-value {
-        font-size: variables.$font-size-lg;
+        font-size: clamp(1rem, 2.2vw, 1.25rem);
         font-weight: 700;
         color: variables.$color-gray-900;
+        overflow-wrap: break-word;
 
         &--deduction {
             color: variables.$color-danger;
@@ -100,20 +101,25 @@
 
         &__totals-grid {
             grid-template-columns: repeat(2, 1fr);
+            gap: variables.$spacing-sm;
         }
     }
 
     @include variables.mobile {
-        padding: variables.$spacing-md;
+        padding: variables.$spacing-md variables.$spacing-sm;
 
         &__info-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: variables.$spacing-sm;
         }
 
         &__totals-grid {
-            grid-template-columns: 1fr;
-            gap: variables.$spacing-sm;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: variables.$spacing-xs;
+        }
+
+        &__total-card {
+            padding: variables.$spacing-sm;
         }
     }
 }

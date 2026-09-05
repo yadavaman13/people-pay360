@@ -134,7 +134,9 @@
         top: calc(100% + 6px);
         left: 0;
         z-index: variables.$z-sticky;
-        width: 280px;
+        width: 308px;
+        max-width: calc(100vw - 24px);
+        box-sizing: border-box;
         padding: 16px;
         background-color: variables.$color-white;
         border: 1px solid variables.$color-purple-border;
@@ -309,6 +311,9 @@
     border-radius: 14px;
     box-shadow: 0 12px 32px rgb(35 25 75 / 14%);
     padding: 12px 14px;
+    width: 308px;
+    max-width: calc(100vw - 24px);
+    box-sizing: border-box;
     animation: datepicker-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     font-family: Inter, sans-serif;
 

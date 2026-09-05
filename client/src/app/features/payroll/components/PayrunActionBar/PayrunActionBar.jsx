@@ -67,8 +67,7 @@ function PayrunActionBar({
 
     return (
         <div className="payrun-action-bar">
-            {/* Left lifecycle mutation buttons */}
-            <div className="payrun-action-bar__left">
+            <div className="payrun-action-bar__actions">
                 {canCompute && (
                     <Button
                         variant={isDraft ? 'primary' : 'secondary'}
@@ -105,10 +104,8 @@ function PayrunActionBar({
                         <span>Paid & Settled</span>
                     </div>
                 )}
-            </div>
 
-            {/* Right distribution button */}
-            <div className="payrun-action-bar__right">
+                {/* Distribution action */}
                 <Button
                     variant={canSend ? 'secondary' : 'ghost'}
                     onClick={onSendPayslips}

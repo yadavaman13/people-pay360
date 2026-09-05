@@ -39,14 +39,34 @@
     }
 
     @include variables.tablet {
+        row-gap: variables.$spacing-sm;
+
+        &__left {
+            order: 1;
+        }
+
         &__center {
-            order: 3;
-            flex: 1 1 100%;
-            max-width: 100%;
+            order: 2;
+            flex: 1 1 240px;
+            max-width: none;
         }
 
         &__right {
-            margin-left: auto;
+            order: 3;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: variables.$spacing-sm;
+            margin-left: 0;
+        }
+
+        &__dropdown-wrapper {
+            width: 100%;
+            min-width: 0;
+
+            .shared-dropdown-container {
+                width: 100%;
+            }
         }
     }
 
@@ -67,11 +87,14 @@
         }
 
         &__right {
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: variables.$spacing-xs;
         }
 
         &__dropdown-wrapper {
             width: 100%;
+            min-width: 0;
         }
     }
 }
