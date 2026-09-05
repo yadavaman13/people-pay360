@@ -1,4 +1,5 @@
+import payslipRouter from './routes/payslip.routes.js';
 import payslipDocumentRouter from './routes/payslipDocument.routes.js';
 
-export { payslipDocumentRouter };
-export default payslipDocumentRouter;
+export { payslipRouter, payslipDocumentRouter };
+export default payslipRouter;
