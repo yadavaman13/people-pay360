@@ -9,6 +9,10 @@ import { pdfRouter } from './modules/pdf/index.js';
 import { errorHandler } from './modules/auth/middleware/errorHandler.js';
 import passport from './config/passport.config.js';
 
+import { scheduleRouter } from './modules/schedules/index.js';
+import { attendanceRouter } from './modules/attendance/index.js';
+import { timeOffRouter } from './modules/time-off/index.js';
+
 const app = express();
 
 const publicPath = path.join(import.meta.dirname, 'public');
@@ -32,6 +36,9 @@ app.use('/api/admin', adminRouter);
 app.use('/api/pdf', pdfRouter);
 
 //dev-2
+app.use('/api/working-schedules', scheduleRouter);
+app.use('/api/attendance', attendanceRouter);
+app.use('/api/time-off', timeOffRouter);
 
 //dev-3
 

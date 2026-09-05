@@ -80,11 +80,7 @@ export const attendanceStatusEnum = pgEnum('attendance_status', [
  *   PENDING → APPROVED → (balance becomes available)
  *   PENDING → REFUSED
  */
-export const allocationStatusEnum = pgEnum('allocation_status', [
-    'PENDING',
-    'APPROVED',
-    'REFUSED',
-]);
+export const allocationStatusEnum = pgEnum('allocation_status', ['PENDING', 'APPROVED', 'REFUSED']);
 
 /**
  * Time Off Request Status State Machine:
@@ -95,6 +91,7 @@ export const requestStatusEnum = pgEnum('request_status', [
     'PENDING',
     'APPROVED',
     'REFUSED',
+    'CANCELLED',
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -132,11 +129,7 @@ export const ruleCategoryEnum = pgEnum('rule_category', [
  *                 (CHECK: formula_expression IS NOT NULL)
  *                 NEVER use eval() — use a safe math parser (mathjs / custom tokenizer)
  */
-export const computationTypeEnum = pgEnum('computation_type', [
-    'FIXED',
-    'PERCENTAGE',
-    'FORMULA',
-]);
+export const computationTypeEnum = pgEnum('computation_type', ['FIXED', 'PERCENTAGE', 'FORMULA']);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PAYROLL PROCESSING
@@ -195,10 +188,7 @@ export const eligibilityStatusEnum = pgEnum('eligibility_status', [
  *   SELECTED  — HR has included this employee in the payrun
  *   EXCLUDED  — HR has explicitly excluded this employee
  */
-export const selectionStatusEnum = pgEnum('selection_status', [
-    'SELECTED',
-    'EXCLUDED',
-]);
+export const selectionStatusEnum = pgEnum('selection_status', ['SELECTED', 'EXCLUDED']);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BANK / FINANCIAL
@@ -207,8 +197,4 @@ export const selectionStatusEnum = pgEnum('selection_status', [
 /**
  * Bank Account Type.
  */
-export const bankAccountTypeEnum = pgEnum('bank_account_type', [
-    'SAVINGS',
-    'CURRENT',
-    'SALARY',
-]);
+export const bankAccountTypeEnum = pgEnum('bank_account_type', ['SAVINGS', 'CURRENT', 'SALARY']);
