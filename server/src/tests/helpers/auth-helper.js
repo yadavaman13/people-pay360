@@ -13,7 +13,7 @@ export function generateTestUserData(prefix = 'test_user') {
     return {
         firstName: 'Test',
         lastName: 'User',
-        email: `${prefix}_${timestamp}_${random}@apex.io`,
+        email: `${prefix}_${timestamp}_${random}@peoplepay360.io`,
         password: 'Password@123',
         role: 'USER',
     };
