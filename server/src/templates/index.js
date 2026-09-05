@@ -8,9 +8,12 @@ export {
     MONOCHROME_LOGO_SVG,
 } from './pdf.template.js';
 
+export { payslipTemplate } from './payslip.template.js';
+
 export {
     otpEmailTemplate,
     forgotPasswordOtpEmailTemplate,
     recoverAccountOtpEmailTemplate,
     accountRecoveredEmailTemplate,
+    payslipEmailTemplate,
 } from './email.template.js';
