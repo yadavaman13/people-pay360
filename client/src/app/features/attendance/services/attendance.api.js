@@ -120,3 +120,12 @@ export const fetchEmployeesList = async () => {
         return { data: [] };
     }
 };
+
+/**
+ * HR / Admin: batch-resolve all open punch sessions from past dates.
+ * Returns { resolved, skipped, total, details }
+ */
+export const resolveMissingCheckouts = async () => {
+    const response = await attendanceApi.post('/resolve-missing-checkouts');
+    return response.data;
+};

@@ -318,15 +318,33 @@ export function useAttendance() {
                 await loadAttendanceList();
                 return res.data;
             } catch (err) {
+                const status = err.response?.status;
                 const msg =
                     err.response?.data?.message || err.message || 'Failed to check out. Try again.';
-                toastError(msg);
+
+                if (status === 422) {
+                    // Short-session guard — user guidance, not a system error
+                    toastWarning(msg, 6000);
+                    await loadTodayStatus(); // keep widget in sync (still checked in)
+                } else if (status === 409) {
+                    toastWarning(msg || 'No active check-in session found. Already checked out.');
+                    await loadTodayStatus();
+                } else {
+                    toastError(msg);
+                }
                 throw err;
             } finally {
                 setActionLoading(false);
             }
         },
-        [loadTodayStatus, loadAttendanceList, setActionLoading, toastSuccess, toastError],
+        [
+            loadTodayStatus,
+            loadAttendanceList,
+            setActionLoading,
+            toastSuccess,
+            toastWarning,
+            toastError,
+        ],
     );
 
     // ── 8. HR Force Check-Out ───────────────────────────────────────────────

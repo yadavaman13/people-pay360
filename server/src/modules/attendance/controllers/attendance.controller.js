@@ -132,3 +132,18 @@ export async function getSummaryStats(req, res, next) {
         next(error);
     }
 }
+
+export async function resolveStaleCheckouts(req, res, next) {
+    try {
+        const result = await attendanceService.resolveStaleCheckouts();
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: `Stale checkout resolution complete. Resolved: ${result.resolved}, Skipped: ${result.skipped}`,
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+}

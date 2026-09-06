@@ -516,3 +516,57 @@ export async function getSummaryStats({ dateFrom, dateTo, employeeId, excludeHr 
 
     return { stats, missingCheckoutCount };
 }
+
+/**
+ * Find all open (un-checked-out) punch sessions from past dates (before the given date string).
+ * Used by the stale checkout resolver to auto-close forgotten punches.
+ * @param {string} beforeDate - 'YYYY-MM-DD' — only dates strictly before this are fetched
+ * @returns {Array} rows with punch + parent attendanceRecord + employee info
+ */
+export async function findAllOpenPunchesBeforeDate(beforeDate) {
+    // Join attendance_punches → attendance_records → employees → users
+    const rows = await db
+        .select({
+            punch: {
+                id: attendancePunches.id,
+                attendanceRecordId: attendancePunches.attendanceRecordId,
+                checkInTime: attendancePunches.checkInTime,
+                checkOutTime: attendancePunches.checkOutTime,
+                workedHours: attendancePunches.workedHours,
+                notes: attendancePunches.notes,
+            },
+            record: {
+                id: attendanceRecords.id,
+                employeeId: attendanceRecords.employeeId,
+                attendanceDate: attendanceRecords.attendanceDate,
+                checkInTime: attendanceRecords.checkInTime,
+                checkOutTime: attendanceRecords.checkOutTime,
+                workedHours: attendanceRecords.workedHours,
+                status: attendanceRecords.status,
+                notes: attendanceRecords.notes,
+            },
+            employee: {
+                id: employees.id,
+                firstName: employees.firstName,
+                lastName: employees.lastName,
+                employeeCode: employees.employeeCode,
+                workingScheduleId: employees.workingScheduleId,
+            },
+        })
+        .from(attendancePunches)
+        .innerJoin(
+            attendanceRecords,
+            eq(attendancePunches.attendanceRecordId, attendanceRecords.id),
+        )
+        .innerJoin(employees, eq(attendanceRecords.employeeId, employees.id))
+        .leftJoin(users, eq(employees.userId, users.id))
+        .where(
+            and(
+                sql`${attendancePunches.checkOutTime} IS NULL`,
+                sql`${attendanceRecords.attendanceDate} < ${beforeDate}`,
+            ),
+        )
+        .orderBy(attendanceRecords.attendanceDate, attendancePunches.checkInTime);
+
+    return rows;
+}

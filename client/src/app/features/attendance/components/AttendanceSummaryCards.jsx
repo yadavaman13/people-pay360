@@ -9,6 +9,7 @@ import {
     ChevronRight,
     Calendar,
     TrendingUp,
+    Wand2,
 } from 'lucide-react';
 
 export default function AttendanceSummaryCards({
@@ -17,8 +18,11 @@ export default function AttendanceSummaryCards({
     employeeMonthlySummary = {},
     selectedMonth = new Date(),
     onMonthChange,
+    onResolveCheckouts,
+    isResolvingCheckouts = false,
 }) {
     if (isHR) {
+        const staleCount = summaryMetrics.missingCheckoutCount ?? summaryMetrics.halfDayCount ?? 0;
         return (
             <section className="summary-cards-section">
                 <div className="metric-cards-grid">
@@ -48,15 +52,71 @@ export default function AttendanceSummaryCards({
                     />
                     <MetricCard
                         title="Missing Checkout"
-                        value={String(
-                            summaryMetrics.missingCheckoutCount ?? summaryMetrics.halfDayCount ?? 0,
-                        )}
+                        value={String(staleCount)}
                         icon={AlertCircle}
                         variant="default"
                         trend="Pending"
                         trendType="neutral"
                     />
                 </div>
+
+                {/* Resolve missing checkouts action — shown whenever there are open stale records */}
+                {staleCount > 0 && onResolveCheckouts && (
+                    <div
+                        className="resolve-checkout-banner"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            marginTop: '12px',
+                            padding: '12px 16px',
+                            background: 'rgba(239, 68, 68, 0.06)',
+                            border: '1px solid rgba(239, 68, 68, 0.18)',
+                            borderRadius: '10px',
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <AlertCircle
+                                size={18}
+                                style={{ color: 'var(--color-danger, #ef4444)', flexShrink: 0 }}
+                            />
+                            <div>
+                                <div
+                                    style={{
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        color: 'var(--color-text-primary, #111827)',
+                                    }}
+                                >
+                                    {staleCount} unresolved missing checkout
+                                    {staleCount !== 1 ? 's' : ''} detected
+                                </div>
+                                <div
+                                    style={{
+                                        fontSize: '12px',
+                                        color: 'var(--color-text-secondary, #6b7280)',
+                                        marginTop: '2px',
+                                    }}
+                                >
+                                    Employees from past dates did not clock out. Hours will be
+                                    estimated using their schedule.
+                                </div>
+                            </div>
+                        </div>
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={onResolveCheckouts}
+                            loading={isResolvingCheckouts}
+                            disabled={isResolvingCheckouts}
+                            icon={<Wand2 size={14} />}
+                            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                        >
+                            Auto-Resolve All
+                        </Button>
+                    </div>
+                )}
             </section>
         );
     }

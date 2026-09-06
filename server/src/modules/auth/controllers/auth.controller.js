@@ -735,7 +735,7 @@ export async function getMe(req, res, next) {
                 });
             }
             try {
-                await redis.set(cacheKey, JSON.stringify(user), 'EX', 600); // cache for 10 min.
+                await redis.set(cacheKey, JSON.stringify(user), 'EX', 6000); // cache for 10 min.
             } catch (cacheError) {
                 console.error('Redis cache set error in getMe:', cacheError);
             }
