@@ -21,13 +21,30 @@ export const createRequestValidator = [
     body('typeId').isUUID().withMessage('typeId must be a valid UUID'),
     body('startDate')
         .isDate({ format: 'YYYY-MM-DD' })
-        .withMessage('startDate must be in YYYY-MM-DD format'),
+        .withMessage('startDate must be in YYYY-MM-DD format')
+        .custom((startDate) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            if (isNaN(start.getTime()) || start < tomorrow) {
+                throw new Error('Leave start date must be from tomorrow onwards');
+            }
+            return true;
+        }),
     body('endDate')
         .isDate({ format: 'YYYY-MM-DD' })
         .withMessage('endDate must be in YYYY-MM-DD format')
         .custom((endDate, { req }) => {
             if (endDate && req.body.startDate) {
-                if (endDate < req.body.startDate) {
+                const start = new Date(req.body.startDate);
+                start.setHours(0, 0, 0, 0);
+                const end = new Date(endDate);
+                end.setHours(0, 0, 0, 0);
+                if (isNaN(end.getTime()) || isNaN(start.getTime()) || end < start) {
                     throw new Error('endDate must be on or after startDate');
                 }
             }
@@ -46,14 +63,31 @@ export const updateRequestValidator = [
     body('startDate')
         .optional()
         .isDate({ format: 'YYYY-MM-DD' })
-        .withMessage('startDate must be in YYYY-MM-DD format'),
+        .withMessage('startDate must be in YYYY-MM-DD format')
+        .custom((startDate) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            if (isNaN(start.getTime()) || start < tomorrow) {
+                throw new Error('Leave start date must be from tomorrow onwards');
+            }
+            return true;
+        }),
     body('endDate')
         .optional()
         .isDate({ format: 'YYYY-MM-DD' })
         .withMessage('endDate must be in YYYY-MM-DD format')
         .custom((endDate, { req }) => {
             if (endDate && req.body.startDate) {
-                if (endDate < req.body.startDate) {
+                const start = new Date(req.body.startDate);
+                start.setHours(0, 0, 0, 0);
+                const end = new Date(endDate);
+                end.setHours(0, 0, 0, 0);
+                if (isNaN(end.getTime()) || isNaN(start.getTime()) || end < start) {
                     throw new Error('endDate must be on or after startDate');
                 }
             }
@@ -69,6 +103,15 @@ export const updateRequestValidator = [
 
 export const requestIdParamValidator = [
     param('id').isUUID().withMessage('Valid request UUID is required'),
+    validateRequest,
+];
+
+export const approveRequestValidator = [
+    param('id').isUUID().withMessage('Valid request UUID is required'),
+    body('reviewNotes')
+        .optional({ nullable: true })
+        .isString()
+        .withMessage('reviewNotes must be a string'),
     validateRequest,
 ];
 

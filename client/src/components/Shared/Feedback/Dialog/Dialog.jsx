@@ -30,9 +30,13 @@ function Dialog({
     showCloseIcon = true,
     confirmLoading = false,
     confirmDisabled = false,
+    isConfirmLoading = false,
     footer,
     children,
 }) {
+    const effectiveConfirmLoading = Boolean(confirmLoading || isConfirmLoading);
+    const isConfirmActionDisabled = Boolean(confirmDisabled || effectiveConfirmLoading);
+
     // Prevent scrolling on background when modal is open
     useEffect(() => {
         if (isOpen) {
@@ -49,14 +53,14 @@ function Dialog({
     // Close modal on Escape key press
     useEffect(() => {
         const handleEscape = (e) => {
-            if (e.key === 'Escape' && isOpen && !confirmLoading) {
+            if (e.key === 'Escape' && isOpen && !effectiveConfirmLoading) {
                 onClose && onClose();
             }
         };
 
         window.addEventListener('keydown', handleEscape);
         return () => window.removeEventListener('keydown', handleEscape);
-    }, [isOpen, onClose, confirmLoading]);
+    }, [isOpen, onClose, effectiveConfirmLoading]);
 
     if (!isOpen) return null;
 
@@ -64,11 +68,16 @@ function Dialog({
         // Only close if user clicked directly on the overlay backdrop
         if (
             closeOnBackdrop &&
-            !confirmLoading &&
+            !effectiveConfirmLoading &&
             e.target.classList.contains('shared-dialog-overlay')
         ) {
             onClose && onClose();
         }
+    };
+
+    const handleConfirmClick = (e) => {
+        if (isConfirmActionDisabled) return;
+        onConfirm && onConfirm(e);
     };
 
     // Render modal content
@@ -95,7 +104,7 @@ function Dialog({
                             className="dialog-close-btn"
                             onClick={onClose}
                             aria-label="Close dialog"
-                            disabled={confirmLoading}
+                            disabled={effectiveConfirmLoading}
                         >
                             <CloseIcon />
                         </button>
@@ -123,17 +132,17 @@ function Dialog({
                                     preset="cancel"
                                     onClick={onClose}
                                     label={cancelText}
-                                    disabled={confirmLoading}
+                                    disabled={effectiveConfirmLoading}
                                 />
                             )}
                             {confirmText && (
                                 <Button
                                     preset="save"
-                                    onClick={onConfirm}
+                                    onClick={handleConfirmClick}
                                     label={confirmText}
                                     variant={variant}
-                                    loading={confirmLoading}
-                                    disabled={confirmDisabled || confirmLoading}
+                                    loading={effectiveConfirmLoading}
+                                    disabled={isConfirmActionDisabled}
                                 />
                             )}
                         </div>
