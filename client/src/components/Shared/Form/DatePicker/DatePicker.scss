@@ -275,6 +275,15 @@
                 &:hover {
                     background-color: variables.$color-purple-light;
                 }
+
+                &:disabled {
+                    opacity: 0.35;
+                    cursor: not-allowed;
+
+                    &:hover {
+                        background-color: transparent;
+                    }
+                }
             }
         }
     }

@@ -13,6 +13,7 @@ import {
     UserCheck as EmployeesIcon,
     Clock as ClockIcon,
     FileText as FileTextIcon,
+    CalendarOff as CalendarOffIcon,
 } from 'lucide-react';
 import { loadFeatureRoutes } from '@/app/routes.loader';
 import './DashboardLayout.scss';
@@ -101,6 +102,8 @@ function DashboardLayout({ onLogout }) {
                     itemIcon = <FileTextIcon size={18} />;
                 else if (item.label === 'Attendance' || item.icon === 'Clock')
                     itemIcon = <ClockIcon size={18} />;
+                else if (item.label === 'Time Off' || item.icon === 'CalendarOff')
+                    itemIcon = <CalendarOffIcon size={18} />;
                 else itemIcon = <UsersIcon size={18} />;
             }
 

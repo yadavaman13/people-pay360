@@ -1,0 +1,53 @@
+@use '@/styles/variables' as variables;
+
+.add-rule-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-md;
+
+    .modal-alert-wrapper {
+        margin-bottom: variables.$spacing-xs;
+    }
+
+    .form-row {
+        display: flex;
+        gap: variables.$spacing-md;
+
+        @include variables.mobile {
+            flex-direction: column;
+            gap: variables.$spacing-md;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .flex-2 {
+            flex: 2;
+        }
+    }
+
+    .form-field-wrapper {
+        display: flex;
+        flex-direction: column;
+
+        &.full-width {
+            width: 100%;
+        }
+    }
+
+    .computation-subform {
+        background-color: variables.$color-gray-50;
+        border: 1px dashed variables.$color-gray-300;
+        border-radius: variables.$radius-medium;
+        padding: variables.$spacing-md;
+    }
+}
+
+.add-rule-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: variables.$spacing-sm;
+    width: 100%;
+}

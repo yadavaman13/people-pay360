@@ -5,6 +5,7 @@ import {
     createRequestValidator,
     updateRequestValidator,
     requestIdParamValidator,
+    approveRequestValidator,
     refuseRequestValidator,
     listRequestsValidator,
 } from '../validators/timeOffRequest.validator.js';
@@ -22,7 +23,7 @@ router
     .route('/:id/approve')
     .post(
         restrictTo('HR_MANAGER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
-        requestIdParamValidator,
+        approveRequestValidator,
         timeOffRequestController.approveRequest,
     );
 

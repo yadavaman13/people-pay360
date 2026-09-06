@@ -1,0 +1,185 @@
+@use '@/styles/variables' as variables;
+
+.time-off-detail-page {
+    display: flex;
+    flex-direction: column;
+    padding: variables.$spacing-md variables.$spacing-xl;
+    box-sizing: border-box;
+    width: 100%;
+    gap: variables.$spacing-md;
+    font-family: variables.$font-sans;
+    overflow-y: auto;
+
+    @media (width <= 768px) {
+        padding: variables.$spacing-sm variables.$spacing-md;
+    }
+}
+
+.detail-loading-state,
+.detail-error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: variables.$spacing-md;
+    padding: variables.$spacing-xl;
+    min-height: 300px;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: variables.$spacing-md;
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-md;
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: variables.$color-gray-600;
+        }
+
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+
+            .page-title {
+                font-size: variables.$font-size-xl;
+                font-weight: 700;
+                color: variables.$color-gray-900;
+                margin: 0;
+            }
+
+            .page-subtitle {
+                font-size: variables.$font-size-xs;
+                color: variables.$color-gray-500;
+            }
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+    }
+}
+
+.detail-card {
+    background: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-medium;
+    padding: variables.$spacing-lg;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-lg;
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: variables.$spacing-xl;
+
+        @media (width <= 768px) {
+            grid-template-columns: 1fr;
+            gap: variables.$spacing-md;
+        }
+
+        .detail-col {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-md;
+        }
+    }
+
+    .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .field-label {
+            font-size: variables.$font-size-xs;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: variables.$color-gray-500;
+        }
+
+        .field-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: variables.$font-size-md;
+            color: variables.$color-gray-900;
+
+            .field-icon {
+                color: variables.$color-gray-400;
+                flex-shrink: 0;
+            }
+
+            .type-title {
+                font-weight: 600;
+            }
+
+            .type-badge-pill {
+                font-size: variables.$font-size-xxs;
+                background: variables.$color-gray-100;
+                color: variables.$color-gray-700;
+                padding: 2px 8px;
+                border-radius: 999px;
+            }
+
+            &.user-info {
+                .user-name {
+                    font-weight: 600;
+                }
+
+                .user-code {
+                    font-size: variables.$font-size-xs;
+                    color: variables.$color-gray-500;
+                    margin-left: 4px;
+                }
+            }
+        }
+    }
+
+    .detail-full-width {
+        border-top: 1px solid variables.$color-gray-100;
+        padding-top: variables.$spacing-md;
+
+        .text-box {
+            background: variables.$color-gray-50;
+            border: 1px solid variables.$color-gray-200;
+            border-radius: variables.$radius-small;
+            padding: 12px 16px;
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-800;
+            line-height: 1.6;
+
+            p {
+                margin: 0;
+            }
+
+            .empty-text {
+                color: variables.$color-gray-400;
+                font-style: italic;
+            }
+
+            &.notes-box {
+                background: variables.$color-gray-50;
+                border-color: variables.$color-gray-300;
+            }
+        }
+    }
+}

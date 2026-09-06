@@ -55,3 +55,24 @@ export async function deleteSalaryStructure(id) {
     const response = await salaryStructureApiInstance.delete(`/${id}`);
     return response.data;
 }
+
+/**
+ * Fetch ordered rules for a structure
+ * @param {string} structureId - Structure UUID
+ * @returns {Promise<object>} API response { success, data, message }
+ */
+export async function fetchStructureRules(structureId) {
+    const response = await salaryStructureApiInstance.get(`/${structureId}/rules`);
+    return response.data;
+}
+
+/**
+ * Add a new salary rule to a structure
+ * @param {string} structureId - Structure UUID
+ * @param {object} rulePayload - Rule data payload
+ * @returns {Promise<object>} API response { success, data, message }
+ */
+export async function addRuleToStructure(structureId, rulePayload) {
+    const response = await salaryStructureApiInstance.post(`/${structureId}/rules`, rulePayload);
+    return response.data;
+}

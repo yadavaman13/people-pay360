@@ -3,6 +3,8 @@ import * as timeOffTypeDao from '../../../dao/timeOffType.dao.js';
 import * as allocationDao from '../../../dao/allocation.dao.js';
 import * as employeeDao from '../../../dao/employee.dao.js';
 import { AppError } from '../../../utils/appError.js';
+import { sendEmail } from '../../../services/mail/mail.service.js';
+import { timeOffDecisionEmailTemplate } from '../../../templates/email.template.js';
 
 /**
  * Calculate business days (Monday-Friday) between two dates inclusive
@@ -10,9 +12,12 @@ import { AppError } from '../../../utils/appError.js';
 export function calculateBusinessDays(startDateStr, endDateStr) {
     const start = new Date(startDateStr);
     const end = new Date(endDateStr);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) return 0;
+
     let count = 0;
     const cur = new Date(start);
-
     while (cur <= end) {
         const day = cur.getDay();
         if (day !== 0 && day !== 6) {
@@ -20,7 +25,7 @@ export function calculateBusinessDays(startDateStr, endDateStr) {
         }
         cur.setDate(cur.getDate() + 1);
     }
-    return Math.max(1, count);
+    return count;
 }
 
 /**
@@ -92,17 +97,27 @@ export async function createRequest(data, user) {
         throw new AppError('Active leave type not found', 404);
     }
 
-    if (data.startDate > data.endDate) {
-        throw new AppError('startDate must be on or before endDate', 422);
+    // Strict business rules enforcement
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const start = new Date(data.startDate);
+    start.setHours(0, 0, 0, 0);
+    if (isNaN(start.getTime()) || start < tomorrow) {
+        throw new AppError('Leave start date must be from tomorrow onwards', 422);
     }
 
-    const numberOfDays =
-        data.numberOfDays !== undefined
-            ? Number(data.numberOfDays)
-            : calculateBusinessDays(data.startDate, data.endDate);
+    const end = new Date(data.endDate);
+    end.setHours(0, 0, 0, 0);
+    if (isNaN(end.getTime()) || end < start) {
+        throw new AppError('endDate must be on or after startDate', 422);
+    }
 
+    const numberOfDays = calculateBusinessDays(data.startDate, data.endDate);
     if (numberOfDays <= 0) {
-        throw new AppError('numberOfDays must be greater than 0', 422);
+        throw new AppError('The selected date range contains no business days', 422);
     }
 
     if (type.maxDaysPerRequest && numberOfDays > type.maxDaysPerRequest) {
@@ -211,9 +226,46 @@ export async function deleteRequest(id, user) {
     return { id, isDeleted: true };
 }
 
-export async function approveRequest(id, user) {
-    const result = await timeOffRequestDao.approveRequestAtomic(id, user.id);
+async function dispatchDecisionEmail(request, status, reviewNotes) {
+    try {
+        const employeeEmail = request?.employee?.email;
+        if (!employeeEmail) return;
+
+        const employeeName =
+            [request.employee?.firstName, request.employee?.lastName].filter(Boolean).join(' ') ||
+            'Employee';
+
+        const html = timeOffDecisionEmailTemplate({
+            employeeName,
+            status,
+            typeName: request?.timeOffType?.name || 'Leave',
+            startDate: request.startDate,
+            endDate: request.endDate,
+            numberOfDays: request.numberOfDays,
+            reviewNotes: reviewNotes || request.reviewNotes,
+        });
+
+        await sendEmail({
+            to: employeeEmail,
+            subject: `Time Off Request ${status === 'APPROVED' ? 'Approved' : 'Refused'} - PeoplePay360`,
+            html,
+            text: `Your time off request for ${request?.timeOffType?.name || 'Leave'} (${request.startDate} to ${request.endDate}) has been ${status}.`,
+        });
+    } catch (err) {
+        console.error(
+            `[TimeOff] Failed to send decision email for request ${request?.id}:`,
+            err?.message || err,
+        );
+    }
+}
+
+export async function approveRequest(id, user, reviewNotes) {
+    const result = await timeOffRequestDao.approveRequestAtomic(id, user.id, reviewNotes);
     const fullRequest = await timeOffRequestDao.findRequestById(id);
+
+    // Asynchronously dispatch decision notification email
+    dispatchDecisionEmail(fullRequest, 'APPROVED', reviewNotes);
+
     return {
         request: fullRequest,
         allocation: result.allocation,
@@ -222,7 +274,12 @@ export async function approveRequest(id, user) {
 
 export async function refuseRequest(id, user, reviewNotes) {
     const refused = await timeOffRequestDao.refuseRequest(id, user.id, reviewNotes);
-    return timeOffRequestDao.findRequestById(refused.id);
+    const fullRequest = await timeOffRequestDao.findRequestById(refused.id);
+
+    // Asynchronously dispatch decision notification email
+    dispatchDecisionEmail(fullRequest, 'REFUSED', reviewNotes);
+
+    return fullRequest;
 }
 
 export async function cancelRequest(id, user) {

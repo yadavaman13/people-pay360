@@ -19,17 +19,22 @@ function DatePicker({
     disabled = false,
     error = '',
     min = null,
+    minDate = null,
     max = null,
+    maxDate = null,
     clearable = true,
     portal = false,
     align = 'left',
     className = '',
 }) {
+    const effectiveMin = minDate || min;
+    const effectiveMax = maxDate || max;
+
     const [isOpen, setIsOpen] = useState(false);
     const [popoverPos, setPopoverPos] = useState(null);
 
     const parsedDate = parseStringToDate(value);
-    const parsedMin = parseStringToDate(min);
+    const parsedMin = parseStringToDate(effectiveMin);
     const [viewDate, setViewDate] = useState(() => {
         if (parsedDate) return parsedDate;
         if (parsedMin && parsedMin > new Date()) return parsedMin;
@@ -42,13 +47,13 @@ function DatePicker({
         const d = parseStringToDate(value);
         if (d) {
             setViewDate(d);
-        } else if (min) {
-            const m = parseStringToDate(min);
+        } else if (effectiveMin) {
+            const m = parseStringToDate(effectiveMin);
             if (m) {
                 setViewDate((prev) => (prev < m ? m : prev));
             }
         }
-    }, [value, min]);
+    }, [value, effectiveMin]);
 
     // Real-time position updating for portal mode with auto-flip and boundary clamping
     const updatePosition = useCallback(() => {
@@ -121,6 +126,10 @@ function DatePicker({
 
     const handleTodayClick = () => {
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (parsedMin && today < new Date(new Date(parsedMin).setHours(0, 0, 0, 0))) {
+            return;
+        }
         handleSelectDate(today);
         setViewDate(today);
     };
@@ -159,8 +168,8 @@ function DatePicker({
                 onSelectDate={handleSelectDate}
                 viewDate={viewDate}
                 onViewDateChange={setViewDate}
-                min={min}
-                max={max}
+                min={effectiveMin}
+                max={effectiveMax}
                 onTodayClick={handleTodayClick}
             />
 

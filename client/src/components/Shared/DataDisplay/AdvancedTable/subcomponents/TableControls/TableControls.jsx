@@ -158,6 +158,7 @@ function TableControls({
                                     setNumericFilters={setNumericFilters}
                                     columnUniqueValues={columnUniqueValues}
                                     onFilterValueChange={onFilterValueChange}
+                                    setFilterPanelOpen={setFilterPanelOpen}
                                 />
                             )}
                         </div>

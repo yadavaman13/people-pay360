@@ -1,0 +1,218 @@
+@use '@/styles/variables' as variables;
+
+.salary-structure-detail-page {
+    display: flex;
+    flex-direction: column;
+    padding: variables.$spacing-md variables.$spacing-xl;
+    gap: variables.$spacing-lg;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: variables.$font-sans;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md;
+        gap: variables.$spacing-md;
+    }
+
+    &.is-loading {
+        min-height: 60vh;
+    }
+
+    .detail-loading-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: variables.$spacing-xxl 0;
+        flex: 1;
+    }
+
+    .salary-structure-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: variables.$spacing-md;
+        flex-wrap: wrap;
+
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-xs;
+
+            .title-row {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-sm;
+
+                .back-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: none;
+                    border: 1px solid variables.$color-gray-300;
+                    border-radius: variables.$radius-small;
+                    padding: 4px;
+                    color: variables.$color-gray-700;
+                    cursor: pointer;
+
+                    @include variables.transition-ease;
+
+                    &:hover {
+                        background-color: variables.$color-gray-100;
+                        color: variables.$color-gray-900;
+                    }
+                }
+
+                .header-title {
+                    font-size: variables.$font-size-xxl;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    margin: 0;
+                    letter-spacing: -0.02em;
+                }
+            }
+
+            .header-subtitle {
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-500;
+                margin: 0;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+            flex-wrap: wrap;
+
+            .edit-structure-btn,
+            .save-changes-btn,
+            .add-rule-btn {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+                font-weight: 600;
+            }
+
+            .deactivate-btn,
+            .cancel-btn {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+            }
+        }
+    }
+
+    .page-error-alert {
+        margin-bottom: variables.$spacing-xs;
+
+        .alert-retry-action {
+            margin-top: variables.$spacing-sm;
+        }
+    }
+
+    .metadata-section {
+        width: 100%;
+    }
+
+    .rules-section {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-md;
+
+        .rules-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .rules-title-group {
+                display: flex;
+                align-items: baseline;
+                gap: variables.$spacing-xs;
+
+                .rules-title {
+                    font-size: variables.$font-size-lg;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    margin: 0;
+                }
+
+                .rules-count-badge {
+                    font-size: variables.$font-size-sm;
+                    font-weight: 600;
+                    color: variables.$color-gray-500;
+                }
+            }
+
+            .inline-add-rule-btn {
+                display: flex;
+                align-items: center;
+                gap: variables.$spacing-xs;
+            }
+        }
+
+        .desktop-rules-container {
+            display: block;
+
+            @include variables.mobile {
+                display: none;
+            }
+        }
+
+        .mobile-rules-container {
+            display: none;
+
+            @include variables.mobile {
+                display: flex;
+                flex-direction: column;
+                gap: variables.$spacing-sm;
+            }
+
+            .mobile-empty-rules {
+                background-color: variables.$color-white;
+                border: 1px solid variables.$color-gray-200;
+                border-radius: variables.$radius-large;
+                padding: variables.$spacing-lg;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: variables.$spacing-md;
+
+                p {
+                    margin: 0;
+                    color: variables.$color-gray-600;
+                    font-size: variables.$font-size-sm;
+                }
+            }
+        }
+    }
+
+    .dialog-body-content {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-md;
+        padding: variables.$spacing-sm 0;
+
+        p {
+            margin: 0;
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-800;
+            line-height: 1.5;
+        }
+
+        .dialog-subtext {
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-500;
+        }
+
+        .dialog-actions-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: variables.$spacing-sm;
+            margin-top: variables.$spacing-sm;
+        }
+    }
+}

@@ -22,6 +22,13 @@ function DatePickerPopover({
 }) {
     if (!isOpen || disabled) return null;
 
+    const parsedMinDate = parseStringToDate(min);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    const isTodayDisabled = Boolean(
+        parsedMinDate && todayDate < new Date(new Date(parsedMinDate).setHours(0, 0, 0, 0)),
+    );
+
     const content = (
         <div
             ref={popoverRef}
@@ -43,13 +50,18 @@ function DatePickerPopover({
                 onSelectDate={onSelectDate}
                 viewDate={viewDate}
                 onViewDateChange={onViewDateChange}
-                minDate={parseStringToDate(min)}
+                minDate={parsedMinDate}
                 maxDate={parseStringToDate(max)}
                 showCard={false}
                 eventDates={[]}
             />
             <div className="datepicker-popover-footer">
-                <button type="button" className="datepicker-today-btn" onClick={onTodayClick}>
+                <button
+                    type="button"
+                    className="datepicker-today-btn"
+                    onClick={onTodayClick}
+                    disabled={isTodayDisabled}
+                >
                     Today
                 </button>
             </div>

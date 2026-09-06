@@ -25,6 +25,7 @@ function TableFilterPanel({
     setNumericFilters,
     columnUniqueValues = {},
     onFilterValueChange,
+    setFilterPanelOpen,
 }) {
     return (
         <div className="at-filter-panel" ref={filterPanelRef}>
@@ -209,6 +210,24 @@ function TableFilterPanel({
                         </div>
                     );
                 })}
+            </div>
+
+            <div className="at-fp-footer">
+                <button
+                    type="button"
+                    className="at-fp-btn-clear"
+                    onClick={clearAllFilters}
+                    disabled={!hasActiveFilters}
+                >
+                    Clear Filters
+                </button>
+                <button
+                    type="button"
+                    className="at-fp-btn-apply"
+                    onClick={() => setFilterPanelOpen && setFilterPanelOpen(false)}
+                >
+                    Apply Filters
+                </button>
             </div>
         </div>
     );
