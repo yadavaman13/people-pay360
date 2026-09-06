@@ -7,6 +7,7 @@ import Button from '@/components/Shared/Buttons/Button/Button';
 import Dialog from '@/components/Shared/Feedback/Dialog';
 import { useToast } from '@/components/Shared/Feedback/Toast';
 import { useAuth } from '../auth/hooks/useAuth';
+import { formatRoleLabel } from '../auth/hooks/useDerivedProfile';
 import { DEFAULT_AVATAR_URL, getAvatarUrl } from '@/utils/avatar';
 import './AccountSettings.scss';
 
@@ -393,6 +394,19 @@ export default function AccountSettings() {
                             />
                             <span className="field-hint-text">
                                 Contact administrator to update login email.
+                            </span>
+                        </div>
+
+                        <div className="form-field-wrapper full-width">
+                            <InputField
+                                label="Role"
+                                id="settings-role"
+                                type="text"
+                                value={`${formatRoleLabel(roleVal)} (${roleVal})`}
+                                disabled={true}
+                            />
+                            <span className="field-hint-text">
+                                System access role assigned to your account (non-editable).
                             </span>
                         </div>
                     </div>

@@ -3,9 +3,19 @@ import App from './App';
 import DashboardLayout from '@/app/features/dashboard/DashboardLayout/DashboardLayout';
 import DashboardIndex from '@/app/features/dashboard/DashboardIndex';
 import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
+import { useAuth } from '@/app/features/auth/hooks/useAuth';
 import { loadFeatureRoutes } from './routes.loader';
 
-// Auto-discover all *.routes.jsx across all feature modules
+function HrIndexRedirect() {
+    const { user } = useAuth();
+    const roleUpper = (user?.role || '').toUpperCase();
+    if (['HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'].includes(roleUpper)) {
+        return <Navigate to="/dashboard/hr/home" replace />;
+    }
+    return <Navigate to="/dashboard/hr/attendance" replace />;
+}
+
+// Auto-discovered all *.routes.jsx across all feature modules
 const {
     employeeRoutes = [],
     hrRoutes = [],
@@ -41,13 +51,13 @@ export const router = createBrowserRouter([
                         children: [
                             {
                                 index: true,
-                                element: <Navigate to="/dashboard/employee/home" replace />,
+                                element: <Navigate to="/dashboard/employee/attendance" replace />,
                             },
                             // Auto-discovered employee feature routes
                             ...employeeRoutes,
                             {
                                 path: '*',
-                                element: <Navigate to="/dashboard/employee/home" replace />,
+                                element: <Navigate to="/dashboard/employee/attendance" replace />,
                             },
                         ],
                     },
@@ -73,13 +83,13 @@ export const router = createBrowserRouter([
                         children: [
                             {
                                 index: true,
-                                element: <Navigate to="/dashboard/hr/attendance" replace />,
+                                element: <HrIndexRedirect />,
                             },
                             // Auto-discovered hr feature routes
                             ...hrRoutes,
                             {
                                 path: '*',
-                                element: <Navigate to="/dashboard/hr/attendance" replace />,
+                                element: <HrIndexRedirect />,
                             },
                         ],
                     },

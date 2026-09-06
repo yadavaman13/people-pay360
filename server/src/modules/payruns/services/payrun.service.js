@@ -10,7 +10,7 @@ import { computePayslip } from '../../payslips/services/salaryEngine.service.js'
 import { AppError } from '../../../utils/appError.js';
 import { db } from '../../../config/database.config.js';
 import { payruns, payslips } from '../../../db/schema/payroll.schema.js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 
 /**
  * Payrun Service
@@ -100,8 +100,13 @@ export async function createPayrun(data, createdByUserId) {
 
     let payrunName = data.name;
     if (!payrunName) {
-        const dateObj = new Date(data.periodStart);
-        const monthYear = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const [year, month] = data.periodStart.split('-');
+        const dateObj = new Date(Date.UTC(Number(year), Number(month) - 1, 1));
+        const monthYear = dateObj.toLocaleDateString('en-US', {
+            month: 'long',
+            year: 'numeric',
+            timeZone: 'UTC',
+        });
         payrunName = `${monthYear} ${structure.name} Payroll`;
     }
 
@@ -174,6 +179,15 @@ export async function computePayrun(payrunId, _computedByUserId) {
     const payrun = await payrunDao.findPayrunById(payrunId);
     if (!payrun) {
         throw new AppError('Payrun not found', 404);
+    }
+
+    // Invariant: future period check
+    const today = new Date().toISOString().split('T')[0];
+    if (payrun.periodEnd > today) {
+        throw new AppError(
+            'Payroll period has not ended yet. Computation is only allowed after the period has completed.',
+            422,
+        );
     }
 
     // Invariant: recomputation is only permitted in DRAFT or COMPUTED state
@@ -333,7 +347,7 @@ export async function markPayrunAsPaid(payrunId, paidByUserId, paymentDate) {
             .where(eq(payruns.id, payrunId))
             .returning();
 
-        // 2. Update child Payslips
+        // 2. Update child Payslips (both VALIDATED and SENT are marked PAID)
         await tx
             .update(payslips)
             .set({
@@ -341,7 +355,12 @@ export async function markPayrunAsPaid(payrunId, paidByUserId, paymentDate) {
                 paidAt: now,
                 updatedAt: now,
             })
-            .where(and(eq(payslips.payrunId, payrunId), eq(payslips.status, 'VALIDATED')));
+            .where(
+                and(
+                    eq(payslips.payrunId, payrunId),
+                    inArray(payslips.status, ['VALIDATED', 'SENT']),
+                ),
+            );
 
         return updatedPayrun;
     });

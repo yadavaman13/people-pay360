@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useSearchParams, useLocation } from 'react-router';
+import { useSearchParams, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '@/app/features/auth/hooks/useAuth';
 import { fetchSalaryStructures } from '../services/salaryStructure.api';
 import { useToast } from '@/components/Shared/Feedback/Toast';
@@ -10,6 +10,7 @@ import { useToast } from '@/components/Shared/Feedback/Toast';
  */
 export function useSalaryStructuresList() {
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
     const { pathname } = useLocation();
     const { user } = useAuth();
     const { addToast } = useToast();
@@ -248,9 +249,9 @@ export function useSalaryStructuresList() {
     const handleRowClick = useCallback(
         (id) => {
             if (!id) return;
-            addToast('Salary structure details screen is under development', 'info');
+            navigate(`/dashboard/${roleSegment}/payroll/salary-structures/${id}`);
         },
-        [addToast],
+        [navigate, roleSegment],
     );
 
     const handleCreateSuccess = useCallback(() => {
