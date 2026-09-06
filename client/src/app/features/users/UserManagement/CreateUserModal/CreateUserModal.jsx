@@ -6,7 +6,6 @@ import { Info, ShieldAlert } from 'lucide-react';
 import './CreateUserModal.scss';
 
 const ROLES = [
-    { value: 'EMPLOYEE', label: 'Employee' },
     { value: 'HR_MANAGER', label: 'HR Manager' },
     { value: 'HR_PAYROLL_USER', label: 'HR Payroll User' },
     { value: 'HR_PAYROLL_MANAGER', label: 'HR Payroll Manager' },

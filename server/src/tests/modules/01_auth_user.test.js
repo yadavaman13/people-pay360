@@ -4,6 +4,7 @@ import { FeatureApiDocLogger } from '../helpers/md-logger.js';
 import { generateTempPassword } from '../../utils/password.utils.js';
 import { accountCreatedEmailTemplate } from '../../templates/email.template.js';
 import { generateTestUserData, createAndLoginTestUser } from '../helpers/auth-helper.js';
+import { findEmployeeByUserId } from '../../dao/employee.dao.js';
 
 const docLogger = new FeatureApiDocLogger(
     '01_auth_user.md',
@@ -225,7 +226,19 @@ describe('01: Auth & Admin User Management API', () => {
             const created = res.body.user || res.body.data;
             expect(created.email).toBe(payload.email);
             expect(created.role).toBe('HR_PAYROLL_USER');
+            expect(created.employeeId).toBeDefined();
+            expect(created.employeeCode).toBeDefined();
+            expect(created.employeeCode).toMatch(/^PP360-/);
             createdUserId = created.id;
+
+            // Verify linked employee record in DB
+            const linkedEmployee = await findEmployeeByUserId(created.id);
+            expect(linkedEmployee).toBeDefined();
+            expect(linkedEmployee.id).toBe(created.employeeId);
+            expect(linkedEmployee.employeeCode).toBe(created.employeeCode);
+            expect(linkedEmployee.email).toBe(payload.email);
+            expect(linkedEmployee.status).toBe('ACTIVE');
+            expect(linkedEmployee.isActive).toBe(true);
         });
 
         it('GET /api/admin/users should list registered users (200)', async () => {

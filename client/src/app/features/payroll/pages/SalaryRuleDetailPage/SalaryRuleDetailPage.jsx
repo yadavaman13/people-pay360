@@ -395,6 +395,11 @@ function SalaryRuleDetailPage() {
                 isOpen={showDeleteDialog}
                 onClose={() => setShowDeleteDialog(false)}
                 title="Delete Salary Rule"
+                variant="danger"
+                confirmText="Delete Rule"
+                cancelText="Cancel"
+                confirmLoading={isDeleting}
+                onConfirm={handleDeleteConfirm}
             >
                 <div className="dialog-body-content">
                     <p>
@@ -405,23 +410,6 @@ function SalaryRuleDetailPage() {
                         This rule will be removed from payslip computations. This action cannot be
                         undone.
                     </p>
-                    <div className="dialog-actions-row">
-                        <Button
-                            variant="secondary"
-                            onClick={() => setShowDeleteDialog(false)}
-                            disabled={isDeleting}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="danger"
-                            onClick={handleDeleteConfirm}
-                            loading={isDeleting}
-                            disabled={isDeleting}
-                        >
-                            Delete Rule
-                        </Button>
-                    </div>
                 </div>
             </Dialog>
 
@@ -430,20 +418,16 @@ function SalaryRuleDetailPage() {
                 isOpen={showDiscardDialog}
                 onClose={() => setShowDiscardDialog(false)}
                 title="Discard Unsaved Changes"
+                variant="danger"
+                confirmText="Discard Changes"
+                cancelText="Keep Editing"
+                onConfirm={handleConfirmDiscard}
             >
                 <div className="dialog-body-content">
                     <p>
                         You have unsaved modifications to this salary rule. Are you sure you want to
                         discard them?
                     </p>
-                    <div className="dialog-actions-row">
-                        <Button variant="secondary" onClick={() => setShowDiscardDialog(false)}>
-                            Keep Editing
-                        </Button>
-                        <Button variant="danger" onClick={handleConfirmDiscard}>
-                            Discard Changes
-                        </Button>
-                    </div>
                 </div>
             </Dialog>
         </div>

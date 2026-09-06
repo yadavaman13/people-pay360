@@ -203,11 +203,12 @@ export async function adminCleanupUsers(req, res, next) {
 export async function adminCreateUser(req, res, next) {
     try {
         const { firstName, lastName, email, role } = req.body;
-        const { user, emailFailed } = await userService.adminCreateUser({
+        const { user, employee, emailFailed } = await userService.adminCreateUser({
             firstName,
             lastName,
             email,
             role,
+            createdBy: req.user?.id,
         });
 
         if (emailFailed) {
