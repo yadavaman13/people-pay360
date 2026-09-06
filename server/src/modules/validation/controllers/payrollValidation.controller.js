@@ -28,6 +28,16 @@ async function auditPayrunWarnings(payrunId) {
 
     const alerts = [];
 
+    // 0. Future Period Check (BLOCKER)
+    const today = new Date().toISOString().split('T')[0];
+    if (payrun.periodEnd > today) {
+        alerts.push({
+            type: 'FUTURE_PERIOD_OPEN',
+            severity: 'BLOCKER',
+            message: `Payroll period end date (${payrun.periodEnd}) is in the future. Payroll validation requires a completed period.`,
+        });
+    }
+
     // 1. Structure Rules Check (BLOCKER)
     if (rulesCount === 0) {
         alerts.push({
@@ -311,8 +321,35 @@ export async function validatePayrun(req, res, next) {
             });
         }
 
+        if (payrun.status !== 'COMPUTED') {
+            return sendResponse({
+                res,
+                statusCode: 400,
+                message: `Payrun must be in COMPUTED status before validation (current status: "${payrun.status}")`,
+                success: false,
+            });
+        }
+
         // Run validation audit
         const audit = await auditPayrunWarnings(payrunId);
+
+        // Enforce hard non-overridable blockers
+        const hardBlockers = audit.alerts.filter((a) =>
+            ['DUPLICATE_PAYSLIP_PERIOD', 'FUTURE_PERIOD_OPEN'].includes(a.type),
+        );
+        if (hardBlockers.length > 0) {
+            return sendResponse({
+                res,
+                statusCode: 422,
+                message: `Payrun cannot be validated due to non-overridable blocker(s): ${hardBlockers.map((b) => b.message).join('; ')}`,
+                success: false,
+                data: {
+                    summary: audit.summary,
+                    blockers: hardBlockers,
+                },
+            });
+        }
+
         if (audit.summary.blockersCount > 0 && !overrideBlockers) {
             return sendResponse({
                 res,

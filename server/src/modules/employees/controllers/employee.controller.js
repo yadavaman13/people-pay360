@@ -51,13 +51,31 @@ export async function updateMe(req, res, next) {
  */
 export async function createEmployeeProfile(req, res, next) {
     try {
-        const employee = await employeeService.createEmployeeProfile(req.body, req.user);
+        const employee = await employeeService.createEmployeeProfile(req.body, req.user, req.file);
         return sendResponse({
             res,
             statusCode: 201,
             success: true,
             message: 'Employee profile created successfully',
             data: employee,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Send or resend welcome email with temporary credentials to employee
+ */
+export async function sendWelcomeEmail(req, res, next) {
+    try {
+        const result = await employeeService.sendEmployeeWelcomeEmail(req.params.id);
+        return sendResponse({
+            res,
+            statusCode: 200,
+            success: true,
+            message: 'Welcome email sent successfully',
+            data: result,
         });
     } catch (error) {
         next(error);

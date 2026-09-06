@@ -1,0 +1,264 @@
+@use '@/styles/variables' as variables;
+
+.rule-form-card {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-xl;
+    box-shadow: variables.$shadow-sm;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md;
+    }
+
+    .card-header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: variables.$spacing-md;
+        margin-bottom: variables.$spacing-lg;
+        padding-bottom: variables.$spacing-md;
+        border-bottom: 1px solid variables.$color-gray-200;
+
+        .card-title {
+            font-size: variables.$font-size-lg;
+            font-weight: 700;
+            color: variables.$color-gray-900;
+            margin: 0;
+            letter-spacing: -0.01em;
+        }
+    }
+
+    /* Editable Form Mode */
+    .form-grid-2col {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: variables.$spacing-xl;
+
+        @include variables.tablet {
+            grid-template-columns: 1fr;
+            gap: variables.$spacing-md;
+        }
+
+        @include variables.mobile {
+            grid-template-columns: 1fr;
+            gap: variables.$spacing-md;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-md;
+        }
+
+        .form-field-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-xs;
+
+            .field-hint-text {
+                font-size: variables.$font-size-xs;
+                color: variables.$color-gray-500;
+                font-style: italic;
+            }
+        }
+
+        .formula-group {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-xs;
+
+            .form-label {
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                color: variables.$color-gray-700;
+            }
+
+            .formula-textarea {
+                width: 100%;
+                font-family: monospace;
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-900;
+                background-color: variables.$color-gray-50;
+                border: 1px solid variables.$color-gray-300;
+                border-radius: variables.$radius-medium;
+                padding: variables.$spacing-sm variables.$spacing-md;
+                resize: vertical;
+                box-sizing: border-box;
+                outline: none;
+
+                @include variables.transition-ease;
+
+                &:focus {
+                    border-color: variables.$color-primary;
+                    background-color: variables.$color-white;
+                    box-shadow: 0 0 0 2px
+                        color-mix(in srgb, variables.$color-primary 20%, transparent);
+                }
+
+                &.has-error {
+                    border-color: variables.$color-danger;
+                }
+            }
+
+            .error-message {
+                font-size: variables.$font-size-xs;
+                color: variables.$color-danger;
+            }
+        }
+    }
+
+    /* Read-Only View Mode */
+    .view-grid-2col {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: variables.$spacing-xl;
+
+        @include variables.tablet {
+            grid-template-columns: 1fr;
+            gap: variables.$spacing-lg;
+        }
+
+        @include variables.mobile {
+            grid-template-columns: 1fr;
+            gap: variables.$spacing-md;
+        }
+
+        .view-column {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-lg;
+        }
+
+        .view-field-item {
+            display: flex;
+            flex-direction: column;
+            gap: variables.$spacing-xs;
+
+            .view-label {
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                color: variables.$color-gray-500;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+
+            .view-value-strong {
+                font-size: variables.$font-size-md;
+                font-weight: 700;
+                color: variables.$color-gray-900;
+            }
+
+            .view-value-text {
+                font-size: variables.$font-size-sm;
+                color: variables.$color-gray-800;
+            }
+
+            .view-value-highlight {
+                font-size: variables.$font-size-md;
+                font-weight: 700;
+                color: variables.$color-primary;
+            }
+
+            .view-code-pill {
+                display: inline-block;
+                align-self: flex-start;
+                font-family: monospace;
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                color: variables.$color-gray-700;
+                background-color: variables.$color-gray-100;
+                border: 1px solid variables.$color-gray-200;
+                padding: 2px variables.$spacing-sm;
+                border-radius: variables.$radius-tiny;
+            }
+
+            .rule-category-badge {
+                align-self: flex-start;
+                font-weight: 600;
+
+                &.category-badge-basic {
+                    background-color: variables.$color-info-light;
+                    color: variables.$color-info;
+                    border-color: variables.$color-info-border;
+                }
+
+                &.category-badge-allowance {
+                    background-color: variables.$color-success-light;
+                    color: variables.$color-success;
+                    border-color: variables.$color-success-border;
+                }
+
+                &.category-badge-gross {
+                    background-color: variables.$color-purple-light;
+                    color: variables.$color-purple;
+                    border-color: variables.$color-purple-border;
+                }
+
+                &.category-badge-deduction {
+                    background-color: variables.$color-warning-light;
+                    color: variables.$color-warning;
+                    border-color: variables.$color-warning-border;
+                }
+
+                &.category-badge-net {
+                    background-color: variables.$color-teal-light;
+                    color: variables.$color-teal;
+                    border-color: variables.$color-teal-border;
+                }
+
+                &.category-badge-other {
+                    background-color: variables.$color-gray-100;
+                    color: variables.$color-gray-700;
+                    border-color: variables.$color-gray-300;
+                }
+            }
+
+            .view-sequence-badge {
+                display: inline-flex;
+                align-items: center;
+                align-self: flex-start;
+                padding: 2px variables.$spacing-sm;
+                border-radius: variables.$radius-small;
+                background-color: variables.$color-gray-100;
+                border: 1px solid variables.$color-gray-300;
+                color: variables.$color-gray-800;
+                font-size: variables.$font-size-xs;
+                font-weight: 700;
+            }
+
+            .structure-nav-btn {
+                background: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+                font-size: variables.$font-size-sm;
+                font-weight: 600;
+                color: variables.$color-primary;
+                cursor: pointer;
+                text-align: left;
+                align-self: flex-start;
+
+                @include variables.transition-ease;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            .view-formula-code {
+                display: inline-block;
+                align-self: flex-start;
+                font-family: monospace;
+                font-size: variables.$font-size-sm;
+                font-weight: 600;
+                color: variables.$color-gray-900;
+                background-color: variables.$color-gray-100;
+                border: 1px solid variables.$color-gray-200;
+                padding: variables.$spacing-xs variables.$spacing-sm;
+                border-radius: variables.$radius-small;
+                overflow-wrap: break-word;
+            }
+        }
+    }
+}

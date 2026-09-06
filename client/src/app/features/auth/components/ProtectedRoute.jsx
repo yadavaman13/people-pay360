@@ -1,4 +1,4 @@
-import { Navigate, useNavigate } from 'react-router';
+import { Navigate, useNavigate, Outlet } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 import Spinner from '@/components/Shared/Feedback/Spinner/Spinner';
 import ForbiddenPage from '@/components/Shared/ErrorPages/ForbiddenPage/ForbiddenPage';
@@ -43,7 +43,7 @@ const ProtectedRoute = ({ children, allowedRoles, fallbackPath }) => {
         }
     }
 
-    return children;
+    return children || <Outlet />;
 };
 
 export default ProtectedRoute;

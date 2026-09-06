@@ -39,3 +39,5 @@ export function generateTempPassword(length = 8) {
 
     return password.join('');
 }
+
+export const generateTemporaryPassword = generateTempPassword;

@@ -1,0 +1,108 @@
+@use '@/styles/variables' as variables;
+
+.structure-rule-mobile-card {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-sm;
+    box-shadow: variables.$shadow-sm;
+    cursor: pointer;
+    min-height: 44px;
+
+    @include variables.transition-ease;
+
+    &:hover,
+    &:focus-visible {
+        border-color: variables.$color-primary;
+        box-shadow: variables.$shadow-sm;
+        outline: none;
+    }
+
+    .card-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: variables.$spacing-xs;
+
+        .seq-and-code {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-xs;
+
+            .seq-pill {
+                font-family: monospace;
+                font-size: variables.$font-size-xs;
+                font-weight: 700;
+                color: variables.$color-gray-900;
+                background-color: variables.$color-gray-100;
+                border: 1px solid variables.$color-gray-300;
+                padding: 2px 6px;
+                border-radius: variables.$radius-small;
+            }
+
+            .code-pill {
+                font-family: monospace;
+                font-size: variables.$font-size-xs;
+                font-weight: 700;
+                color: variables.$color-gray-800;
+                background-color: variables.$color-gray-100;
+                border: 1px solid variables.$color-gray-200;
+                padding: 2px 6px;
+                border-radius: variables.$radius-small;
+            }
+        }
+    }
+
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .rule-name {
+            font-size: variables.$font-size-md;
+            font-weight: 700;
+            color: variables.$color-gray-900;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .calc-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            font-size: variables.$font-size-sm;
+
+            .calc-label {
+                color: variables.$color-gray-500;
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .calc-value {
+                color: variables.$color-gray-700;
+                font-weight: 500;
+            }
+        }
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding-top: variables.$spacing-xs;
+        border-top: 1px solid variables.$color-gray-100;
+
+        .detail-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: variables.$font-size-xs;
+            font-weight: 600;
+            color: variables.$color-primary;
+        }
+    }
+}

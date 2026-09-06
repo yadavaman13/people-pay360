@@ -1,0 +1,95 @@
+@use '@/styles/variables' as variables;
+
+.salary-structure-card {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    cursor: pointer;
+    outline: none;
+    min-height: 48px;
+    border-radius: variables.$radius-medium;
+    box-shadow: variables.$shadow-sm;
+
+    @include variables.transition-ease;
+
+    &:hover {
+        border-color: variables.$color-primary;
+        box-shadow: variables.$shadow-md;
+    }
+
+    &:focus-visible {
+        border-color: variables.$color-primary;
+        box-shadow: 0 0 0 2px color-mix(in srgb, variables.$color-primary 30%, transparent);
+    }
+
+    .card-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: variables.$spacing-sm;
+
+        .structure-title {
+            font-size: variables.$font-size-md;
+            font-weight: 700;
+            color: variables.$color-gray-900;
+            margin: 0;
+            line-height: 1.35;
+        }
+    }
+
+    .card-code-row {
+        margin-top: variables.$spacing-xs;
+
+        .code-pill {
+            display: inline-block;
+            font-family: monospace;
+            font-size: variables.$font-size-xs;
+            color: variables.$color-gray-500;
+            background-color: variables.$color-gray-100;
+            padding: 2px variables.$spacing-xs;
+            border-radius: variables.$radius-tiny;
+            letter-spacing: 0.02em;
+        }
+    }
+
+    .card-divider {
+        height: 1px;
+        background-color: variables.$color-gray-200;
+        margin: variables.$spacing-sm 0;
+    }
+
+    .card-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: variables.$spacing-sm;
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .info-label {
+                font-size: variables.$font-size-xs;
+                color: variables.$color-gray-500;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+
+            .info-value {
+                font-size: variables.$font-size-sm;
+                font-weight: 500;
+                color: variables.$color-gray-900;
+            }
+        }
+    }
+
+    .card-action-hint {
+        margin-top: variables.$spacing-sm;
+        text-align: right;
+        font-size: variables.$font-size-xs;
+        font-weight: 600;
+        color: variables.$color-primary;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+}
