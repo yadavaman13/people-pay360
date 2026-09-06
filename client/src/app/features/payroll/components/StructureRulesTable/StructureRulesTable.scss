@@ -1,0 +1,146 @@
+@use '@/styles/variables' as variables;
+
+.structure-rules-table-wrapper {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    overflow-x: auto;
+    box-shadow: variables.$shadow-sm;
+
+    .structure-rules-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-family: variables.$font-sans;
+
+        thead {
+            background-color: variables.$color-gray-50;
+            border-bottom: 1px solid variables.$color-gray-200;
+
+            th {
+                padding: variables.$spacing-sm variables.$spacing-md;
+                font-size: variables.$font-size-xs;
+                font-weight: 700;
+                color: variables.$color-gray-600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                white-space: nowrap;
+
+                &.col-sequence {
+                    width: 70px;
+                    text-align: center;
+                }
+
+                &.col-name {
+                    min-width: 180px;
+                }
+
+                &.col-code {
+                    width: 110px;
+                }
+
+                &.col-category {
+                    width: 130px;
+                }
+
+                &.col-calc {
+                    min-width: 200px;
+                }
+
+                &.col-action {
+                    width: 40px;
+                    text-align: right;
+                }
+            }
+        }
+
+        tbody {
+            .rule-row {
+                border-bottom: 1px solid variables.$color-gray-100;
+                cursor: pointer;
+
+                @include variables.transition-ease;
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                &:hover {
+                    background-color: variables.$color-gray-50;
+
+                    .rule-name-link {
+                        color: variables.$color-primary;
+                    }
+
+                    .row-arrow-icon {
+                        transform: translateX(3px);
+                        color: variables.$color-primary;
+                    }
+                }
+
+                td {
+                    padding: variables.$spacing-sm variables.$spacing-md;
+                    font-size: variables.$font-size-sm;
+                    color: variables.$color-gray-800;
+                    vertical-align: middle;
+
+                    &.col-sequence {
+                        text-align: center;
+                    }
+
+                    .sequence-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: monospace;
+                        font-size: variables.$font-size-xs;
+                        font-weight: 700;
+                        color: variables.$color-gray-900;
+                        background-color: variables.$color-gray-100;
+                        border: 1px solid variables.$color-gray-300;
+                        border-radius: variables.$radius-small;
+                        min-width: 28px;
+                        height: 24px;
+                        padding: 0 6px;
+                    }
+
+                    .rule-name-link {
+                        font-weight: 600;
+                        color: variables.$color-gray-900;
+
+                        @include variables.transition-ease;
+                    }
+
+                    .code-pill {
+                        font-family: monospace;
+                        font-size: variables.$font-size-xs;
+                        font-weight: 700;
+                        color: variables.$color-gray-800;
+                        background-color: variables.$color-gray-100;
+                        border: 1px solid variables.$color-gray-200;
+                        padding: 2px 6px;
+                        border-radius: variables.$radius-small;
+                    }
+
+                    .calc-summary {
+                        font-size: variables.$font-size-sm;
+                        color: variables.$color-gray-700;
+                    }
+
+                    .row-arrow-icon {
+                        color: variables.$color-gray-400;
+
+                        @include variables.transition-ease;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.structure-rules-empty {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-xl;
+}
