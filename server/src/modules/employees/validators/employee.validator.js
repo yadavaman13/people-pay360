@@ -23,6 +23,20 @@ export function validateRequest(req, res, next) {
  * Validator for employee profile creation (self-onboarding or admin onboarding)
  */
 export const createEmployeeProfileValidator = [
+    body('firstName')
+        .optional({ nullable: true, checkFalsy: true })
+        .isString()
+        .trim()
+        .withMessage('First name must be a valid string'),
+    body('lastName')
+        .optional({ nullable: true, checkFalsy: true })
+        .isString()
+        .trim()
+        .withMessage('Last name must be a valid string'),
+    body('email')
+        .optional({ nullable: true, checkFalsy: true })
+        .isEmail()
+        .withMessage('Email must be a valid email address'),
     body('phone')
         .optional({ nullable: true, checkFalsy: true })
         .isString()

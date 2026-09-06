@@ -52,6 +52,7 @@ router
     )
     .post(
         restrictTo('HR_MANAGER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
+        upload.single('avatar'),
         createEmployeeProfileValidator,
         employeeController.createEmployeeProfile,
     );
@@ -93,6 +94,12 @@ router.delete('/:id/bank-accounts/:accountId', employeeRelatedController.deleteB
 // ─────────────────────────────────────────────────────────────────────────────
 // PARAMETERIZED /:id ROUTES
 // ─────────────────────────────────────────────────────────────────────────────
+
+router.post(
+    '/:id/send-welcome-email',
+    restrictTo('HR_MANAGER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
+    employeeController.sendWelcomeEmail,
+);
 
 router.patch(
     '/:id/avatar',

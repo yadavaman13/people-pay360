@@ -45,7 +45,19 @@ export async function fetchEmployeeById(id) {
  * @param {object} data
  */
 export async function createEmployee(data) {
-    const response = await employeeApi.post('/', data);
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    const response = await employeeApi.post('/', data, {
+        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+    });
+    return response.data;
+}
+
+/**
+ * Send welcome email with credentials to employee
+ * @param {string} id
+ */
+export async function sendEmployeeWelcomeEmail(id) {
+    const response = await employeeApi.post(`/${id}/send-welcome-email`);
     return response.data;
 }
 
