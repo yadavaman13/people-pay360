@@ -32,6 +32,13 @@ router.route('/check-out').post(checkOutSelfValidator, attendanceController.chec
 router.route('/:id/check-out').post(checkOutValidator, attendanceController.checkOut);
 
 router
+    .route('/resolve-missing-checkouts')
+    .post(
+        restrictTo('HR_MANAGER', 'HR_PAYROLL_MANAGER', 'ADMIN'),
+        attendanceController.resolveStaleCheckouts,
+    );
+
+router
     .route('/:id')
     .get(attendanceIdParamValidator, attendanceController.getAttendanceById)
     .patch(

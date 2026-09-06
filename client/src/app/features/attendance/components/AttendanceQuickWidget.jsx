@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/Shared/DataDisplay/Card/Card';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import InputField from '@/components/Shared/Form/InputField/InputField';
 import Badge from '@/components/Shared/DataDisplay/Badge/Badge';
-import { Clock, LogIn, LogOut, CheckCircle2 } from 'lucide-react';
+import { Clock, LogIn, LogOut, CheckCircle2, TrendingUp, AlertTriangle } from 'lucide-react';
 
 /**
  * Splits seconds into padded { hrs, mins, secs }
@@ -77,6 +77,8 @@ export default function AttendanceQuickWidget({
     const punchesUsed = todayStatus?.punchesUsed ?? 0;
     const maxPunches = todayStatus?.maxPunchesPerDay ?? 3;
     const canPunchIn = todayStatus?.canCheckIn ?? (!isCheckedIn && remainingPunches > 0);
+    const sessionClassification = todayStatus?.sessionClassification ?? 'NORMAL';
+    const estimatedOvertimeMinutes = todayStatus?.estimatedOvertimeMinutes ?? 0;
 
     const userFullName =
         `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Welcome Back';
@@ -133,6 +135,47 @@ export default function AttendanceQuickWidget({
                             ? `Started at ${new Date(activePunch.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                             : 'Punch in to start recording your active work session'}
                     </div>
+
+                    {/* Session classification banner — only shown when checked in */}
+                    {isCheckedIn && sessionClassification !== 'NORMAL' && (
+                        <div
+                            className="session-classification-banner"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                marginTop: '10px',
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                ...(sessionClassification === 'OVERTIME'
+                                    ? {
+                                          background: 'rgba(245, 158, 11, 0.1)',
+                                          color: 'var(--color-warning, #d97706)',
+                                          border: '1px solid rgba(245, 158, 11, 0.25)',
+                                      }
+                                    : {
+                                          background: 'rgba(239, 68, 68, 0.08)',
+                                          color: 'var(--color-danger, #ef4444)',
+                                          border: '1px solid rgba(239, 68, 68, 0.2)',
+                                      }),
+                            }}
+                        >
+                            {sessionClassification === 'OVERTIME' ? (
+                                <>
+                                    <TrendingUp size={13} />
+                                    Overtime&nbsp;·&nbsp;{estimatedOvertimeMinutes} min past
+                                    schedule
+                                </>
+                            ) : (
+                                <>
+                                    <AlertTriangle size={13} />
+                                    Session may be a missing checkout
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right: Actions, Notes & Shift Metadata */}

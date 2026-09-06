@@ -63,8 +63,10 @@ export const manualCorrectionValidator = [
     body('status')
         .optional({ nullable: true })
         .toUpperCase()
-        .isIn(['PRESENT', 'LATE', 'ABSENT', 'HALF_DAY', 'MANUAL_CORRECTION'])
-        .withMessage('status must be one of PRESENT, LATE, ABSENT, HALF_DAY, MANUAL_CORRECTION'),
+        .isIn(['PRESENT', 'LATE', 'ABSENT', 'HALF_DAY', 'MANUAL_CORRECTION', 'MISSING_CHECKOUT'])
+        .withMessage(
+            'status must be one of PRESENT, LATE, ABSENT, HALF_DAY, MANUAL_CORRECTION, MISSING_CHECKOUT',
+        ),
     body('notes').optional({ nullable: true }).isString().withMessage('notes must be a string'),
     validateRequest,
 ];
@@ -100,8 +102,10 @@ export const listAttendanceValidator = [
     query('status')
         .optional({ checkFalsy: true })
         .toUpperCase()
-        .isIn(['PRESENT', 'LATE', 'ABSENT', 'HALF_DAY', 'MANUAL_CORRECTION'])
-        .withMessage('status must be one of PRESENT, LATE, ABSENT, HALF_DAY, MANUAL_CORRECTION'),
+        .isIn(['PRESENT', 'LATE', 'ABSENT', 'HALF_DAY', 'MANUAL_CORRECTION', 'MISSING_CHECKOUT'])
+        .withMessage(
+            'status must be one of PRESENT, LATE, ABSENT, HALF_DAY, MANUAL_CORRECTION, MISSING_CHECKOUT',
+        ),
     query('page').optional({ checkFalsy: true }).isInt({ min: 1 }).toInt(),
     query('limit').optional({ checkFalsy: true }).isInt({ min: 1, max: 100 }).toInt(),
     validateRequest,

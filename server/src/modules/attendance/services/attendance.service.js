@@ -111,6 +111,173 @@ export async function resolveMaxDailyPunches(employeeId, dateStr) {
     return 3;
 }
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+/** Grace period (minutes) past scheduled end before we treat a session as MISSING_CHECKOUT */
+const OVERTIME_GRACE_MINUTES = 60;
+/** Default shift length (hours) when an employee has no workingScheduleId */
+const DEFAULT_SHIFT_HOURS = 8;
+
+/**
+ * Classify whether an open (un-checked-out) punch is OVERTIME or MISSING_CHECKOUT.
+ *
+ * Rules:
+ *  - If the punch's attendanceDate is a PAST calendar date  → always MISSING_CHECKOUT
+ *  - If the punch is from TODAY and current time ≤ scheduleEnd + OVERTIME_GRACE_MINUTES → OVERTIME
+ *  - Otherwise (same day but very overdue, or no schedule + > DEFAULT_SHIFT_HOURS elapsed) → MISSING_CHECKOUT
+ *
+ * @param {object} punch            - raw punch row with checkInTime, attendanceDate
+ * @param {object} employee         - employee row with workingScheduleId
+ * @param {string} todayDate        - 'YYYY-MM-DD' string for today
+ * @returns {{ classification: 'OVERTIME'|'MISSING_CHECKOUT', estimatedWorkedHours: number, estimatedCheckOutTime: Date }}
+ */
+export async function classifyOpenPunch(punch, employee, todayDate) {
+    const punchDate =
+        punch.attendanceDate ||
+        new Date(punch.checkInTime).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
+    const isPastDay = punchDate < todayDate;
+    const now = new Date();
+    const checkInTime = new Date(punch.checkInTime);
+
+    // ── Fetch schedule line for that day ──────────────────────────────────────
+    let scheduleEndMinutes = null; // minutes from midnight
+    let breakMinutes = 0;
+
+    if (employee.workingScheduleId) {
+        try {
+            const lines = await scheduleDao.findLinesByScheduleId(employee.workingScheduleId);
+            const dayOfWeek = checkInTime.getDay();
+            const scheduleLine = lines?.find((l) => Number(l.dayOfWeek) === dayOfWeek);
+            if (scheduleLine) {
+                scheduleEndMinutes = scheduleDao.timeStringToMinutes(scheduleLine.endTime);
+                breakMinutes = Number(scheduleLine.breakMinutes || 0);
+            }
+        } catch {
+            // ignore — fall through to defaults
+        }
+    }
+
+    // ── Compute estimated checkout time ───────────────────────────────────────
+    let estimatedCheckOutTime;
+
+    if (scheduleEndMinutes !== null) {
+        // Build a Date for schedule end on the punch date
+        const punchDateObj = new Date(checkInTime);
+        punchDateObj.setHours(Math.floor(scheduleEndMinutes / 60), scheduleEndMinutes % 60, 0, 0);
+        estimatedCheckOutTime = punchDateObj;
+    } else {
+        // No schedule: assume DEFAULT_SHIFT_HOURS after check-in
+        estimatedCheckOutTime = new Date(
+            checkInTime.getTime() + DEFAULT_SHIFT_HOURS * 60 * 60 * 1000,
+        );
+    }
+
+    // ── Classify ──────────────────────────────────────────────────────────────
+    let classification;
+
+    if (isPastDay) {
+        // Any open punch from a previous calendar day is definitely a missing checkout
+        classification = 'MISSING_CHECKOUT';
+    } else {
+        // Same day — check if within overtime grace window
+        const overdueMinutes = Math.floor(
+            (now.getTime() - estimatedCheckOutTime.getTime()) / (1000 * 60),
+        );
+        classification = overdueMinutes <= OVERTIME_GRACE_MINUTES ? 'OVERTIME' : 'MISSING_CHECKOUT';
+    }
+
+    // ── Clamp estimated checkout — never after "now" for MISSING_CHECKOUT ─────
+    if (classification === 'MISSING_CHECKOUT' && estimatedCheckOutTime > now) {
+        estimatedCheckOutTime = new Date(now);
+    }
+
+    const diffMs = Math.max(0, estimatedCheckOutTime.getTime() - checkInTime.getTime());
+    const grossHours = diffMs / (1000 * 60 * 60);
+    const estimatedWorkedHours = Number(Math.max(0, grossHours - breakMinutes / 60).toFixed(2));
+
+    return { classification, estimatedWorkedHours, estimatedCheckOutTime };
+}
+
+/**
+ * Batch-resolve all stale (missing checkout) punches from past dates.
+ * Should be called by HR on-demand or via a nightly cron.
+ *
+ * For each open punch on a past date:
+ *  1. Classify it (will always be MISSING_CHECKOUT since it's a past day)
+ *  2. Close the punch with the estimated checkOutTime and workedHours
+ *  3. Update the parent attendance record: workedHours, status = 'MISSING_CHECKOUT'
+ *
+ * @returns {{ resolved: number, skipped: number, details: Array }}
+ */
+export async function resolveStaleCheckouts() {
+    const today = getTodayDateString();
+    const openRows = await attendanceDao.findAllOpenPunchesBeforeDate(today);
+
+    let resolved = 0;
+    let skipped = 0;
+    const details = [];
+
+    for (const row of openRows) {
+        try {
+            const { punch, record, employee } = row;
+
+            const { estimatedWorkedHours, estimatedCheckOutTime } = await classifyOpenPunch(
+                { ...punch, attendanceDate: record.attendanceDate },
+                employee,
+                today,
+            );
+
+            // Close the stale punch
+            await attendanceDao.updatePunch(punch.id, {
+                checkOutTime: estimatedCheckOutTime,
+                workedHours: estimatedWorkedHours,
+                notes: punch.notes,
+            });
+
+            // Recalculate total workedHours across all punches for this record
+            const allPunches = await attendanceDao.findPunchesByRecordId(record.id);
+            const totalWorkedHours = Number(
+                allPunches
+                    .reduce((sum, p) => {
+                        const hrs =
+                            p.id === punch.id
+                                ? estimatedWorkedHours
+                                : parseFloat(p.workedHours || 0);
+                        return sum + hrs;
+                    }, 0)
+                    .toFixed(2),
+            );
+
+            // Update parent record — flag as MISSING_CHECKOUT for HR visibility
+            await attendanceDao.updateAttendanceRecord(record.id, {
+                checkOutTime: estimatedCheckOutTime,
+                workedHours: String(totalWorkedHours),
+                status: 'MISSING_CHECKOUT',
+                correctionReason: 'Auto-resolved: missing checkout detected on past date',
+                isManuallyCorrected: true,
+            });
+
+            resolved++;
+            details.push({
+                attendanceRecordId: record.id,
+                employeeId: employee.id,
+                employeeName: `${employee.firstName} ${employee.lastName}`,
+                attendanceDate: record.attendanceDate,
+                estimatedCheckOutTime,
+                estimatedWorkedHours,
+            });
+        } catch (err) {
+            skipped++;
+            details.push({
+                attendanceRecordId: row.record?.id,
+                error: err?.message || 'Unknown error during resolution',
+            });
+        }
+    }
+
+    return { resolved, skipped, total: openRows.length, details };
+}
+
 /**
  * Check In (Supports initial or subsequent check-in on the same calendar day up to contract max limit)
  */
@@ -230,13 +397,44 @@ export async function checkOut(attendanceId, user, body = {}) {
     const checkOutTime = new Date();
     const checkInTime = new Date(activePunch.checkInTime);
     const diffMs = checkOutTime.getTime() - checkInTime.getTime();
+    const diffSeconds = Math.floor(diffMs / 1000);
+
+    // ── Short-session guards ──────────────────────────────────────────────────
+    // TIER 1: Hard block — accidental check-in (under 60 seconds)
+    // HR force-checkout (attendanceId provided) bypasses this block so they can
+    // always correct stale records without being locked out.
+    const MIN_SESSION_SECONDS = 60;
+    if (!attendanceId && diffSeconds < MIN_SESSION_SECONDS) {
+        throw new AppError(
+            `You checked in only ${diffSeconds} second${diffSeconds !== 1 ? 's' : ''} ago. ` +
+                `Please wait at least ${MIN_SESSION_SECONDS} seconds before checking out. ` +
+                `If this was accidental, ask HR to void the punch.`,
+            422,
+        );
+    }
+
+    // TIER 2: Soft flag — very short session (60 s – 10 min): allow but annotate for HR review
+    const SHORT_SESSION_MINUTES = 10;
+    const isShortSession =
+        diffSeconds >= MIN_SESSION_SECONDS && diffSeconds < SHORT_SESSION_MINUTES * 60;
+    const shortSessionNote = isShortSession
+        ? `[Short session: ${Math.ceil(diffSeconds / 60)} min — may require HR review]`
+        : null;
+
     const sessionWorkedHours = Number((Math.max(0, diffMs) / (1000 * 60 * 60)).toFixed(2));
+
+    // Merge short-session note with any user-supplied notes
+    const punchNotes = (() => {
+        const userNote = body.notes !== undefined ? body.notes : activePunch.notes;
+        if (shortSessionNote && userNote) return `${shortSessionNote} ${userNote}`;
+        return shortSessionNote || userNote || null;
+    })();
 
     // Close the active punch session
     await attendanceDao.updatePunch(activePunch.id, {
         checkOutTime,
         workedHours: sessionWorkedHours,
-        notes: body.notes !== undefined ? body.notes : activePunch.notes,
+        notes: punchNotes,
     });
 
     // Recalculate total daily worked hours across all punches
@@ -261,12 +459,18 @@ export async function checkOut(attendanceId, user, body = {}) {
     );
 
     // Update parent daily attendance record
-    const updatedNotes = body.notes !== undefined ? body.notes : record.notes;
+    // If it was a short session, merge the flag note onto the parent record too
+    const parentNotes = (() => {
+        const existing = body.notes !== undefined ? body.notes : record.notes;
+        if (shortSessionNote && existing) return `${shortSessionNote} ${existing}`;
+        return shortSessionNote || existing || null;
+    })();
+
     await attendanceDao.updateAttendanceRecord(record.id, {
         checkOutTime,
         workedHours: String(totalDailyWorkedHours),
         status: evaluatedStatus,
-        notes: updatedNotes,
+        notes: parentNotes,
     });
 
     return attendanceDao.findAttendanceById(record.id);
@@ -312,6 +516,9 @@ export async function getTodayStatus(user, explicitEmployeeId) {
     const remainingPunches = Math.max(0, maxPunches - punchesUsed);
     const activePunch = record.activePunch;
     let currentSessionMinutes = 0;
+    let sessionClassification = 'NORMAL';
+    let estimatedOvertimeMinutes = 0;
+
     if (activePunch) {
         const now = new Date();
         const start = new Date(activePunch.checkInTime);
@@ -319,6 +526,29 @@ export async function getTodayStatus(user, explicitEmployeeId) {
             0,
             Math.floor((now.getTime() - start.getTime()) / (1000 * 60)),
         );
+
+        // Classify the active session — OVERTIME vs NORMAL
+        try {
+            const { classification, estimatedCheckOutTime } = await classifyOpenPunch(
+                { ...activePunch, attendanceDate: today },
+                employee,
+                today,
+            );
+            sessionClassification =
+                classification === 'MISSING_CHECKOUT' ? 'MISSING_CHECKOUT' : 'OVERTIME';
+
+            if (sessionClassification === 'OVERTIME') {
+                const now2 = new Date();
+                const overtimeStartMs = estimatedCheckOutTime.getTime(); // schedule end time
+                estimatedOvertimeMinutes = Math.max(
+                    0,
+                    Math.floor((now2.getTime() - overtimeStartMs) / (1000 * 60)),
+                );
+                if (estimatedOvertimeMinutes === 0) sessionClassification = 'NORMAL';
+            }
+        } catch {
+            // ignore classification errors — default NORMAL
+        }
     }
 
     return {
@@ -332,6 +562,8 @@ export async function getTodayStatus(user, explicitEmployeeId) {
         canCheckIn: !record.isCurrentlyCheckedIn && remainingPunches > 0,
         activePunch,
         currentSessionMinutes,
+        sessionClassification,
+        estimatedOvertimeMinutes,
         punches: record.punches,
         record,
         employee: employeeInfo,
