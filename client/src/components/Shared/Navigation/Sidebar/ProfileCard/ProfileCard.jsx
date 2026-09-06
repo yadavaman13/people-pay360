@@ -20,12 +20,13 @@ function ProfileCard({
     const {
         name = 'User',
         role = 'Member',
+        formattedRole,
         username = '',
         avatarUrl = '',
         initials = 'U',
     } = profile;
 
-    const displayRole = role || username || 'Member';
+    const displayRole = formattedRole || role || username || 'Member';
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const cardRef = useRef(null);
 
@@ -150,7 +151,9 @@ function ProfileCard({
 
             <div className="profile-info">
                 <span className="profile-name">{name}</span>
-                <span className="profile-role">{displayRole}</span>
+                <span className="profile-role" title={role || displayRole}>
+                    {displayRole}
+                </span>
             </div>
 
             {/* Settings icon button inside profile card wrapped with Tooltip */}

@@ -5,10 +5,13 @@ export default function DashboardIndex() {
     const { user } = useAuth();
     const roleUpper = (user?.role || '').toUpperCase();
     if (roleUpper === 'ADMIN') {
-        return <Navigate to="admin" replace />;
+        return <Navigate to="admin/home" replace />;
     }
-    if (['HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'].includes(roleUpper)) {
-        return <Navigate to="hr" replace />;
+    if (['HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'].includes(roleUpper)) {
+        return <Navigate to="hr/home" replace />;
     }
-    return <Navigate to="employee" replace />;
+    if (roleUpper === 'HR_MANAGER') {
+        return <Navigate to="hr/attendance" replace />;
+    }
+    return <Navigate to="employee/attendance" replace />;
 }

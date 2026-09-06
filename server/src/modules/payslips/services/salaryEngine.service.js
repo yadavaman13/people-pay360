@@ -203,11 +203,23 @@ export function computePayslip({
               .filter((l) => ['BASIC', 'ALLOWANCE'].includes(l.category))
               .reduce((sum, l) => sum + l.amount, 0);
 
-    const deductionAmount = lines
-        .filter((l) => l.category === 'DEDUCTION')
-        .reduce((sum, l) => sum + l.amount, 0);
+    const totDedLine = lines.find((l) =>
+        ['TOT_DED', 'TOTAL_DEDUCTION', 'TOTAL_DEDUCTIONS'].includes(l.code?.toUpperCase()),
+    );
 
-    const netAmount = netLine ? netLine.amount : Math.max(0, grossAmount - deductionAmount);
+    const componentDeductions = lines.filter(
+        (l) =>
+            l.category === 'DEDUCTION' &&
+            !['TOT_DED', 'TOTAL_DEDUCTION', 'TOTAL_DEDUCTIONS'].includes(l.code?.toUpperCase()),
+    );
+
+    const componentDeductionsSum = componentDeductions.reduce((sum, l) => sum + l.amount, 0);
+
+    const deductionAmount = totDedLine ? totDedLine.amount : componentDeductionsSum;
+
+    const netAmount = netLine
+        ? netLine.amount
+        : Number(Math.max(0, grossAmount - deductionAmount).toFixed(2));
 
     return {
         lines,

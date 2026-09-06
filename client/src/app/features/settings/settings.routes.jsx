@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router';
+import { Navigate, Outlet } from 'react-router';
 import GeneralSettings from './GeneralSettings';
 import AccountSettings from './AccountSettings';
 
@@ -6,10 +6,19 @@ export default {
     // Multi-Role RBAC: accessible to all authenticated system roles
     allowedRoles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER', 'EMPLOYEE'],
 
+    // Feature navigation metadata for topbar / breadcrumbs
+    navItem: {
+        label: 'Settings',
+        path: '/dashboard/employee/settings/general',
+        roles: ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER', 'EMPLOYEE'],
+        subTabs: ['General', 'Account'],
+    },
+
     // Feature routes auto-discovered by routes.loader.jsx
     routes: [
         {
             path: 'settings',
+            element: <Outlet />,
             children: [
                 {
                     index: true,

@@ -28,8 +28,8 @@ function PayrunActionBar({
     const computeLabel = isComputed ? 'Recompute' : 'Compute';
 
     // Validate button states
-    const canClickValidate = isComputed && (canValidate || blockersCount === 0);
-    const validateDisabled = !isComputed || !canValidate;
+    const canClickValidate = isComputed;
+    const validateDisabled = !isComputed;
 
     // Mark Paid button states
     const canClickMarkPaid = isValidated;
@@ -40,7 +40,9 @@ function PayrunActionBar({
     const renderValidateButton = () => {
         const btn = (
             <Button
-                variant={canClickValidate ? 'primary' : 'outline'}
+                variant={
+                    canClickValidate ? (blockersCount > 0 ? 'secondary' : 'primary') : 'outline'
+                }
                 onClick={onValidate}
                 loading={isValidating}
                 disabled={validateDisabled || isValidating}
@@ -51,10 +53,10 @@ function PayrunActionBar({
             </Button>
         );
 
-        if (isComputed && !canValidate) {
+        if (isComputed && blockersCount > 0) {
             return (
                 <Tooltip
-                    content={`Validation blocked: ${blockersCount} blocker(s) must be resolved`}
+                    content={`Validation requires review: ${blockersCount} blocker(s) detected`}
                     position="top"
                 >
                     <span className="payrun-action-bar__tooltip-trigger">{btn}</span>

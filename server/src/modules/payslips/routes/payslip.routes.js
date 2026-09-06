@@ -25,11 +25,26 @@ const router = express.Router();
 router.use(protect);
 
 // ── Dev 3: Payslip Management & Calculation ──────────────────────────────────
-router.get('/', listPayslipsValidator, getAllPayslips);
+router.get(
+    '/',
+    restrictTo('HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN', 'EMPLOYEE'),
+    listPayslipsValidator,
+    getAllPayslips,
+);
 
-router.get('/:id', payslipIdParamValidator, getPayslipById);
+router.get(
+    '/:id',
+    restrictTo('HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN', 'EMPLOYEE'),
+    payslipIdParamValidator,
+    getPayslipById,
+);
 
-router.get('/:id/lines', payslipIdParamValidator, getPayslipLines);
+router.get(
+    '/:id/lines',
+    restrictTo('HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN', 'EMPLOYEE'),
+    payslipIdParamValidator,
+    getPayslipLines,
+);
 
 router.patch(
     '/:id',
@@ -53,9 +68,19 @@ router.post(
 );
 
 // ── Dev 4: Payslip Document Rendering & Email Distribution ────────────────────
-router.get('/:id/pdf', pdfViewQueryValidator, generatePayslipPdf);
+router.get(
+    '/:id/pdf',
+    restrictTo('HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN', 'EMPLOYEE'),
+    pdfViewQueryValidator,
+    generatePayslipPdf,
+);
 
-router.get('/:id/preview', payslipIdParamValidator, previewPayslipHtml);
+router.get(
+    '/:id/preview',
+    restrictTo('HR_PAYROLL_USER', 'HR_PAYROLL_MANAGER', 'ADMIN', 'EMPLOYEE'),
+    payslipIdParamValidator,
+    previewPayslipHtml,
+);
 
 router.post(
     '/:id/send',

@@ -7,6 +7,9 @@ import { getAttendanceForPeriod } from '../../../dao/attendance.dao.js';
 import { getApprovedTimeOff } from '../../../dao/timeOffRequest.dao.js';
 import { computePayslip } from './salaryEngine.service.js';
 import { AppError } from '../../../utils/appError.js';
+import { db } from '../../../config/database.config.js';
+import { payslips } from '../../../db/schema/payroll.schema.js';
+import { eq } from 'drizzle-orm';
 
 /**
  * Payslip Service
@@ -180,6 +183,31 @@ export async function recomputeSinglePayslip(payslipId, _userId) {
         workedDays: computation.workedDays,
         contractWageSnapshot: computation.contractWageSnapshot,
         lines: computation.lines,
+    });
+
+    // Update parent payrun financial totals to reflect the recomputed payslip
+    const payrunPayslips = await db
+        .select({
+            grossAmount: payslips.grossAmount,
+            deductionAmount: payslips.deductionAmount,
+            netAmount: payslips.netAmount,
+        })
+        .from(payslips)
+        .where(eq(payslips.payrunId, payrun.id));
+
+    let totalGross = 0;
+    let totalDeductions = 0;
+    let totalNet = 0;
+    for (const p of payrunPayslips) {
+        totalGross += Number(p.grossAmount || 0);
+        totalDeductions += Number(p.deductionAmount || 0);
+        totalNet += Number(p.netAmount || 0);
+    }
+
+    await payrunDao.updatePayrun(payrun.id, {
+        totalGross: totalGross.toFixed(2),
+        totalDeductions: totalDeductions.toFixed(2),
+        totalNet: totalNet.toFixed(2),
     });
 
     return payslipDao.findPayslipWithLines(payslipId);
