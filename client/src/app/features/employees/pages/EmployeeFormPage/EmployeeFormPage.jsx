@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useMemo, useRef } from 'react';
+import { useEffect, useState, useContext, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router';
 import { EmployeesContext } from '../../context/employees.context';
 import { useEmployees } from '../../hooks';
@@ -6,16 +6,21 @@ import SmartButtonsBar from '../../components/SmartButtonsBar/SmartButtonsBar';
 import SmartRecordsDrawer from '../../components/SmartRecordsDrawer/SmartRecordsDrawer';
 import Button from '@/components/Shared/Buttons/Button/Button';
 import InputField from '@/components/Shared/Form/InputField/InputField';
+import Dropdown from '@/components/Shared/Form/Dropdown/Dropdown';
+import Calendar from '@/components/Shared/Form/Calendar/Calendar';
+import AvatarUpload from '@/components/Shared/Form/Upload/AvatarUpload/AvatarUpload';
 import Spinner from '@/components/Shared/Feedback/Spinner/Spinner';
 import Dialog from '@/components/Shared/Feedback/Dialog/Dialog';
+import { useToast } from '@/components/Shared/Feedback/Toast';
 import { getAvatarUrl } from '@/utils/avatar';
-import { Save, X, Edit3, Trash2, CheckCircle2, AlertCircle, Camera } from 'lucide-react';
+import { Save, X, Edit3, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import './EmployeeFormPage.scss';
 
 function EmployeeFormPage({ isNew = false }) {
     const { id: paramId } = useParams();
     const navigate = useNavigate();
     const { pathname } = useLocation();
+    const { success: toastSuccess } = useToast();
     const roleSegment = pathname.includes('/admin/')
         ? 'admin'
         : pathname.includes('/hr/')
@@ -50,10 +55,8 @@ function EmployeeFormPage({ isNew = false }) {
         handleUploadAvatar,
     } = useEmployees();
 
-    const fileInputRef = useRef(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [selectedAvatarFile, setSelectedAvatarFile] = useState(null);
-    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
     const [isEditing, setIsEditing] = useState(isCreateMode);
     const [activeTab, setActiveTab] = useState('work'); // 'work' | 'private'
@@ -141,50 +144,21 @@ function EmployeeFormPage({ isNew = false }) {
         });
     };
 
-    const handleAvatarClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleAvatarFileChange = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        e.target.value = '';
-
-        const previewUrl = URL.createObjectURL(file);
-        setAvatarPreview(previewUrl);
-
-        if (!isCreateMode && paramId) {
-            setIsUploadingAvatar(true);
-            try {
-                await handleUploadAvatar(paramId, file);
-            } catch (err) {
-                console.error('Failed to upload avatar:', err);
-            } finally {
-                setIsUploadingAvatar(false);
-            }
-        } else {
-            setSelectedAvatarFile(file);
-        }
-    };
-
     const handleSave = async () => {
         try {
             if (isCreateMode) {
-                const created = await handleSaveEmployee(null, formData);
+                const created = await handleSaveEmployee(null, formData, selectedAvatarFile);
                 if (created?.id) {
-                    if (selectedAvatarFile) {
-                        try {
-                            await handleUploadAvatar(created.id, selectedAvatarFile);
-                        } catch (err) {
-                            console.error('Failed to upload avatar for new employee:', err);
-                        }
-                    }
-                    navigate(`/dashboard/${roleSegment}/employees/${created.id}`);
-                    setIsEditing(false);
+                    navigate(`/dashboard/${roleSegment}/employees/${created.id}`, {
+                        replace: true,
+                    });
+                    // Keep form open for further edits as requested
+                    setIsEditing(true);
                 }
             } else {
-                await handleSaveEmployee(paramId, formData);
-                setIsEditing(false);
+                await handleSaveEmployee(paramId, formData, selectedAvatarFile);
+                // Keep form open for further edits as requested
+                setIsEditing(true);
             }
         } catch (err) {
             console.error('Save employee error:', err);
@@ -315,7 +289,7 @@ function EmployeeFormPage({ isNew = false }) {
             {/* Top Action Bar matching Image 3 */}
             <div className="employee-form-page__action-bar">
                 <div className="left-actions">
-                    {!isEditing ? (
+                    {!isEditing && (
                         <Button
                             variant="secondary"
                             icon={Edit3}
@@ -324,25 +298,6 @@ function EmployeeFormPage({ isNew = false }) {
                         >
                             EDIT
                         </Button>
-                    ) : (
-                        <div className="edit-controls">
-                            <Button
-                                variant="primary"
-                                icon={Save}
-                                onClick={handleSave}
-                                loading={actionLoading}
-                            >
-                                SAVE
-                            </Button>
-                            <Button
-                                variant="secondary"
-                                icon={X}
-                                onClick={handleDiscard}
-                                disabled={actionLoading}
-                            >
-                                DISCARD
-                            </Button>
-                        </div>
                     )}
 
                     {!isCreateMode && !isEditing && (
@@ -372,39 +327,26 @@ function EmployeeFormPage({ isNew = false }) {
             {/* Profile Header Card matching Image 3 */}
             <div className="employee-form-card">
                 <div className="employee-profile-header">
-                    <div
-                        className="profile-avatar-box has-upload"
-                        onClick={handleAvatarClick}
-                        role="button"
-                        tabIndex={0}
-                        title="Click to upload profile photo"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                handleAvatarClick();
+                    <div className="profile-avatar-container">
+                        <AvatarUpload
+                            value={
+                                avatarPreview ||
+                                getAvatarUrl(
+                                    currentEmployee?.profileImage ||
+                                        currentEmployee?.user?.profileImage,
+                                )
                             }
-                        }}
-                    >
-                        {avatarImage ? (
-                            <img src={avatarImage} alt={fullName} className="avatar-img" />
-                        ) : (
-                            <span>{initials}</span>
-                        )}
-                        <div className="avatar-upload-overlay">
-                            <Camera size={18} />
-                            <span>Upload</span>
-                        </div>
-                        {isUploadingAvatar && (
-                            <div className="avatar-uploading-spinner">
-                                <Spinner size="sm" />
-                            </div>
-                        )}
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleAvatarFileChange}
-                            style={{ display: 'none' }}
+                            name={fullName}
+                            size={110}
+                            disabled={!isEditing}
+                            onChange={(croppedUrl) => {
+                                setAvatarPreview(croppedUrl);
+                                setSelectedAvatarFile(croppedUrl);
+                            }}
+                            onRemove={() => {
+                                setAvatarPreview(null);
+                                setSelectedAvatarFile(null);
+                            }}
                         />
                     </div>
 
@@ -485,20 +427,16 @@ function EmployeeFormPage({ isNew = false }) {
                                     {!isEditing ? (
                                         <div className="field-display-box">{departmentName}</div>
                                     ) : (
-                                        <select
+                                        <Dropdown
+                                            options={metadata.departments.map((d) => ({
+                                                value: d.id,
+                                                label: d.name,
+                                            }))}
                                             value={formData.departmentId}
-                                            onChange={(e) =>
-                                                handleChange('departmentId', e.target.value)
-                                            }
-                                            className="form-select-control"
-                                        >
-                                            <option value="">Select Department</option>
-                                            {metadata.departments.map((d) => (
-                                                <option key={d.id} value={d.id}>
-                                                    {d.name}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            onChange={(val) => handleChange('departmentId', val)}
+                                            placeholder="Select Department"
+                                            clearable={false}
+                                        />
                                     )}
                                 </div>
 
@@ -507,20 +445,16 @@ function EmployeeFormPage({ isNew = false }) {
                                     {!isEditing ? (
                                         <div className="field-display-box">{managerName}</div>
                                     ) : (
-                                        <select
+                                        <Dropdown
+                                            options={availableManagers.map((m) => ({
+                                                value: m.id,
+                                                label: `${m.firstName} ${m.lastName} (${m.employeeCode})`,
+                                            }))}
                                             value={formData.managerId}
-                                            onChange={(e) =>
-                                                handleChange('managerId', e.target.value)
-                                            }
-                                            className="form-select-control"
-                                        >
-                                            <option value="">No Manager (Top Level)</option>
-                                            {availableManagers.map((m) => (
-                                                <option key={m.id} value={m.id}>
-                                                    {m.firstName} {m.lastName} ({m.employeeCode})
-                                                </option>
-                                            ))}
-                                        </select>
+                                            onChange={(val) => handleChange('managerId', val)}
+                                            placeholder="Select Manager"
+                                            clearable={true}
+                                        />
                                     )}
                                 </div>
 
@@ -534,26 +468,19 @@ function EmployeeFormPage({ isNew = false }) {
                                                   'Standard 40 Hours / Week'}
                                         </div>
                                     ) : (
-                                        <select
+                                        <Dropdown
+                                            options={metadata.schedules.map((s) => ({
+                                                value: s.id,
+                                                label: `${s.name} (${s.weeklyHours || 40} Hours / Week)`,
+                                            }))}
                                             value={formData.workingScheduleId}
-                                            onChange={(e) =>
-                                                handleChange('workingScheduleId', e.target.value)
+                                            onChange={(val) =>
+                                                handleChange('workingScheduleId', val)
                                             }
-                                            className="form-select-control"
-                                        >
-                                            <option value="">Select Working Schedule</option>
-                                            {metadata.schedules.map((s) => (
-                                                <option key={s.id} value={s.id}>
-                                                    {s.name} ({s.weeklyHours || 40} Hours / Week)
-                                                </option>
-                                            ))}
-                                        </select>
+                                            placeholder="Select Working Schedule"
+                                            clearable={false}
+                                        />
                                     )}
-                                </div>
-
-                                <div className="field-group">
-                                    <label className="field-label">Company</label>
-                                    <div className="field-display-box">PeoplePay360 Pvt Ltd</div>
                                 </div>
                             </div>
 
@@ -564,61 +491,16 @@ function EmployeeFormPage({ isNew = false }) {
                                     {!isEditing ? (
                                         <div className="field-display-box">{jobTitle}</div>
                                     ) : (
-                                        <select
+                                        <Dropdown
+                                            options={availablePositions.map((p) => ({
+                                                value: p.id,
+                                                label: p.title,
+                                            }))}
                                             value={formData.jobPositionId}
-                                            onChange={(e) =>
-                                                handleChange('jobPositionId', e.target.value)
-                                            }
-                                            className="form-select-control"
-                                        >
-                                            <option value="">Select Job Position</option>
-                                            {availablePositions.map((p) => (
-                                                <option key={p.id} value={p.id}>
-                                                    {p.title}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    )}
-                                </div>
-
-                                <div className="field-group">
-                                    <label className="field-label">Work Location</label>
-                                    {!isEditing ? (
-                                        <div className="field-display-box">
-                                            {formData.address || 'Headquarters'}
-                                        </div>
-                                    ) : (
-                                        <InputField
-                                            value={formData.address}
-                                            onChange={(e) =>
-                                                handleChange('address', e.target.value)
-                                            }
-                                            placeholder="e.g. Mumbai HQ / Bangalore"
+                                            onChange={(val) => handleChange('jobPositionId', val)}
+                                            placeholder="Select Job Position"
+                                            clearable={false}
                                         />
-                                    )}
-                                </div>
-
-                                <div className="field-group">
-                                    <label className="field-label">Status</label>
-                                    {!isEditing ? (
-                                        <div className="field-display-box status-value">
-                                            <span
-                                                className={`status-pill pill--${formData.status.toLowerCase()}`}
-                                            >
-                                                ● {formData.status}
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <select
-                                            value={formData.status}
-                                            onChange={(e) => handleChange('status', e.target.value)}
-                                            className="form-select-control"
-                                        >
-                                            <option value="ACTIVE">Active</option>
-                                            <option value="DRAFT">Draft</option>
-                                            <option value="SUSPENDED">Suspended</option>
-                                            <option value="ARCHIVED">Archived</option>
-                                        </select>
                                     )}
                                 </div>
 
@@ -673,15 +555,17 @@ function EmployeeFormPage({ isNew = false }) {
                                             {formData.gender || '—'}
                                         </div>
                                     ) : (
-                                        <select
+                                        <Dropdown
+                                            options={[
+                                                { value: 'Male', label: 'Male' },
+                                                { value: 'Female', label: 'Female' },
+                                                { value: 'Other', label: 'Other' },
+                                            ]}
                                             value={formData.gender}
-                                            onChange={(e) => handleChange('gender', e.target.value)}
-                                            className="form-select-control"
-                                        >
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                            <option value="Other">Other</option>
-                                        </select>
+                                            onChange={(val) => handleChange('gender', val)}
+                                            placeholder="Select Gender"
+                                            clearable={false}
+                                        />
                                     )}
                                 </div>
 
@@ -692,13 +576,18 @@ function EmployeeFormPage({ isNew = false }) {
                                             {formData.dateOfBirth || '—'}
                                         </div>
                                     ) : (
-                                        <input
-                                            type="date"
-                                            value={formData.dateOfBirth}
-                                            onChange={(e) =>
-                                                handleChange('dateOfBirth', e.target.value)
+                                        <Calendar
+                                            selectedDate={
+                                                formData.dateOfBirth
+                                                    ? new Date(formData.dateOfBirth)
+                                                    : null
                                             }
-                                            className="form-date-control"
+                                            onSelectDate={(date) =>
+                                                handleChange(
+                                                    'dateOfBirth',
+                                                    date.toISOString().split('T')[0],
+                                                )
+                                            }
                                         />
                                     )}
                                 </div>
@@ -710,13 +599,18 @@ function EmployeeFormPage({ isNew = false }) {
                                             {formData.hireDate || '—'}
                                         </div>
                                     ) : (
-                                        <input
-                                            type="date"
-                                            value={formData.hireDate}
-                                            onChange={(e) =>
-                                                handleChange('hireDate', e.target.value)
+                                        <Calendar
+                                            selectedDate={
+                                                formData.hireDate
+                                                    ? new Date(formData.hireDate)
+                                                    : null
                                             }
-                                            className="form-date-control"
+                                            onSelectDate={(date) =>
+                                                handleChange(
+                                                    'hireDate',
+                                                    date.toISOString().split('T')[0],
+                                                )
+                                            }
                                         />
                                     )}
                                 </div>
@@ -814,11 +708,29 @@ function EmployeeFormPage({ isNew = false }) {
                 )}
             </div>
 
-            {/* Useful Note matching Image 3 wireframe */}
-            <div className="useful-note">
-                Useful note: smart buttons should open related Contracts, Attendance and Time Off
-                records filtered for the current employee.
-            </div>
+            {/* Action Buttons placed after form markup */}
+            {isEditing && (
+                <div className="employee-form-page__bottom-actions">
+                    <Button
+                        variant="primary"
+                        size="md"
+                        icon={Save}
+                        onClick={handleSave}
+                        loading={actionLoading}
+                    >
+                        SAVE
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="md"
+                        icon={X}
+                        onClick={handleDiscard}
+                        disabled={actionLoading}
+                    >
+                        DISCARD
+                    </Button>
+                </div>
+            )}
 
             {/* Smart Records Slide-Over Drawer */}
             <SmartRecordsDrawer

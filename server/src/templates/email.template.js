@@ -365,3 +365,65 @@ export const timeOffDecisionEmailTemplate = ({
     </html>
   `;
 };
+
+export const employeeWelcomeEmailTemplate = ({
+    employeeName,
+    employeeId,
+    employeeCode,
+    email,
+    temporaryPassword,
+}) => {
+    const safeName = escapeHtml(employeeName || 'Employee');
+    const safeCode = escapeHtml(employeeCode || employeeId || '');
+    const safeEmail = escapeHtml(email || '');
+    const safePassword = escapeHtml(temporaryPassword || '');
+
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Welcome to PeoplePay360 — Your Account Credentials</title>
+      <style>
+        ${emailStyles}
+        .cred-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .cred-table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; font-size: 15px; }
+        .cred-table td.label { font-weight: 600; color: #374151; width: 40%; }
+        .cred-table td.val { color: #111827; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>PeoplePay360</h1>
+        </div>
+        <div class="content">
+          <p>Hello ${safeName},</p>
+          <p>Welcome to <strong>PeoplePay360</strong>! Your employee profile and user account have been successfully created. Here are your account credentials and details:</p>
+          
+          <table class="cred-table">
+            <tr>
+              <td class="label">Employee ID / Code:</td>
+              <td class="val"><strong>${safeCode}</strong></td>
+            </tr>
+            <tr>
+              <td class="label">Login Email:</td>
+              <td class="val">${safeEmail}</td>
+            </tr>
+          </table>
+
+          <p style="margin-bottom: 8px; font-weight: 600; color: #374151;">Temporary Password:</p>
+          <div class="otp-box" style="font-size: 24px; letter-spacing: 2px;">${safePassword}</div>
+
+          <p>Please use these credentials to log in to the portal.</p>
+          <p class="note"><strong>Security Notice:</strong> This is a temporary password. For your security, you are strongly advised to change your password immediately after logging in.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} PeoplePay360. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};

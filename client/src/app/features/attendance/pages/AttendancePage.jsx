@@ -13,6 +13,7 @@ import Button from '@/components/Shared/Buttons/Button/Button';
 import Tooltip from '@/components/Shared/DataDisplay/Tooltip/Tooltip';
 import { Card, CardContent } from '@/components/Shared/DataDisplay/Card/Card';
 import { Eye, Edit3, LogOut, Clock, Calendar, ShieldCheck } from 'lucide-react';
+import { resolveMissingCheckouts } from '../services/attendance.api';
 import '../Attendance.scss';
 
 // ADMIN is view-only — they cannot punch their own attendance
@@ -63,6 +64,10 @@ function getStatusVariant(status) {
             return 'danger';
         case 'HALF_DAY':
             return 'warning';
+        case 'MISSING_CHECKOUT':
+            return 'danger';
+        case 'MANUAL_CORRECTION':
+            return 'neutral';
         default:
             return 'neutral';
     }
@@ -179,6 +184,33 @@ export default function AttendancePage({ mode: initialMode }) {
     // Modal state for HR manual correction
     const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState(null);
+
+    // Resolve missing checkouts state
+    const [isResolvingCheckouts, setIsResolvingCheckouts] = useState(false);
+
+    const handleResolveCheckouts = useCallback(async () => {
+        setIsResolvingCheckouts(true);
+        try {
+            const result = await resolveMissingCheckouts();
+            const data = result?.data ?? result;
+            const resolved = data?.resolved ?? 0;
+            const skipped = data?.skipped ?? 0;
+            // Refresh the list and summary after resolution
+            await Promise.all([
+                loadAttendanceList({ page: 1, excludeHr: true }),
+                loadSummaryMetrics({ excludeHr: true }),
+            ]);
+            window.alert(
+                `Resolution complete\n\nResolved: ${resolved}\nSkipped (errors): ${skipped}`,
+            );
+        } catch (err) {
+            window.alert(
+                `Failed to resolve: ${err?.response?.data?.message || err?.message || 'Unknown error'}`,
+            );
+        } finally {
+            setIsResolvingCheckouts(false);
+        }
+    }, [loadAttendanceList, loadSummaryMetrics]);
 
     // Track current month range for self-view so refresh uses same window
     const employeeDateRangeRef = useRef(null);
@@ -375,6 +407,11 @@ export default function AttendancePage({ mode: initialMode }) {
                 label: 'Half Day',
                 count: isEmployeesView ? summaryMetrics?.halfDayCount : undefined,
             },
+            {
+                id: 'MISSING_CHECKOUT',
+                label: 'Missing Checkout',
+                count: isEmployeesView ? summaryMetrics?.missingCheckoutCount : undefined,
+            },
         ],
         [isEmployeesView, summaryMetrics, pagination?.total],
     );
@@ -386,7 +423,14 @@ export default function AttendancePage({ mode: initialMode }) {
                 key: 'status',
                 label: 'Status',
                 type: 'select',
-                options: ['PRESENT', 'LATE', 'ABSENT', 'HALF_DAY'],
+                options: [
+                    'PRESENT',
+                    'LATE',
+                    'ABSENT',
+                    'HALF_DAY',
+                    'MISSING_CHECKOUT',
+                    'MANUAL_CORRECTION',
+                ],
             },
             {
                 key: 'attendanceDate',
@@ -901,6 +945,10 @@ export default function AttendancePage({ mode: initialMode }) {
                 employeeMonthlySummary={employeeMonthlySummary}
                 selectedMonth={selectedMonth}
                 onMonthChange={(offsetOrDate) => changeMonth(offsetOrDate, { scope: 'self' })}
+                onResolveCheckouts={
+                    isEmployeesView && canManageEmployees ? handleResolveCheckouts : undefined
+                }
+                isResolvingCheckouts={isResolvingCheckouts}
             />
 
             {/* AdvancedTable — server-side driven with API filter wiring */}
