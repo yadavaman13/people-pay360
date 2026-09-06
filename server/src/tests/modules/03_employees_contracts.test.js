@@ -101,6 +101,47 @@ describe('03: Employees & Contracts API', () => {
             expect([400, 422]).toContain(res.status);
             expect(res.body.success).toBe(false);
         });
+
+        it('should allow HR/Admin to onboard new employee with name and email without passing userId (201)', async () => {
+            const uniqueEmail = `newhire_${Date.now()}@company.com`;
+            const payload = {
+                firstName: 'Siddharth',
+                lastName: 'Nair',
+                email: uniqueEmail,
+                phone: '+919123456780',
+                gender: 'MALE',
+                dateOfBirth: '1992-08-20',
+                hireDate: '2026-02-01',
+                workingScheduleId: testSchedule.id,
+                bankAccount: {
+                    bankName: 'ICICI Bank',
+                    accountNumber: `11223344${Date.now().toString().slice(-4)}`,
+                    accountHolderName: 'Siddharth Nair',
+                    ifscCode: 'ICIC0001234',
+                    accountType: 'SAVINGS',
+                },
+            };
+
+            const res = await request(app)
+                .post('/api/employees')
+                .set('Cookie', adminAuth.cookie)
+                .send(payload);
+
+            expect(res.status).toBe(201);
+            expect(res.body.success).toBe(true);
+            expect(res.body.data.id).toBeDefined();
+            expect(res.body.data.firstName).toBe('Siddharth');
+            expect(res.body.data.email).toBe(uniqueEmail);
+            expect(res.body.data.employeeCode).toBeDefined();
+
+            // Duplicate email creation should return 409
+            const dupRes = await request(app)
+                .post('/api/employees')
+                .set('Cookie', adminAuth.cookie)
+                .send(payload);
+
+            expect(dupRes.status).toBe(409);
+        });
     });
 
     describe('GET /api/employees', () => {

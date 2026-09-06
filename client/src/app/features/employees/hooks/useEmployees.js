@@ -1,5 +1,6 @@
 import { useContext, useCallback, useRef, useEffect } from 'react';
 import { EmployeesContext } from '../context/employees.context';
+import { useAuth } from '@/app/features/auth/hooks/useAuth';
 import * as employeeApi from '../services/employee.api';
 
 /**
@@ -9,6 +10,7 @@ import * as employeeApi from '../services/employee.api';
  * Exports ACTION HANDLERS ONLY without duplicating state variables or setters!
  */
 export function useEmployees() {
+    const { user: currentUser } = useAuth();
     const context = useContext(EmployeesContext);
     if (!context) {
         throw new Error('useEmployees must be used within an EmployeesProvider');
@@ -550,10 +552,15 @@ export function useEmployees() {
      */
     const loadMetadata = useCallback(async () => {
         try {
+            const fetchUsersPromise =
+                currentUser?.role === 'ADMIN'
+                    ? employeeApi.fetchUnassignedUsers()
+                    : Promise.resolve({ users: [] });
+
             const [deptRes, schedRes, userRes, posRes] = await Promise.allSettled([
                 employeeApi.fetchDepartments(),
                 employeeApi.fetchWorkingSchedules(),
-                employeeApi.fetchUnassignedUsers(),
+                fetchUsersPromise,
                 employeeApi.fetchJobPositions(),
             ]);
 
@@ -571,7 +578,7 @@ export function useEmployees() {
         } catch (err) {
             console.error('Failed to load metadata:', err);
         }
-    }, [setMetadata]);
+    }, [currentUser?.role, setMetadata]);
 
     const dismissNotification = useCallback(() => {
         setNotification(null);

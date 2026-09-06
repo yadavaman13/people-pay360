@@ -1,5 +1,12 @@
 import * as employeeDao from '../../../dao/employee.dao.js';
-import { getUserById, updateUser } from '../../../dao/user.dao.js';
+import * as bankAccountDao from '../../../dao/bankAccount.dao.js';
+import {
+    getUserById,
+    getUserByEmail,
+    createUser,
+    recoverUser,
+    updateUser,
+} from '../../../dao/user.dao.js';
 import { uploadImageOnImageKit } from '../../../services/image.service.js';
 import { generateEmployeeCode } from '../../../utils/employeeCode.utils.js';
 import { AppError } from '../../../utils/appError.js';
@@ -11,62 +18,141 @@ import { AppError } from '../../../utils/appError.js';
 /**
  * Onboard/Create an employee profile.
  * Can be called by an authenticated user for self-onboarding,
- * or by Admin/HR on behalf of a registered user.
+ * or by Admin/HR on behalf of a new or registered user.
  *
  * @param {object} data
  * @param {object} authenticatedUser
  */
 export async function createEmployeeProfile(data, authenticatedUser) {
     const userRole = (authenticatedUser.role || '').toUpperCase();
-    const isPrivileged = ['ADMIN', 'HR_MANAGER'].includes(userRole);
+    const isPrivileged = ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER'].includes(userRole);
 
-    let targetUserId = authenticatedUser.id;
-    if (isPrivileged && data.userId) {
-        targetUserId = data.userId;
+    let targetUserId = null;
+    let targetUser = null;
+
+    if (data.userId) {
+        // 1. Explicit userId provided by privileged caller or linking flow
+        targetUser = await getUserById(data.userId);
+        if (!targetUser) {
+            throw new AppError('Target user account does not exist', 404);
+        }
+        if (!targetUser.isActive) {
+            throw new AppError('Cannot create employee profile for an inactive user account', 400);
+        }
+        const existingEmployee = await employeeDao.findEmployeeByUserId(data.userId);
+        if (existingEmployee) {
+            throw new AppError(
+                'An employee profile is already registered for this user account',
+                409,
+            );
+        }
+        targetUserId = targetUser.id;
+    } else if (!isPrivileged) {
+        // 2. Regular user self-onboarding: only allowed for their own account
+        targetUserId = authenticatedUser.id;
+        targetUser = await getUserById(targetUserId);
+        if (!targetUser) {
+            throw new AppError('Target user account does not exist', 404);
+        }
+        if (!targetUser.isActive) {
+            throw new AppError('Cannot create employee profile for an inactive user account', 400);
+        }
+        const existingEmployee = await employeeDao.findEmployeeByUserId(targetUserId);
+        if (existingEmployee) {
+            throw new AppError(
+                'An employee profile is already registered for this user account',
+                409,
+            );
+        }
+    } else {
+        // 3. Privileged user creating new employee profile without explicit userId
+        const email = (data.email || '').toLowerCase().trim();
+        if (email) {
+            // Check if employee with this email already exists
+            const existingEmpByEmail = await employeeDao.findEmployeeByEmail(email);
+            if (existingEmpByEmail) {
+                throw new AppError('An employee with this email address already exists', 409);
+            }
+
+            // Check if a user account exists with this email
+            const existingUser = await getUserByEmail(email, true);
+            if (existingUser) {
+                if (existingUser.isDeleted) {
+                    await recoverUser(existingUser.id);
+                }
+                const existingEmpForUser = await employeeDao.findEmployeeByUserId(existingUser.id);
+                if (existingEmpForUser) {
+                    throw new AppError(
+                        'An employee profile is already registered for this user account',
+                        409,
+                    );
+                }
+                targetUser = existingUser;
+                targetUserId = existingUser.id;
+            } else {
+                // Auto-provision user account for new employee
+                try {
+                    const newUser = await createUser({
+                        firstName: (data.firstName || 'Employee').trim(),
+                        lastName: (data.lastName || '').trim(),
+                        email,
+                        role: 'EMPLOYEE',
+                        isActive: true,
+                        emailVerified: false,
+                    });
+                    targetUser = newUser;
+                    targetUserId = newUser.id;
+                } catch (err) {
+                    console.warn(
+                        'Could not auto-provision user account for employee:',
+                        err.message,
+                    );
+                    targetUserId = null;
+                }
+            }
+        }
     }
 
-    // 1. Verify target user exists and is active
-    const targetUser = await getUserById(targetUserId);
-    if (!targetUser) {
-        throw new AppError('Target user account does not exist', 404);
+    const firstName = (data.firstName || targetUser?.firstName || '').trim();
+    const lastName = (data.lastName || targetUser?.lastName || '').trim();
+    const email = (data.email || targetUser?.email || '').toLowerCase().trim();
+
+    if (!firstName) {
+        throw new AppError('First name is required', 422);
     }
-    if (!targetUser.isActive) {
-        throw new AppError('Cannot create employee profile for an inactive user account', 400);
+    if (!email) {
+        throw new AppError('Email is required', 422);
     }
 
-    // 2. Enforce 1:1 constraint — check if an employee profile already exists
-    const existingEmployee = await employeeDao.findEmployeeByUserId(targetUserId);
-    if (existingEmployee) {
-        throw new AppError('An employee profile is already registered for this user account', 409);
-    }
-
-    // 3. Generate unique employeeCode
+    // 4. Generate unique employeeCode
     const hireDate = data.hireDate || new Date().toISOString().split('T')[0];
     const year = new Date(hireDate).getFullYear();
     const maxSeq = await employeeDao.getMaxEmployeeSequence(year);
     const sequenceNumber = maxSeq + 1;
 
     const employeeCode = generateEmployeeCode({
-        firstName: targetUser.firstName,
-        lastName: targetUser.lastName,
-        email: targetUser.email,
+        firstName,
+        lastName,
+        email,
         year,
         sequenceNumber,
     });
 
-    // 4. Construct employee record
+    // 5. Construct employee record
     const newEmployeeData = {
         userId: targetUserId,
         employeeCode,
-        firstName: targetUser.firstName,
-        lastName: targetUser.lastName,
-        email: targetUser.email,
+        firstName,
+        lastName,
+        email,
         phone: data.phone || null,
         gender: data.gender || null,
         dateOfBirth: data.dateOfBirth || null,
         address: data.address || null,
         profileImage:
-            targetUser.profileImage || 'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
+            data.profileImage ||
+            targetUser?.profileImage ||
+            'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
         hireDate,
         departmentId: isPrivileged ? data.departmentId || null : null,
         jobPositionId: isPrivileged ? data.jobPositionId || null : null,
@@ -84,11 +170,37 @@ export async function createEmployeeProfile(data, authenticatedUser) {
     } catch (err) {
         if (err.code === '23505') {
             throw new AppError(
-                'An employee record with this user account or code already exists',
+                'An employee record with this user account, code, or email already exists',
                 409,
             );
         }
         throw err;
+    }
+
+    // 6. Handle primary bank account creation atomically if provided
+    const bankData = data.bankAccount || {
+        bankName: data.bankName,
+        accountNumber: data.accountNumber,
+        accountHolderName: data.accountHolderName || `${firstName} ${lastName}`.trim(),
+        ifscCode: data.ifscCode,
+        accountType: data.accountType || 'SAVINGS',
+    };
+
+    if (bankData.bankName && bankData.accountNumber) {
+        try {
+            await bankAccountDao.createBankAccount({
+                employeeId: createdEmployee.id,
+                bankName: bankData.bankName,
+                accountNumber: bankData.accountNumber,
+                accountHolderName: bankData.accountHolderName || `${firstName} ${lastName}`.trim(),
+                ifscCode: bankData.ifscCode || null,
+                accountType: (bankData.accountType || 'SAVINGS').toUpperCase(),
+                isPrimary: true,
+                isActive: true,
+            });
+        } catch (bankErr) {
+            console.warn('Failed to auto-create bank account for employee:', bankErr.message);
+        }
     }
 
     // Return enriched profile
