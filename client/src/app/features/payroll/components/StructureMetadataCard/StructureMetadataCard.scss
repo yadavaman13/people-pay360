@@ -1,0 +1,121 @@
+@use '@/styles/variables' as variables;
+
+.structure-metadata-card {
+    background-color: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-large;
+    padding: variables.$spacing-lg variables.$spacing-xl;
+    box-shadow: variables.$shadow-sm;
+    font-family: variables.$font-sans;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: variables.$spacing-lg;
+        padding-bottom: variables.$spacing-sm;
+        border-bottom: 1px solid variables.$color-gray-100;
+        flex-wrap: wrap;
+        gap: variables.$spacing-sm;
+
+        .card-title {
+            font-size: variables.$font-size-lg;
+            font-weight: 700;
+            color: variables.$color-gray-900;
+            margin: 0;
+        }
+
+        .card-badges {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-xs;
+        }
+    }
+
+    .card-view-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: variables.$spacing-lg variables.$spacing-xl;
+
+        @include variables.mobile {
+            grid-template-columns: 1fr;
+            gap: variables.$spacing-md;
+        }
+
+        .view-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            &.full-width {
+                grid-column: 1 / -1;
+            }
+
+            .field-label {
+                font-size: variables.$font-size-xs;
+                font-weight: 600;
+                color: variables.$color-gray-500;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+
+            .field-value {
+                font-size: variables.$font-size-md;
+                color: variables.$color-gray-800;
+                font-weight: 500;
+
+                &.highlight-value {
+                    font-size: variables.$font-size-lg;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                }
+
+                .code-pill {
+                    display: inline-block;
+                    font-family: monospace;
+                    font-size: variables.$font-size-sm;
+                    font-weight: 700;
+                    color: variables.$color-gray-900;
+                    background-color: variables.$color-gray-100;
+                    border: 1px solid variables.$color-gray-200;
+                    padding: 2px 8px;
+                    border-radius: variables.$radius-small;
+                }
+
+                &.description-text {
+                    font-size: variables.$font-size-sm;
+                    line-height: 1.6;
+                    color: variables.$color-gray-700;
+                    margin: 0;
+                }
+            }
+        }
+    }
+
+    .card-edit-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: variables.$spacing-md variables.$spacing-lg;
+
+        @include variables.mobile {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+
+            &.full-width {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .active-toggle-group {
+            margin-top: variables.$spacing-xs;
+        }
+    }
+}

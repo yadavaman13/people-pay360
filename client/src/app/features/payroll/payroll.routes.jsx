@@ -6,6 +6,7 @@ import PayrunDetailPage from './pages/PayrunDetailPage/PayrunDetailPage';
 import PayslipsListPage from './pages/PayslipsListPage/PayslipsListPage';
 import PayslipDetailPage from './pages/PayslipDetailPage/PayslipDetailPage';
 import SalaryStructuresListPage from './pages/SalaryStructuresListPage/SalaryStructuresListPage';
+import SalaryStructureDetailPage from './pages/SalaryStructureDetailPage/SalaryStructureDetailPage';
 import SalaryRulesListPage from './pages/SalaryRulesListPage/SalaryRulesListPage';
 import SalaryRuleDetailPage from './pages/SalaryRuleDetailPage/SalaryRuleDetailPage';
 
@@ -65,6 +66,14 @@ export default {
             element: (
                 <PayrollProvider>
                     <SalaryStructuresListPage />
+                </PayrollProvider>
+            ),
+        },
+        {
+            path: 'payroll/salary-structures/:id',
+            element: (
+                <PayrollProvider>
+                    <SalaryStructureDetailPage />
                 </PayrollProvider>
             ),
         },
