@@ -1,3 +1,4 @@
+import { Outlet } from 'react-router';
 import ProtectedRoute from '@/app/features/auth/components/ProtectedRoute';
 
 /**
@@ -277,7 +278,7 @@ export function loadFeatureRoutes() {
                 ...route,
                 element: (
                     <ProtectedRoute allowedRoles={config.allowedRoles}>
-                        {route.element}
+                        {route.element || (route.children ? <Outlet /> : null)}
                     </ProtectedRoute>
                 ),
             }));
