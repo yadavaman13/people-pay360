@@ -8,6 +8,11 @@ import {
     getDeletedUserByEmail,
     createUser,
 } from '../../../dao/user.dao.js';
+import { db } from '../../../config/database.config.js';
+import { users } from '../../../db/schema/users.schema.js';
+import { employees } from '../../../db/schema/employees.schema.js';
+import * as employeeDao from '../../../dao/employee.dao.js';
+import { generateEmployeeCode } from '../../../utils/employeeCode.utils.js';
 import { AppError } from '../utils/appError.js';
 import { generateTempPassword } from '../../../utils/password.utils.js';
 import { sendEmail } from '../../../services/mail/mail.service.js';
@@ -150,9 +155,9 @@ export async function adminDeleteUser(targetUserId) {
 
 /**
  * Create user account by Admin
- * @param {object} param0 { firstName, lastName, email, role }
+ * @param {object} param0 { firstName, lastName, email, role, createdBy }
  */
-export async function adminCreateUser({ firstName, lastName, email, role }) {
+export async function adminCreateUser({ firstName, lastName, email, role, createdBy }) {
     const normalizedEmail = email.trim().toLowerCase();
 
     // Check duplicate active user
@@ -167,19 +172,64 @@ export async function adminCreateUser({ firstName, lastName, email, role }) {
         throw new AppError('Email belongs to a deleted account. Use account recovery.', 409);
     }
 
+    // Check duplicate employee email
+    const existingEmployee = await employeeDao.findEmployeeByEmail(normalizedEmail);
+    if (existingEmployee) {
+        throw new AppError('An employee with this email is already registered', 409);
+    }
+
     const tempPassword = generateTempPassword();
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
 
-    const user = await createUser({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: normalizedEmail,
-        password: hashedPassword,
-        role,
-        emailVerified: true,
-        isActive: true,
-        isDeleted: false,
+    const hireDate = new Date().toISOString().split('T')[0];
+    const year = new Date(hireDate).getFullYear();
+
+    const { user, employee } = await db.transaction(async (tx) => {
+        const [newUser] = await tx
+            .insert(users)
+            .values({
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                email: normalizedEmail,
+                password: hashedPassword,
+                role,
+                emailVerified: true,
+                isActive: true,
+                isDeleted: false,
+            })
+            .returning();
+
+        const maxSeq = await employeeDao.getMaxEmployeeSequence(year, 'PP360', tx);
+        const sequenceNumber = maxSeq + 1;
+
+        const employeeCode = generateEmployeeCode({
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            email: newUser.email,
+            year,
+            sequenceNumber,
+        });
+
+        const [newEmployee] = await tx
+            .insert(employees)
+            .values({
+                userId: newUser.id,
+                employeeCode,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                email: newUser.email,
+                profileImage:
+                    newUser.profileImage ||
+                    'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
+                hireDate,
+                status: 'ACTIVE',
+                isActive: true,
+                createdBy: createdBy || newUser.id,
+            })
+            .returning();
+
+        return { user: newUser, employee: newEmployee };
     });
 
     let emailFailed = false;
@@ -209,9 +259,12 @@ export async function adminCreateUser({ firstName, lastName, email, role }) {
             role: user.role,
             isActive: user.isActive,
             emailVerified: user.emailVerified,
+            employeeId: employee.id,
+            employeeCode: employee.employeeCode,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
         },
+        employee,
         emailFailed,
     };
 }

@@ -6,7 +6,7 @@ const INITIAL_FORM_STATE = {
     firstName: '',
     lastName: '',
     email: '',
-    role: 'EMPLOYEE',
+    role: 'HR_MANAGER',
 };
 
 /**

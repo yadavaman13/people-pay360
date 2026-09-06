@@ -339,7 +339,7 @@ function SalaryStructureDetailPage() {
                                     className="add-rule-btn"
                                 >
                                     <Plus size={16} />
-                                    <span>+ Add Salary Rule</span>
+                                    <span>Add Salary Rule</span>
                                 </Button>
                             </>
                         ) : (
@@ -470,6 +470,11 @@ function SalaryStructureDetailPage() {
                 isOpen={showDeactivateDialog}
                 onClose={() => setShowDeactivateDialog(false)}
                 title="Deactivate Salary Structure"
+                variant="danger"
+                confirmText="Deactivate Structure"
+                cancelText="Cancel"
+                confirmLoading={isDeactivating}
+                onConfirm={handleDeactivateConfirm}
             >
                 <div className="dialog-body-content">
                     <p>
@@ -480,23 +485,6 @@ function SalaryStructureDetailPage() {
                         Deactivating will mark this structure inactive. Active employment contracts
                         or ongoing payruns must not be using this structure.
                     </p>
-                    <div className="dialog-actions-row">
-                        <Button
-                            variant="secondary"
-                            onClick={() => setShowDeactivateDialog(false)}
-                            disabled={isDeactivating}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="danger"
-                            onClick={handleDeactivateConfirm}
-                            loading={isDeactivating}
-                            disabled={isDeactivating}
-                        >
-                            Deactivate Structure
-                        </Button>
-                    </div>
                 </div>
             </Dialog>
         </div>

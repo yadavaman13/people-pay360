@@ -599,13 +599,15 @@ export async function findEmployeesWithFilters({
  * Get maximum employee sequence number for the current year
  * @param {number|string} year
  * @param {string} [prefix='PP360']
+ * @param {object} [tx=db] Optional transaction client
  * @returns {Promise<number>}
  */
-export async function getMaxEmployeeSequence(year, prefix = 'PP360') {
+export async function getMaxEmployeeSequence(year, prefix = 'PP360', tx = db) {
     const yr = String(year || new Date().getFullYear()).slice(-4);
     const pattern = `${prefix}-%-${yr}-%`;
+    const client = tx || db;
 
-    const result = await db
+    const result = await client
         .select({ code: employees.employeeCode })
         .from(employees)
         .where(sql`${employees.employeeCode} LIKE ${pattern}`);

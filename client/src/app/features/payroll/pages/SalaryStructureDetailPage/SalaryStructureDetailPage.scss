@@ -206,13 +206,5 @@
             font-size: variables.$font-size-xs;
             color: variables.$color-gray-500;
         }
-
-        .dialog-actions-row {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: variables.$spacing-sm;
-            margin-top: variables.$spacing-sm;
-        }
     }
 }
