@@ -51,13 +51,19 @@ function DashboardLayout({ onLogout }) {
     const { featureNavItems } = useMemo(() => loadFeatureRoutes(), []);
 
     const sidebarNavItems = useMemo(() => {
-        const items = [
-            {
+        const items = [];
+
+        // Home dashboard tab is only visible to Admin and Payroll roles
+        const canAccessHome = ['ADMIN', 'HR_PAYROLL_MANAGER', 'HR_PAYROLL_USER'].includes(
+            userRoleUpper,
+        );
+        if (canAccessHome) {
+            items.push({
                 label: 'Home',
                 icon: <HomeIcon size={18} />,
                 path: `/dashboard/${roleSegment}/home`,
-            },
-        ];
+            });
+        }
 
         (featureNavItems || []).forEach((item) => {
             if (!item || !item.label) return;

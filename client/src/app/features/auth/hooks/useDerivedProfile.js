@@ -3,11 +3,39 @@ import { useAuth } from './useAuth';
 import { getAvatarUrl } from '@/utils/avatar';
 
 /**
+ * Format raw role string into clean, human-readable display title
+ *
+ * @param {string} role
+ * @returns {string}
+ */
+export function formatRoleLabel(role) {
+    if (!role) return 'Member';
+    const normalized = role.toUpperCase();
+    switch (normalized) {
+        case 'ADMIN':
+            return 'Administrator';
+        case 'HR_MANAGER':
+            return 'HR Manager';
+        case 'HR_PAYROLL_MANAGER':
+            return 'Payroll Manager';
+        case 'HR_PAYROLL_USER':
+            return 'Payroll User';
+        case 'EMPLOYEE':
+            return 'Employee';
+        default:
+            return role
+                .split('_')
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                .join(' ');
+    }
+}
+
+/**
  * Derives a display-ready profileData object from the authenticated user.
  * Any component that needs profile display info should call this hook directly
  * instead of receiving profileData as a prop.
  *
- * @returns {{ id, name, role, username, avatarUrl, initials, email }}
+ * @returns {{ id, name, role, formattedRole, username, avatarUrl, initials, email }}
  */
 export function useDerivedProfile() {
     const { user } = useAuth();
@@ -32,6 +60,7 @@ export function useDerivedProfile() {
             id: user?.id || '',
             name,
             role,
+            formattedRole: formatRoleLabel(role),
             username,
             avatarUrl: getAvatarUrl(user?.profileImage),
             initials: initials.toUpperCase(),

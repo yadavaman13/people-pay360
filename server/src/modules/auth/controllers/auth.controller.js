@@ -743,7 +743,7 @@ export async function getMe(req, res, next) {
 
         return sendResponse({
             res,
-            statusCode: fromCache ? 304 : 200, //status 304 if getme from cache
+            statusCode: fromCache ? 203 : 200,
             message: 'User retrieved successfully',
             success: true,
             user: {
