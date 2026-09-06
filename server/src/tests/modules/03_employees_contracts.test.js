@@ -6,6 +6,8 @@ import {
     createTestSalaryStructureWithRules,
     createTestSchedule,
 } from '../helpers/test-fixtures.js';
+import { emailDispatchTracker } from '../../utils/email.utils.js';
+import { imageUploadTracker } from '../../services/image.service.js';
 
 const docLogger = new FeatureApiDocLogger(
     '03_employees_contracts.md',
@@ -81,6 +83,14 @@ describe('03: Employees & Contracts API', () => {
             expect(res.body.data.id).toBeDefined();
             expect(res.body.data.employeeCode).toBeDefined();
             createdEmployee = res.body.data;
+
+            const welcomeEmailCall = emailDispatchTracker.history.find(
+                (e) => e.toEmail === payload.email,
+            );
+            expect(welcomeEmailCall).toBeDefined();
+            expect(welcomeEmailCall.employeeCode).toBe(res.body.data.employeeCode);
+            expect(welcomeEmailCall.tempPassword).toBeDefined();
+            expect(typeof welcomeEmailCall.tempPassword).toBe('string');
         });
 
         it('should return 422 when validation fails on invalid date', async () => {
@@ -141,6 +151,43 @@ describe('03: Employees & Contracts API', () => {
                 .send(payload);
 
             expect(dupRes.status).toBe(409);
+        });
+
+        it('should create an employee with avatar attachment and trigger welcome email (201)', async () => {
+            const uniqueEmail = `avatarhire_${Date.now()}@company.com`;
+            const res = await request(app)
+                .post('/api/employees')
+                .set('Cookie', adminAuth.cookie)
+                .field('firstName', 'Rohan')
+                .field('lastName', 'Mehta')
+                .field('email', uniqueEmail)
+                .field('phone', '+919988776655')
+                .field('gender', 'MALE')
+                .field('hireDate', '2026-03-01')
+                .field('workingScheduleId', testSchedule.id)
+                .attach('avatar', Buffer.from('fake image content'), 'avatar.png');
+
+            expect(res.status).toBe(201);
+            expect(res.body.success).toBe(true);
+            expect(res.body.data.profileImage).toContain('mock_uploaded_avatar.jpg');
+            expect(imageUploadTracker.uploads.length).toBeGreaterThanOrEqual(1);
+
+            const emailCall = emailDispatchTracker.history.find((e) => e.toEmail === uniqueEmail);
+            expect(emailCall).toBeDefined();
+            expect(emailCall.tempPassword).toBeDefined();
+        });
+
+        it('should dispatch welcome email via POST /api/employees/:id/send-welcome-email (200)', async () => {
+            emailDispatchTracker.clear();
+            const res = await request(app)
+                .post(`/api/employees/${createdEmployee.id}/send-welcome-email`)
+                .set('Cookie', adminAuth.cookie);
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+            expect(emailDispatchTracker.history.length).toBe(1);
+            expect(emailDispatchTracker.history[0].toEmail).toBe(createdEmployee.email);
+            expect(emailDispatchTracker.history[0].tempPassword).toBeDefined();
         });
     });
 

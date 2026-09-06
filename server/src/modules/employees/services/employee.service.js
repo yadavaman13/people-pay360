@@ -9,7 +9,10 @@ import {
 } from '../../../dao/user.dao.js';
 import { uploadImageOnImageKit } from '../../../services/image.service.js';
 import { generateEmployeeCode } from '../../../utils/employeeCode.utils.js';
+import { generateTemporaryPassword } from '../../../utils/password.utils.js';
+import { sendEmployeeWelcome } from '../../../utils/email.utils.js';
 import { AppError } from '../../../utils/appError.js';
+import bcrypt from 'bcryptjs';
 
 /**
  * Employee Service — Business Logic for Employee Management & Self-Service
@@ -22,13 +25,15 @@ import { AppError } from '../../../utils/appError.js';
  *
  * @param {object} data
  * @param {object} authenticatedUser
+ * @param {object} [file] Optional avatar image file
  */
-export async function createEmployeeProfile(data, authenticatedUser) {
+export async function createEmployeeProfile(data, authenticatedUser, file = null) {
     const userRole = (authenticatedUser.role || '').toUpperCase();
     const isPrivileged = ['ADMIN', 'HR_MANAGER', 'HR_PAYROLL_MANAGER'].includes(userRole);
 
     let targetUserId = null;
     let targetUser = null;
+    const tempPassword = generateTemporaryPassword(8);
 
     if (data.userId) {
         // 1. Explicit userId provided by privileged caller or linking flow
@@ -92,10 +97,12 @@ export async function createEmployeeProfile(data, authenticatedUser) {
             } else {
                 // Auto-provision user account for new employee
                 try {
+                    const hashedPassword = await bcrypt.hash(tempPassword, 10);
                     const newUser = await createUser({
                         firstName: (data.firstName || 'Employee').trim(),
                         lastName: (data.lastName || '').trim(),
                         email,
+                        password: hashedPassword,
                         role: 'EMPLOYEE',
                         isActive: true,
                         emailVerified: false,
@@ -110,6 +117,15 @@ export async function createEmployeeProfile(data, authenticatedUser) {
                     targetUserId = null;
                 }
             }
+        }
+    }
+
+    if (targetUser && !targetUser.password) {
+        try {
+            const hashedPassword = await bcrypt.hash(tempPassword, 10);
+            await updateUser(targetUser.id, { password: hashedPassword });
+        } catch (pwErr) {
+            console.warn('Could not set initial password for target user:', pwErr.message);
         }
     }
 
@@ -138,7 +154,18 @@ export async function createEmployeeProfile(data, authenticatedUser) {
         sequenceNumber,
     });
 
-    // 5. Construct employee record
+    // 5. Handle optional avatar upload if file provided
+    let uploadedImageUrl = null;
+    if (file) {
+        try {
+            const uploaded = await uploadImageOnImageKit({ image: file });
+            uploadedImageUrl = uploaded.url;
+        } catch (uploadErr) {
+            console.warn('Avatar upload failed during employee creation:', uploadErr.message);
+        }
+    }
+
+    // 6. Construct employee record
     const newEmployeeData = {
         userId: targetUserId,
         employeeCode,
@@ -150,6 +177,7 @@ export async function createEmployeeProfile(data, authenticatedUser) {
         dateOfBirth: data.dateOfBirth || null,
         address: data.address || null,
         profileImage:
+            uploadedImageUrl ||
             data.profileImage ||
             targetUser?.profileImage ||
             'https://ik.imagekit.io/2bzzjhgkg/defaul_profile_image.jpeg',
@@ -177,16 +205,26 @@ export async function createEmployeeProfile(data, authenticatedUser) {
         throw err;
     }
 
-    // 6. Handle primary bank account creation atomically if provided
-    const bankData = data.bankAccount || {
-        bankName: data.bankName,
-        accountNumber: data.accountNumber,
-        accountHolderName: data.accountHolderName || `${firstName} ${lastName}`.trim(),
-        ifscCode: data.ifscCode,
-        accountType: data.accountType || 'SAVINGS',
-    };
+    // 7. Handle primary bank account creation atomically if provided
+    let bankData = data.bankAccount;
+    if (typeof bankData === 'string') {
+        try {
+            bankData = JSON.parse(bankData);
+        } catch {
+            bankData = null;
+        }
+    }
+    if (!bankData) {
+        bankData = {
+            bankName: data.bankName,
+            accountNumber: data.accountNumber,
+            accountHolderName: data.accountHolderName || `${firstName} ${lastName}`.trim(),
+            ifscCode: data.ifscCode,
+            accountType: data.accountType || 'SAVINGS',
+        };
+    }
 
-    if (bankData.bankName && bankData.accountNumber) {
+    if (bankData && bankData.bankName && bankData.accountNumber) {
         try {
             await bankAccountDao.createBankAccount({
                 employeeId: createdEmployee.id,
@@ -203,8 +241,56 @@ export async function createEmployeeProfile(data, authenticatedUser) {
         }
     }
 
+    // 8. Trigger welcome email with credentials
+    try {
+        await sendEmployeeWelcome(email, {
+            employeeId: createdEmployee.id,
+            employeeCode: createdEmployee.employeeCode,
+            employeeName: `${firstName} ${lastName}`.trim(),
+            tempPassword,
+        });
+    } catch (emailErr) {
+        console.warn('Failed to send employee welcome email on creation:', emailErr.message);
+    }
+
     // Return enriched profile
     return employeeDao.findEmployeeWithJoins(createdEmployee.id);
+}
+
+/**
+ * Send welcome email to an employee with their employeeCode and temporary password
+ * @param {string} employeeId
+ */
+export async function sendEmployeeWelcomeEmail(employeeId) {
+    const employee = await employeeDao.findEmployeeWithJoins(employeeId);
+    if (!employee) {
+        throw new AppError('Employee not found', 404);
+    }
+    if (!employee.email) {
+        throw new AppError('Employee does not have an email address', 400);
+    }
+
+    const tempPassword = generateTemporaryPassword(8);
+    if (employee.userId) {
+        try {
+            const hashedPassword = await bcrypt.hash(tempPassword, 10);
+            await updateUser(employee.userId, { password: hashedPassword });
+        } catch (pwErr) {
+            console.warn('Could not update password for employee user:', pwErr.message);
+        }
+    }
+
+    await sendEmployeeWelcome(employee.email, {
+        employeeId: employee.id,
+        employeeCode: employee.employeeCode,
+        employeeName: `${employee.firstName} ${employee.lastName}`.trim(),
+        tempPassword,
+    });
+
+    return {
+        success: true,
+        message: 'Welcome email sent successfully',
+    };
 }
 
 /**

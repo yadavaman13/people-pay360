@@ -1,7 +1,24 @@
 import { useContext, useCallback, useRef, useEffect } from 'react';
 import { EmployeesContext } from '../context/employees.context';
 import { useAuth } from '@/app/features/auth/hooks/useAuth';
+import { useToast } from '@/components/Shared/Feedback/Toast';
 import * as employeeApi from '../services/employee.api';
+
+function dataURLtoBlob(dataurl) {
+    try {
+        const arr = dataurl.split(',');
+        const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
+    } catch {
+        return null;
+    }
+}
 
 /**
  * useEmployees — Orchestrates async API calls and updates State layer (EmployeesContext).
@@ -33,6 +50,8 @@ export function useEmployees() {
         setError,
         setNotification,
     } = context;
+
+    const { success: toastSuccess, error: toastError } = useToast();
 
     const searchDebounceTimerRef = useRef(null);
     const latestParamsRef = useRef(tableParams);
@@ -278,7 +297,7 @@ export function useEmployees() {
      * Create or update employee record
      */
     const handleSaveEmployee = useCallback(
-        async (id, formData) => {
+        async (id, formData, avatarFile = null) => {
             setActionLoading(true);
             setError(null);
 
@@ -292,13 +311,62 @@ export function useEmployees() {
                         title: 'Employee Updated',
                         message: `Employee ${saved.firstName} ${saved.lastName} (${saved.employeeCode}) was successfully updated.`,
                     });
+                    toastSuccess('Employee updated successfully');
                 } else {
-                    const res = await employeeApi.createEmployee(formData);
+                    let payload = formData;
+                    const fileToUpload = avatarFile || formData?.avatarFile || formData?.avatar;
+                    if (fileToUpload) {
+                        const fd = new FormData();
+                        Object.entries(formData).forEach(([k, v]) => {
+                            if (
+                                k !== 'avatar' &&
+                                k !== 'avatarFile' &&
+                                v !== undefined &&
+                                v !== null &&
+                                v !== ''
+                            ) {
+                                if (
+                                    typeof v === 'object' &&
+                                    !(v instanceof File) &&
+                                    !(v instanceof Blob)
+                                ) {
+                                    fd.append(k, JSON.stringify(v));
+                                } else {
+                                    fd.append(k, v);
+                                }
+                            }
+                        });
+                        if (fileToUpload instanceof File || fileToUpload instanceof Blob) {
+                            fd.append('avatar', fileToUpload, 'avatar.jpg');
+                        } else if (
+                            typeof fileToUpload === 'string' &&
+                            fileToUpload.startsWith('data:')
+                        ) {
+                            const blob = dataURLtoBlob(fileToUpload);
+                            if (blob) {
+                                fd.append('avatar', blob, 'avatar.jpg');
+                            }
+                        }
+                        payload = fd;
+                    }
+
+                    const res = await employeeApi.createEmployee(payload);
                     saved = res.data || res;
+
+                    // Trigger welcome email endpoint after successful employee creation
+                    if (saved?.id) {
+                        try {
+                            await employeeApi.sendEmployeeWelcomeEmail(saved.id);
+                        } catch (emailErr) {
+                            console.warn('Welcome email trigger note:', emailErr.message);
+                        }
+                    }
+
+                    toastSuccess('Employee created and email sent');
                     setNotification({
                         type: 'success',
                         title: 'Employee Created',
-                        message: `Employee ${saved.firstName} ${saved.lastName} was created with code ${saved.employeeCode}.`,
+                        message: 'Employee created and email sent',
                     });
                 }
                 setCurrentEmployee(saved);
@@ -308,6 +376,7 @@ export function useEmployees() {
                 console.error('Failed to save employee:', err);
                 const msg = err.response?.data?.message || err.message || 'Failed to save employee';
                 setError(msg);
+                toastError(msg);
                 setNotification({
                     type: 'danger',
                     title: 'Save Failed',
@@ -318,7 +387,45 @@ export function useEmployees() {
                 setActionLoading(false);
             }
         },
-        [setActionLoading, setError, setNotification, setCurrentEmployee, loadEmployees],
+        [
+            setActionLoading,
+            setError,
+            setNotification,
+            setCurrentEmployee,
+            loadEmployees,
+            toastSuccess,
+            toastError,
+        ],
+    );
+
+    /**
+     * Trigger welcome email with temporary credentials for an employee
+     */
+    const handleSendWelcomeEmail = useCallback(
+        async (id) => {
+            setActionLoading(true);
+            setError(null);
+            try {
+                const res = await employeeApi.sendEmployeeWelcomeEmail(id);
+                toastSuccess('Welcome email sent successfully');
+                setNotification({
+                    type: 'success',
+                    title: 'Email Sent',
+                    message: 'Welcome email with login credentials has been sent.',
+                });
+                return res;
+            } catch (err) {
+                console.error('Failed to send welcome email:', err);
+                const msg =
+                    err.response?.data?.message || err.message || 'Failed to send welcome email';
+                setError(msg);
+                toastError(msg);
+                throw err;
+            } finally {
+                setActionLoading(false);
+            }
+        },
+        [setActionLoading, setError, setNotification, toastSuccess, toastError],
     );
 
     /**
@@ -602,5 +709,6 @@ export function useEmployees() {
         loadMetadata,
         dismissNotification,
         handleUploadAvatar,
+        handleSendWelcomeEmail,
     };
 }
