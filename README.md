@@ -1,10 +1,10 @@
 # Hi Mentors & Evaluators! 👋
 
-We are team **PeoplePay360** and we selected **PeoplePay360: Integrated Human Resource & Payroll Operations Platform**.
+We are team **ByteBuilders** and we selected **PeoplePay360: Integrated Human Resource & Payroll Operations Platform**.
 
-**PeoplePay360** is a full-stack, enterprise-grade HR and Payroll platform built with **React 19, Vite, SCSS, Node.js (Express 5.x), PostgreSQL (Drizzle ORM), and Redis**, augmented with **Google Gemini AI**. Unlike fragmented HR software or simplistic CRUD apps, PeoplePay360 connects the entire operational employee lifecycle—master records, period-specific contracts, shift schedules, daily attendance, and leave balance allocations—directly into a dynamic, rule-sequenced payroll computation engine with pre-validation anomaly detection, chromium-free PDF payslip generation, and automated bulk email delivery.
+**PeoplePay360** is a full-stack, enterprise-grade HR and Payroll platform built with **React 19, Vite, SCSS, Node.js (Express 5.x), PostgreSQL (Drizzle ORM), and Redis**. Unlike fragmented HR software or simplistic CRUD apps, PeoplePay360 connects the entire operational employee lifecycle—master records, period-specific contracts, shift schedules, daily attendance, and leave balance allocations—directly into a dynamic, rule-sequenced payroll computation engine with pre-validation anomaly detection, chromium-free PDF payslip generation, and automated bulk email delivery.
 
-- **Project Hosted Link:** [Live Deployment Demo](https://peoplepay360.live)
+- **Project Hosted Link:** [Live Deployment Demo](https://people-pay360.onrender.com/login)
 - **Presentation Video Link:** [Product Walkthrough & Demo Video](https://youtu.be/peoplepay360-demo)
 
 **Project Screenshot:**
@@ -30,12 +30,12 @@ We are team **PeoplePay360** and we selected **PeoplePay360: Integrated Human Re
 
 ## Team Members & Roles
 
-| Member Name              | Role                                  | Core Responsibilities                                                                                                                           | GitHub Profile                                                                                                                                                                        |
+| Member Name              | Role                                  | Implemented Features                                                                                                                           | GitHub Profile                                                                                                                                                                        |
 | :----------------------- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Aryan Patel**          | Full Stack Developer & AI Engineer    | Frontend development, feature wiring, backend API integrations, Gemini Live Voice valet token services, and intelligent HR assistance           | <a href="https://github.com/aryanpatel287"><img src="https://github.com/aryanpatel287.png?size=40" width="40" height="40" style="border-radius:50%;" alt="aryanpatel287" /></a>       |
-| **Iteshkumar Prajapati** | Frontend Developer & UI/UX Specialist | Frontend architecture, 3-tier SCSS design system, accessible UI component development, and responsive layout wiring                             | <a href="https://github.com/iteshprajapati"><img src="https://github.com/iteshprajapati.png?size=40" width="40" height="40" style="border-radius:50%;" alt="iteshprajapati" /></a>    |
-| **Yadav Aman Singh**     | Backend Lead & DevOps Engineer        | Core Express 5.x API architecture, modular service pipelines, database transactional integrity, version control, and CI/CD automation           | <a href="https://github.com/yadavaman13"><img src="https://github.com/yadavaman13.png?size=40" width="40" height="40" style="border-radius:50%;" alt="yadavaman13" /></a>             |
-| **Ankur Singh**          | Database Architect & QA Lead          | Relational PostgreSQL schema modeling, Drizzle ORM migrations & seeders, end-to-end Jest/Supertest suite, and Test-Driven Documentation (TDDoc) | <a href="https://github.com/Ankursingh018as"><img src="https://github.com/Ankursingh018as.png?size=40" width="40" height="40" style="border-radius:50%;" alt="Ankursingh018as" /></a> |
+| **Aryan Patel**          | Full Stack Developer    | feature wiring, auth, backend API integrations,payroll, salary management(client)          | <a href="https://github.com/aryanpatel287"><img src="https://github.com/aryanpatel287.png?size=40" width="40" height="40" style="border-radius:50%;" alt="aryanpatel287" /></a>       |
+| **Iteshkumar Prajapati** | Full stack Developer | Frontend architecture, feature wiring, 3-tier SCSS design system, shared UI component development, employee(Both Client and Server), contract(Both Client and Server),Version control                              | <a href="https://github.com/iteshprajapati"><img src="https://github.com/iteshprajapati.png?size=40" width="40" height="40" style="border-radius:50%;" alt="iteshprajapati" /></a>    |
+| **Yadav Aman Singh**     | Full Stack Developer        | Core Express 5.x API architecture, modular service pipelines, version control,attendance management, time-off, salary management(server)           | <a href="https://github.com/yadavaman13"><img src="https://github.com/yadavaman13.png?size=40" width="40" height="40" style="border-radius:50%;" alt="yadavaman13" /></a>             |
+| **Ankur Singh**          | Database Architect & QA Lead          | Relational PostgreSQL schema modeling, Drizzle ORM migrations & seeders, end-to-end Jest/Supertest suite, and Test-Driven Documentation (TDDoc), Payslip(server side), Payrole Dashboard(Client side), Version control  | <a href="https://github.com/Ankursingh018as"><img src="https://github.com/Ankursingh018as.png?size=40" width="40" height="40" style="border-radius:50%;" alt="Ankursingh018as" /></a> |
 
 ---
 
@@ -68,12 +68,6 @@ We are team **PeoplePay360** and we selected **PeoplePay360: Integrated Human Re
 - **Relational Database Engine:** PostgreSQL 16+ (`pg` v8.14.0) with native range indexing (`daterange &&`)
 - **Cache Store:** Redis (`ioredis` v5.10.1) for session caching, RBAC lookup, and rate limiting
 - **Database Tools & Dashboards:** Drizzle Kit CLI (`drizzle-kit studio`, migration push, and schema diffing)
-
-### AI & Intelligent Automation Layer
-
-- **Foundation LLMs:** Google Gemini API (`@google/genai`, `@langchain/google`), Mistral AI (`@langchain/mistralai`)
-- **RAG & Vector Retrieval:** LangChain (`langchain`, `@langchain/textsplitters`), LlamaIndex Cloud (`@llamaindex/llama-cloud`), Pinecone Vector Database (`@pinecone-database/pinecone`), Tavily Search (`@tavily/core`)
-- **Real-Time Voice & Live Transcription:** Google Gemini 3.5 Live Ephemeral Valet Tokens (`/api/ai/transcribe/token`) with single-use scoped access
 
 ### Third-Party & Infrastructure Integrations
 
@@ -618,6 +612,24 @@ To explore your PostgreSQL database using the interactive GUI:
 npm run db:studio
 ```
 
+### 3. Seeded Login Credentials
+
+Use any of the following seeded credentials generated by `npm run db:seed` to test role-based access control (RBAC):
+
+| Role | Name | Email | Password |
+| :--- | :--- | :---- | :------- |
+| **Admin** | Aryan Patel | `aryanpatel.me@gmail.com` | `Aryan@123` |
+| **Admin** | Itesh Prajapati | `iteshofficial@gmail.com` | `Itesh@123` |
+| **Admin** | Aman Yadav | `yadavaman1948@gmail.com` | `Aman@123` |
+| **HR Payroll Manager** | Asr Singh | `asr24983@gmail.com` | `Asr@123` |
+| **HR Payroll Manager** | Sky High | `skyh53624@gmail.com` | `Sky@123` |
+| **HR Manager** | Leo Patel | `leopatel967@gmail.com` | `Leo@123` |
+| **HR Manager** | Doom Wiser | `doomwiser@gmail.com` | `Doom@123` |
+| **HR Manager** | Priya Nair | `hr@example.com` | `Priya@123` |
+| **HR Manager** | Aman Yadav | `work.yadavaman@gmail.com` | `Aman@123` |
+| **Employee** | Ankur | `asrajput5656@gmail.com` | `Ankur@123` |
+| **Employee** | Aman Yadav | `yadavaman1388@example.com` | `Aman@123` |
+
 ---
 
 ## Challenges We Overcame
@@ -644,4 +656,4 @@ During the architecture and development of **PeoplePay360**, our team tackled se
 
 ---
 
-_Developed with ❤️ by Team **PeoplePay360** (Aryan, Itesh, Aman, Ankur)._
+_Developed with ❤️ by Team **ByteBuilders** (Aryan, Itesh, Aman, Ankur)._
