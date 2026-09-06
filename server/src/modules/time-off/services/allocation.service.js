@@ -140,10 +140,18 @@ export async function getLeaveBalance(requestedEmployeeId, user) {
             throw new AppError('You can only view your own leave balance', 403);
         }
         targetEmployeeId = employee.id;
+    } else if (!targetEmployeeId) {
+        // HR or Admin without an explicit employeeId parameter: check if linked to an employee profile
+        const selfEmployee = await employeeDao.findEmployeeByUserId(user.id);
+        if (selfEmployee) {
+            targetEmployeeId = selfEmployee.id;
+        } else {
+            return [];
+        }
     }
 
     if (!targetEmployeeId) {
-        throw new AppError('employeeId is required', 422);
+        return [];
     }
 
     return allocationDao.findEmployeeBalances(targetEmployeeId);

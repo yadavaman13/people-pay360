@@ -1,0 +1,183 @@
+@use '@/styles/variables' as variables;
+
+.new-time-off-request-page {
+    display: flex;
+    flex-direction: column;
+    padding: variables.$spacing-md variables.$spacing-xl;
+    box-sizing: border-box;
+    width: 100%;
+    gap: variables.$spacing-md;
+    font-family: variables.$font-sans;
+    overflow-y: auto;
+
+    @media (width <= 768px) {
+        padding: variables.$spacing-sm variables.$spacing-md;
+    }
+}
+
+.form-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-md;
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: variables.$color-gray-600;
+        }
+
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+
+            .page-title {
+                font-size: variables.$font-size-xl;
+                font-weight: 700;
+                color: variables.$color-gray-900;
+                margin: 0;
+            }
+
+            .page-subtitle {
+                font-size: variables.$font-size-xs;
+                color: variables.$color-gray-500;
+            }
+        }
+    }
+}
+
+.request-form-card {
+    background: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-medium;
+    padding: variables.$spacing-lg;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-lg;
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: variables.$spacing-md;
+
+        @media (width <= 768px) {
+            grid-template-columns: 1fr;
+        }
+
+        .form-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            &.full-width {
+                grid-column: 1 / -1;
+            }
+        }
+    }
+
+    .input-label-preview {
+        font-size: variables.$font-size-xs;
+        font-weight: 600;
+        color: variables.$color-gray-700;
+        margin-bottom: 2px;
+    }
+
+    .balance-preview-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 12px;
+        background: variables.$color-gray-50;
+        border: 1px solid variables.$color-gray-200;
+        border-radius: variables.$radius-small;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-600;
+
+        .info-icon {
+            color: variables.$color-gray-400;
+        }
+
+        &.with-quota {
+            background: variables.$color-success-light;
+            border-color: variables.$color-success-border;
+            color: variables.$color-success;
+            font-weight: 600;
+
+            .info-icon {
+                color: variables.$color-success;
+            }
+        }
+    }
+
+    .datepicker-hint {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-gray-500;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    .duration-banner {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: variables.$color-gray-50;
+        border: 1px solid variables.$color-gray-300;
+        border-radius: variables.$radius-small;
+        padding: 10px 14px;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-gray-800;
+
+        .duration-placeholder {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: variables.$color-gray-500;
+
+            .duration-hint-sub {
+                font-size: variables.$font-size-xs;
+                color: variables.$color-gray-500;
+                font-style: italic;
+            }
+        }
+    }
+
+    .validation-warning-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        background: variables.$color-danger-light;
+        border: 1px solid variables.$color-danger-border;
+        border-radius: variables.$radius-small;
+        padding: 10px 14px;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-danger-dark;
+
+        .warn-icon {
+            flex-shrink: 0;
+            margin-top: 2px;
+            color: variables.$color-danger;
+        }
+    }
+
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        padding-top: variables.$spacing-md;
+        border-top: 1px solid variables.$color-gray-100;
+
+        .submit-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+    }
+}

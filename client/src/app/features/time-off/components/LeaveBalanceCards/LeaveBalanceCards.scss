@@ -1,0 +1,175 @@
+@use '@/styles/variables' as variables;
+
+.leave-balance-loading,
+.leave-balance-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: variables.$spacing-sm;
+    padding: variables.$spacing-md variables.$spacing-lg;
+    background: variables.$color-gray-50;
+    border: 1px dashed variables.$color-gray-200;
+    border-radius: variables.$radius-medium;
+    color: variables.$color-gray-500;
+    font-size: variables.$font-size-sm;
+    margin-bottom: variables.$spacing-md;
+
+    .empty-icon {
+        color: variables.$color-gray-400;
+    }
+}
+
+.leave-balance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: variables.$spacing-md;
+    margin-bottom: variables.$spacing-md;
+    width: 100%;
+}
+
+.balance-card {
+    background: variables.$color-white;
+    border: 1px solid variables.$color-gray-200;
+    border-radius: variables.$radius-medium;
+    padding: variables.$spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-sm;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgb(0 0 0 / 6%);
+        border-color: variables.$color-gray-300;
+    }
+
+    .balance-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: variables.$spacing-xs;
+
+        .type-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .type-badge {
+                font-size: variables.$font-size-xxs;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: variables.$color-gray-500;
+            }
+
+            .type-title {
+                font-size: variables.$font-size-md;
+                font-weight: 700;
+                color: variables.$color-gray-900;
+                margin: 0;
+            }
+        }
+
+        .remaining-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            background: variables.$color-gray-50;
+            border: 1px solid variables.$color-gray-200;
+            border-radius: variables.$radius-small;
+            padding: 4px 10px;
+
+            .chip-value {
+                font-size: variables.$font-size-xl;
+                font-weight: 800;
+                color: variables.$color-gray-900;
+                line-height: 1.1;
+            }
+
+            .chip-unit {
+                font-size: variables.$font-size-xxs;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: variables.$color-gray-500;
+            }
+        }
+    }
+
+    .progress-container {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 4px;
+
+        .progress-track {
+            height: 6px;
+            background: variables.$color-gray-100;
+            border-radius: 999px;
+            overflow: hidden;
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    variables.$color-gray-800 0%,
+                    variables.$color-black 100%
+                );
+                border-radius: 999px;
+                transition: width 0.3s ease;
+            }
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: variables.$font-size-xxs;
+            color: variables.$color-gray-400;
+        }
+    }
+
+    .balance-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: variables.$spacing-xs;
+        border-top: 1px solid variables.$color-gray-100;
+        margin-top: auto;
+
+        .stat-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .stat-label {
+                font-size: variables.$font-size-xxs;
+                color: variables.$color-gray-400;
+            }
+
+            .stat-value {
+                font-size: variables.$font-size-sm;
+                font-weight: 600;
+                color: variables.$color-gray-800;
+
+                &.text-muted {
+                    color: variables.$color-gray-500;
+                }
+
+                &.text-accent {
+                    color: variables.$color-gray-900;
+                    font-weight: 700;
+                }
+            }
+        }
+
+        .stat-divider {
+            width: 1px;
+            height: 20px;
+            background: variables.$color-gray-200;
+        }
+    }
+}

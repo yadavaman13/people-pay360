@@ -136,8 +136,8 @@ describe('05: Time Off & Leave Management API', () => {
             const payload = {
                 employeeId: employeeSession.employee.id,
                 typeId: createdTypeId,
-                startDate: '2026-06-10',
-                endDate: '2026-06-12',
+                startDate: '2026-10-14',
+                endDate: '2026-10-16',
                 numberOfDays: '3.00',
                 reason: 'Family event',
             };
@@ -161,6 +161,38 @@ describe('05: Time Off & Leave Management API', () => {
             expect(res.body.success).toBe(true);
             expect(res.body.data.status).toBe('PENDING');
             createdRequestId = res.body.data.id;
+        });
+
+        it('should create a single-day leave request where endDate equals startDate (201)', async () => {
+            const payload = {
+                employeeId: employeeSession.employee.id,
+                typeId: createdTypeId,
+                startDate: '2026-10-20',
+                endDate: '2026-10-20',
+                numberOfDays: '1.00',
+                reason: 'Doctor appointment',
+            };
+
+            const res = await request(app)
+                .post('/api/time-off/requests')
+                .set('Cookie', employeeSession.cookie)
+                .send(payload);
+
+            expect(res.status).toBe(201);
+            expect(res.body.success).toBe(true);
+            expect(res.body.data.status).toBe('PENDING');
+            expect(res.body.data.startDate).toBe('2026-10-20');
+            expect(res.body.data.endDate).toBe('2026-10-20');
+            expect(Number(res.body.data.numberOfDays)).toBe(1);
+
+            const singleDayId = res.body.data.id;
+            const cancelRes = await request(app)
+                .post(`/api/time-off/requests/${singleDayId}/cancel`)
+                .set('Cookie', employeeSession.cookie);
+
+            expect(cancelRes.status).toBe(200);
+            expect(cancelRes.body.success).toBe(true);
+            expect(cancelRes.body.data.status).toBe('CANCELLED');
         });
 
         it('POST /api/time-off/requests/:id/approve should approve request and consume allocation (BR-009) (200)', async () => {

@@ -266,3 +266,102 @@ export const payslipEmailTemplate = ({
     </html>
   `;
 };
+
+export const timeOffDecisionEmailTemplate = ({
+    employeeName,
+    status,
+    typeName,
+    startDate,
+    endDate,
+    numberOfDays,
+    reviewNotes,
+}) => {
+    const isApproved = status === 'APPROVED';
+    const statusColor = isApproved ? '#15803d' : '#b91c1c';
+    const statusBg = isApproved ? '#dcfce7' : '#fee2e2';
+    const statusLabel = isApproved ? 'APPROVED' : 'REFUSED';
+
+    const safeName = escapeHtml(employeeName || 'Employee');
+    const safeType = escapeHtml(typeName || 'Time Off');
+    const safeStart = escapeHtml(String(startDate || ''));
+    const safeEnd = escapeHtml(String(endDate || ''));
+    const safeDays = escapeHtml(String(numberOfDays || '0'));
+    const safeNotes = reviewNotes ? escapeHtml(reviewNotes) : null;
+
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Time Off Request ${statusLabel} - PeoplePay360</title>
+      <style>
+        ${emailStyles}
+        .cred-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .cred-table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; font-size: 15px; }
+        .cred-table td.label { font-weight: 600; color: #374151; width: 40%; }
+        .cred-table td.val { color: #111827; }
+        .status-pill {
+          display: inline-block;
+          padding: 6px 16px;
+          border-radius: 9999px;
+          font-weight: 700;
+          font-size: 14px;
+          letter-spacing: 0.5px;
+          background-color: ${statusBg};
+          color: ${statusColor};
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>PeoplePay360</h1>
+        </div>
+        <div class="content">
+          <p>Dear ${safeName},</p>
+          <p>Your time off request has been reviewed by your management/HR team. Here is the official decision:</p>
+          
+          <div style="text-align: center; margin: 20px 0;">
+            <span class="status-pill">${statusLabel}</span>
+          </div>
+
+          <table class="cred-table">
+            <tr>
+              <td class="label">Leave Type:</td>
+              <td class="val">${safeType}</td>
+            </tr>
+            <tr>
+              <td class="label">Duration:</td>
+              <td class="val"><strong>${safeDays} Days</strong></td>
+            </tr>
+            <tr>
+              <td class="label">Period:</td>
+              <td class="val">${safeStart} to ${safeEnd}</td>
+            </tr>
+            ${
+                safeNotes
+                    ? `<tr>
+              <td class="label">Review Notes:</td>
+              <td class="val">${safeNotes}</td>
+            </tr>`
+                    : ''
+            }
+          </table>
+
+          <p>${
+              isApproved
+                  ? 'Your requested time off dates have been officially scheduled and your leave balance has been updated.'
+                  : 'If you have any questions or require additional details regarding this refusal, please speak with your reporting manager or HR department.'
+          }</p>
+
+          <p class="note">You can view your current leave balances and request history at any time through the PeoplePay360 portal.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} PeoplePay360. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};

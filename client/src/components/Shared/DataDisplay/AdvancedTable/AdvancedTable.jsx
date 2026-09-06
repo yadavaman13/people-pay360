@@ -117,6 +117,7 @@ function AdvancedTable({
     showAllOption = false,
     enableContextMenu = false,
     showScrollButtons = false,
+    enableVerticalScroll = false,
     className = '',
     controlsLeft = null,
     onSortChange = null,
@@ -248,69 +249,62 @@ function AdvancedTable({
 
     // ── Auto-generate filterConfig from columns if not provided ───────────────
     const effectiveFilterConfig = useMemo(() => {
-        const rawConfig =
-            Array.isArray(filterConfig) && filterConfig.length > 0
-                ? filterConfig.map((fc) => ({
-                      type: 'select',
-                      ...fc,
-                  }))
-                : effectiveColumns
-                      .filter(
-                          (col) =>
-                              col.key !== 'action' &&
-                              col.key !== 'actions' &&
-                              col.key.toLowerCase() !== 'status' &&
-                              col.key !== tabFilterKey,
-                      )
-                      .map((col) => {
-                          const sample = internalData.find(
-                              (row) =>
-                                  row[col.key] !== null &&
-                                  row[col.key] !== undefined &&
-                                  row[col.key] !== '-' &&
-                                  row[col.key] !== '',
-                          );
-                          if (!sample) return null;
-                          const val = sample[col.key];
+        if (Array.isArray(filterConfig) && filterConfig.length > 0) {
+            return filterConfig.map((fc) => ({
+                type: 'select',
+                ...fc,
+            }));
+        }
 
-                          if (typeof val === 'string') {
-                              const cleanedNum = String(val).replace(/[₹$€£¥\s,]/g, '');
-                              if (
-                                  !isNaN(parseFloat(cleanedNum)) &&
-                                  cleanedNum !== '' &&
-                                  !isNaN(cleanedNum)
-                              ) {
-                                  return { key: col.key, label: col.label, type: 'numeric' };
-                              }
-                              if (
-                                  parseDate(val) !== null &&
-                                  (String(val).includes('-') ||
-                                      String(val).includes(',') ||
-                                      String(val).includes('/'))
-                              ) {
-                                  return { key: col.key, label: col.label, type: 'date' };
-                              }
-                              const uniqueVals = [
-                                  ...new Set(
-                                      internalData
-                                          .map((r) => r[col.key])
-                                          .filter((v) => v !== null && v !== undefined && v !== ''),
-                                  ),
-                              ];
-                              if (uniqueVals.length <= 20 && uniqueVals.length >= 2) {
-                                  return { key: col.key, label: col.label, type: 'select' };
-                              }
-                          }
-                          if (typeof val === 'number') {
-                              return { key: col.key, label: col.label, type: 'numeric' };
-                          }
-                          return null;
-                      })
-                      .filter(Boolean);
+        return effectiveColumns
+            .filter(
+                (col) =>
+                    col.key !== 'action' &&
+                    col.key !== 'actions' &&
+                    col.key.toLowerCase() !== 'status' &&
+                    col.key !== tabFilterKey,
+            )
+            .map((col) => {
+                const sample = internalData.find(
+                    (row) =>
+                        row[col.key] !== null &&
+                        row[col.key] !== undefined &&
+                        row[col.key] !== '-' &&
+                        row[col.key] !== '',
+                );
+                if (!sample) return null;
+                const val = sample[col.key];
 
-        return rawConfig.filter(
-            (fc) => fc.key.toLowerCase() !== 'status' && fc.key !== tabFilterKey,
-        );
+                if (typeof val === 'string') {
+                    const cleanedNum = String(val).replace(/[₹$€£¥\s,]/g, '');
+                    if (!isNaN(parseFloat(cleanedNum)) && cleanedNum !== '' && !isNaN(cleanedNum)) {
+                        return { key: col.key, label: col.label, type: 'numeric' };
+                    }
+                    if (
+                        parseDate(val) !== null &&
+                        (String(val).includes('-') ||
+                            String(val).includes(',') ||
+                            String(val).includes('/'))
+                    ) {
+                        return { key: col.key, label: col.label, type: 'date' };
+                    }
+                    const uniqueVals = [
+                        ...new Set(
+                            internalData
+                                .map((r) => r[col.key])
+                                .filter((v) => v !== null && v !== undefined && v !== ''),
+                        ),
+                    ];
+                    if (uniqueVals.length <= 20 && uniqueVals.length >= 2) {
+                        return { key: col.key, label: col.label, type: 'select' };
+                    }
+                }
+                if (typeof val === 'number') {
+                    return { key: col.key, label: col.label, type: 'numeric' };
+                }
+                return null;
+            })
+            .filter(Boolean);
     }, [filterConfig, effectiveColumns, internalData, tabFilterKey]);
 
     // ── Auto-generate tabs ────────────────────────────────────────────────────
@@ -741,9 +735,10 @@ function AdvancedTable({
     }, [skeletonRows, paginatedData.length, internalData.length, rowsPerPage]);
 
     const shouldUseVerticalScroll = useMemo(() => {
+        if (!enableVerticalScroll) return false;
         if (loading) return dynamicSkeletonCount > 5;
         return paginatedData.length > 5;
-    }, [loading, dynamicSkeletonCount, paginatedData.length]);
+    }, [enableVerticalScroll, loading, dynamicSkeletonCount, paginatedData.length]);
 
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [clearedNewRowIds, setClearedNewRowIds] = useState(new Set());

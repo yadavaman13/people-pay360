@@ -1,0 +1,150 @@
+@use '@/styles/variables' as variables;
+
+.time-off-requests-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+    padding: variables.$spacing-md variables.$spacing-xl;
+    box-sizing: border-box;
+    gap: variables.$spacing-md;
+    font-family: variables.$font-sans;
+
+    @media (width <= 768px) {
+        padding: variables.$spacing-sm variables.$spacing-md;
+        gap: variables.$spacing-sm;
+    }
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: variables.$spacing-md;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+
+    .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-xs;
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: variables.$spacing-sm;
+
+            .header-icon {
+                color: variables.$color-black;
+            }
+
+            .header-title {
+                font-size: variables.$font-size-xxl;
+                font-weight: 700;
+                color: variables.$color-gray-900;
+                margin: 0;
+                letter-spacing: -0.02em;
+            }
+        }
+
+        .header-subtitle {
+            font-size: variables.$font-size-sm;
+            color: variables.$color-gray-500;
+            margin: 0;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+
+        .create-request-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+    }
+}
+
+.balance-section {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-xs;
+
+    .section-title {
+        font-size: variables.$font-size-md;
+        font-weight: 700;
+        color: variables.$color-gray-800;
+        margin: 0;
+    }
+}
+
+.table-wrapper {
+    background: variables.$color-white;
+    border-radius: variables.$radius-medium;
+    border: 1px solid variables.$color-gray-200;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+
+    .advanced-table-component {
+        border: none;
+        box-shadow: none;
+    }
+
+    .advanced-table-scroll-wrapper {
+        &.has-vertical-scroll {
+            max-height: none;
+            overflow-y: visible;
+        }
+    }
+}
+
+.timeoff-employee-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .emp-name {
+        font-weight: 600;
+        color: variables.$color-gray-900;
+    }
+
+    .emp-code {
+        font-size: variables.$font-size-xxs;
+        color: variables.$color-gray-500;
+    }
+}
+
+.timeoff-type-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .type-name {
+        font-weight: 600;
+        color: variables.$color-gray-900;
+    }
+
+    .type-sub {
+        font-size: variables.$font-size-xxs;
+        color: variables.$color-gray-500;
+    }
+}
+
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+
+    button {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: variables.$font-size-xs;
+        padding: 4px 8px;
+        height: 28px;
+    }
+}

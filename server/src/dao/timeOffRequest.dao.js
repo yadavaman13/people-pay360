@@ -190,8 +190,9 @@ export async function deleteRequest(id) {
  * Updates allocation balance and request status in a single DB transaction.
  * @param {string} requestId
  * @param {string} reviewedByUserId
+ * @param {string} [reviewNotes]
  */
-export async function approveRequestAtomic(requestId, reviewedByUserId) {
+export async function approveRequestAtomic(requestId, reviewedByUserId, reviewNotes) {
     return db.transaction(async (tx) => {
         // 1. Lock and load request
         const [request] = await tx
@@ -271,6 +272,7 @@ export async function approveRequestAtomic(requestId, reviewedByUserId) {
             .set({
                 status: 'APPROVED',
                 reviewedBy: reviewedByUserId,
+                reviewNotes: reviewNotes || request.reviewNotes,
                 reviewedAt: new Date(),
                 updatedAt: new Date(),
             })
@@ -338,17 +340,17 @@ export async function cancelRequestAtomic(requestId, cancelledByUserId) {
             throw new AppError('Time off request not found', 404);
         }
 
-        if (request.status !== 'APPROVED') {
+        if (request.status !== 'PENDING' && request.status !== 'APPROVED') {
             throw new AppError(
-                `Cannot cancel a request that is not APPROVED (current: ${request.status})`,
+                `Cannot cancel a request with status ${request.status}. Only PENDING or APPROVED requests can be cancelled.`,
                 409,
             );
         }
 
         let restoredAllocation = null;
 
-        // Restore allocation balance if linked
-        if (request.allocationId) {
+        // Restore allocation balance if linked and request was APPROVED
+        if (request.status === 'APPROVED' && request.allocationId) {
             const [allocation] = await tx
                 .select()
                 .from(timeOffAllocations)

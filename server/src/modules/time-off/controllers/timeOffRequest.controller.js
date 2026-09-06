@@ -88,7 +88,11 @@ export async function deleteRequest(req, res, next) {
 
 export async function approveRequest(req, res, next) {
     try {
-        const result = await timeOffRequestService.approveRequest(req.params.id, req.user);
+        const result = await timeOffRequestService.approveRequest(
+            req.params.id,
+            req.user,
+            req.body?.reviewNotes,
+        );
         return sendResponse({
             res,
             statusCode: 200,

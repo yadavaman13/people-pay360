@@ -29,8 +29,16 @@ function SidebarSubTabs({ subTabs, parentLabel, onSubTabClick }) {
             navigate(`/dashboard/${roleSegment}/attendance/${segment}`);
         } else if (parentLabel === 'Payroll') {
             navigate(`/dashboard/${roleSegment}/payroll/${segment}`);
+        } else if (parentLabel === 'Time Off') {
+            if (segment === 'time-off-types') {
+                navigate(`/dashboard/${roleSegment}/time-off/types`);
+            } else {
+                navigate(`/dashboard/${roleSegment}/time-off/${segment}`);
+            }
         } else {
-            navigate(`/dashboard/${roleSegment}/${parentLabel.toLowerCase()}/${segment}`);
+            navigate(
+                `/dashboard/${roleSegment}/${parentLabel.toLowerCase().replace(/\s+/g, '-')}/${segment}`,
+            );
         }
     };
 
