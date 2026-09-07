@@ -1060,7 +1060,14 @@ function AdvancedTable({
                 cancelText="Cancel"
                 onConfirm={confirmDeleteSelected}
             >
-                <p style={{ margin: 0, fontSize: '0.95rem', color: '#4b5563', lineHeight: 1.5 }}>
+                <p
+                    style={{
+                        margin: 0,
+                        fontSize: '0.95rem',
+                        color: 'var(--color-gray-600)',
+                        lineHeight: 1.5,
+                    }}
+                >
                     Are you sure you want to permanently delete {selectedIds.length} selected item
                     {selectedIds.length > 1 ? 's' : ''}? This action is irreversible.
                 </p>

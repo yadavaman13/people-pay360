@@ -49,14 +49,14 @@
         }
     }
 
-    // Breadcrumb matching Image 3 wireframe
+    // Breadcrumb matching wireframe
     &__breadcrumb {
         display: flex;
         align-items: center;
         gap: 8px;
         font-size: variables.$font-size-xxl;
         font-weight: 700;
-        color: var(--color-text-primary, #0f172a);
+        color: variables.$color-gray-900;
         letter-spacing: -0.5px;
         margin-bottom: 4px;
 
@@ -77,17 +77,17 @@
         }
 
         .breadcrumb-current {
-            color: var(--color-text-primary, #0f172a);
+            color: variables.$color-gray-900;
         }
     }
 
     &__subtitle {
         margin: 0 0 20px;
         font-size: variables.$font-size-md;
-        color: var(--color-text-secondary, #64748b);
+        color: variables.$color-gray-600;
     }
 
-    // Action Bar matching Image 3
+    // Action Bar
     &__action-bar {
         display: flex;
         align-items: center;
@@ -123,13 +123,13 @@
         }
     }
 
-    // Master Form Card matching Image 3 wireframe
+    // Master Form Card
     .employee-form-card {
-        background-color: var(--color-surface, #fff);
-        border: 1px solid var(--color-border-subtle, #e2e8f0);
+        background-color: variables.$color-white;
+        border: 1px solid variables.$color-gray-200;
         border-radius: 18px;
         padding: 32px 36px;
-        box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+        box-shadow: variables.$shadow-sm;
 
         @media (width <= 768px) {
             padding: 20px;
@@ -140,7 +140,7 @@
             align-items: center;
             gap: 24px;
             padding-bottom: 26px;
-            border-bottom: 1px solid var(--color-border-subtle, #f1f5f9);
+            border-bottom: 1px solid variables.$color-gray-200;
 
             .profile-avatar-container {
                 display: flex;
@@ -153,16 +153,16 @@
                 height: 76px;
                 min-width: 76px;
                 border-radius: 18px;
-                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-                border: 2px solid variables.$color-blue-accent;
+                background: variables.$color-gray-100;
+                border: 2px solid variables.$color-gray-300;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: variables.$color-blue-dark;
+                color: variables.$color-gray-800;
                 font-size: variables.$font-size-xxl;
                 font-weight: 700;
                 user-select: none;
-                box-shadow: 0 4px 12px rgb(37 99 235 / 12%);
+                box-shadow: variables.$shadow-sm;
                 position: relative;
                 overflow: hidden;
                 cursor: pointer;
@@ -170,7 +170,7 @@
 
                 &:hover {
                     border-color: variables.$color-primary;
-                    box-shadow: 0 6px 16px rgb(37 99 235 / 22%);
+                    box-shadow: variables.$shadow-md;
                     transform: scale(1.02);
 
                     .avatar-upload-overlay {
@@ -189,7 +189,7 @@
                 .avatar-upload-overlay {
                     position: absolute;
                     inset: 0;
-                    background: rgb(15 23 42 / 65%);
+                    background: rgb(0 0 0 / 65%);
                     color: variables.$color-white;
                     display: flex;
                     flex-direction: column;
@@ -208,7 +208,7 @@
                 .avatar-uploading-spinner {
                     position: absolute;
                     inset: 0;
-                    background: rgb(255 255 255 / 85%);
+                    background: rgb(0 0 0 / 50%);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -226,7 +226,7 @@
                     margin: 0;
                     font-size: variables.$font-size-xxl;
                     font-weight: 750;
-                    color: var(--color-text-primary, #0f172a);
+                    color: variables.$color-gray-900;
                     letter-spacing: -0.4px;
                 }
 
@@ -241,7 +241,7 @@
                     align-items: center;
                     gap: 8px;
                     font-size: variables.$font-size-md;
-                    color: var(--color-text-secondary, #475569);
+                    color: variables.$color-gray-600;
                     font-weight: 500;
 
                     .dot-separator {
@@ -254,7 +254,7 @@
                     align-items: center;
                     gap: 10px;
                     font-size: variables.$font-size-sm;
-                    color: var(--color-text-secondary, #64748b);
+                    color: variables.$color-gray-600;
                     margin-top: 2px;
 
                     .pipe-separator {
@@ -264,7 +264,7 @@
             }
         }
 
-        // Form Tabs Navigation matching Image 3 wireframe
+        // Form Tabs Navigation
         .form-tabs-nav {
             display: flex;
             align-items: center;
@@ -279,17 +279,17 @@
                 padding: 10px 4px 12px;
                 font-size: variables.$font-size-md;
                 font-weight: 600;
-                color: var(--color-text-secondary, #64748b);
+                color: variables.$color-gray-600;
                 cursor: pointer;
                 position: relative;
                 transition: color 0.2s ease;
 
                 &:hover {
-                    color: var(--color-text-primary, #0f172a);
+                    color: variables.$color-gray-900;
                 }
 
                 &.is-active {
-                    color: var(--color-primary, #2563eb);
+                    color: variables.$color-primary;
 
                     &::after {
                         content: '';
@@ -298,14 +298,14 @@
                         left: 0;
                         right: 0;
                         height: 2.5px;
-                        background-color: var(--color-primary, #2563eb);
+                        background-color: variables.$color-primary;
                         border-radius: 2px;
                     }
                 }
             }
         }
 
-        // Two-column fields grid matching Image 3
+        // Two-column fields grid
         .fields-two-column-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -325,7 +325,7 @@
                     font-size: variables.$font-size-md;
                     font-weight: 650;
                     margin: 0 0 4px;
-                    color: var(--color-text-primary, #1e293b);
+                    color: variables.$color-gray-900;
                     border-bottom: 1px dashed variables.$color-gray-200;
                     padding-bottom: 8px;
                 }
@@ -338,16 +338,16 @@
                     .field-label {
                         font-size: variables.$font-size-sm;
                         font-weight: 600;
-                        color: var(--color-text-secondary, #475569);
+                        color: variables.$color-gray-600;
                     }
 
                     .field-display-box {
                         padding: 10px 14px;
                         background-color: variables.$color-gray-50;
-                        border: 1px solid var(--color-border-subtle, #e2e8f0);
+                        border: 1px solid variables.$color-gray-200;
                         border-radius: 10px;
                         font-size: variables.$font-size-md;
-                        color: var(--color-text-primary, #0f172a);
+                        color: variables.$color-gray-900;
                         min-height: 42px;
                         display: flex;
                         align-items: center;
@@ -381,35 +381,35 @@
                     .form-select-control {
                         height: 42px;
                         padding: 0 14px;
-                        border: 1px solid var(--color-border-subtle, #cbd5e1);
+                        border: 1px solid variables.$color-gray-300;
                         border-radius: 10px;
-                        background-color: var(--color-surface, #fff);
+                        background-color: variables.$color-white;
                         font-size: variables.$font-size-sm;
-                        color: var(--color-text-primary, #1e293b);
+                        color: variables.$color-gray-900;
                         outline: none;
                         transition:
                             border-color 0.2s ease,
                             box-shadow 0.2s ease;
 
                         &:focus {
-                            border-color: var(--color-primary, #2563eb);
-                            box-shadow: 0 0 0 3px rgb(37 99 235 / 14%);
+                            border-color: variables.$color-primary;
+                            box-shadow: 0 0 0 3px rgb(128 128 128 / 14%);
                         }
                     }
 
                     .form-date-control {
                         height: 42px;
                         padding: 0 14px;
-                        border: 1px solid var(--color-border-subtle, #cbd5e1);
+                        border: 1px solid variables.$color-gray-300;
                         border-radius: 10px;
-                        background-color: var(--color-surface, #fff);
+                        background-color: variables.$color-white;
                         font-size: variables.$font-size-sm;
-                        color: var(--color-text-primary, #1e293b);
+                        color: variables.$color-gray-900;
                         outline: none;
 
                         &:focus {
-                            border-color: var(--color-primary, #2563eb);
-                            box-shadow: 0 0 0 3px rgb(37 99 235 / 14%);
+                            border-color: variables.$color-primary;
+                            box-shadow: 0 0 0 3px rgb(128 128 128 / 14%);
                         }
                     }
                 }
@@ -446,7 +446,7 @@
         justify-content: center;
         min-height: 400px;
         gap: 16px;
-        color: var(--color-text-secondary, #64748b);
+        color: variables.$color-gray-600;
     }
 
     .archive-dialog-body {
@@ -458,13 +458,13 @@
         p {
             margin: 0;
             font-size: variables.$font-size-md;
-            color: var(--color-text-primary, #1e293b);
+            color: variables.$color-gray-900;
             line-height: 1.5;
         }
 
         .note-text {
             font-size: variables.$font-size-sm;
-            color: var(--color-text-secondary, #64748b);
+            color: variables.$color-gray-600;
             line-height: 1.5;
         }
     }
