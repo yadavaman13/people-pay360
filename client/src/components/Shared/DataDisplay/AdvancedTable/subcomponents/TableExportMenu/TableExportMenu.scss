@@ -105,7 +105,7 @@
             text-transform: uppercase;
             letter-spacing: 0.06em;
             color: variables.$color-gray-500;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid variables.$color-gray-100;
             margin-bottom: 4px;
         }
 
@@ -205,7 +205,7 @@
         align-items: flex-start;
         justify-content: space-between;
         padding: 20px 24px 16px;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid variables.$color-gray-100;
 
         .at-export-modal-title-wrap {
             display: flex;
@@ -354,7 +354,7 @@
         justify-content: flex-end;
         gap: 12px;
         padding: 16px 24px;
-        border-top: 1px solid #f1f5f9;
+        border-top: 1px solid variables.$color-gray-100;
         background-color: variables.$color-gray-50;
     }
 }

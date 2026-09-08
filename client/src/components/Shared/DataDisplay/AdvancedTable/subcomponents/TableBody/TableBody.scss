@@ -33,7 +33,12 @@
                 height: 13px;
                 width: 70%;
                 border-radius: 4px;
-                background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+                background: linear-gradient(
+                    90deg,
+                    variables.$color-gray-100 25%,
+                    variables.$color-gray-200 50%,
+                    variables.$color-gray-100 75%
+                );
                 background-size: 200% 100%;
                 animation: skeleton-shimmer 1.5s infinite ease-in-out;
             }
@@ -48,7 +53,12 @@
                     height: 36px;
                     border-radius: 50%;
                     flex-shrink: 0;
-                    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+                    background: linear-gradient(
+                        90deg,
+                        variables.$color-gray-100 25%,
+                        variables.$color-gray-200 50%,
+                        variables.$color-gray-100 75%
+                    );
                     background-size: 200% 100%;
                     animation: skeleton-shimmer 1.5s infinite ease-in-out;
                 }
@@ -73,7 +83,12 @@
                 height: 22px;
                 width: 68px;
                 border-radius: 9999px;
-                background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+                background: linear-gradient(
+                    90deg,
+                    variables.$color-gray-100 25%,
+                    variables.$color-gray-200 50%,
+                    variables.$color-gray-100 75%
+                );
                 background-size: 200% 100%;
                 animation: skeleton-shimmer 1.5s infinite ease-in-out;
             }
@@ -82,7 +97,12 @@
                 width: 24px;
                 height: 24px;
                 border-radius: 4px;
-                background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+                background: linear-gradient(
+                    90deg,
+                    variables.$color-gray-100 25%,
+                    variables.$color-gray-200 50%,
+                    variables.$color-gray-100 75%
+                );
                 background-size: 200% 100%;
                 animation: skeleton-shimmer 1.5s infinite ease-in-out;
             }
@@ -117,8 +137,8 @@
             max-width: 52px;
             padding: 12px 4px;
             text-align: center;
-            background-color: rgb(248 250 252 / 50%);
-            border-right: 1px dashed #e2e8f0;
+            background-color: variables.$color-gray-50;
+            border-right: 1px dashed variables.$color-gray-200;
 
             .collapsed-cell-dot {
                 display: inline-flex;

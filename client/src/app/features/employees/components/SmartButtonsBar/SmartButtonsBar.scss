@@ -10,23 +10,23 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background-color: var(--color-surface, #fff);
-        border: 1.5px solid var(--color-primary-light, #bfdbfe);
+        background-color: variables.$color-white;
+        border: 1px solid variables.$color-gray-300;
         border-radius: 12px;
         padding: 8px 14px;
         font-size: variables.$font-size-sm;
         font-weight: 550;
-        color: var(--color-primary, #1d4ed8);
+        color: variables.$color-primary;
         cursor: pointer;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+        box-shadow: variables.$shadow-sm;
         user-select: none;
 
         &:hover {
-            background-color: variables.$color-blue-hover;
-            border-color: variables.$color-blue-accent;
+            background-color: variables.$color-gray-100;
+            border-color: variables.$color-gray-400;
             transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgb(37 99 235 / 10%);
+            box-shadow: variables.$shadow-md;
         }
 
         &:active {
@@ -39,14 +39,14 @@
         }
 
         &__label {
-            color: var(--color-text-primary, #1e293b);
+            color: variables.$color-gray-900;
         }
 
         &__count {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background-color: variables.$color-blue-hover;
+            background-color: variables.$color-gray-100;
             color: variables.$color-primary;
             font-size: variables.$font-size-xs;
             font-weight: 700;
