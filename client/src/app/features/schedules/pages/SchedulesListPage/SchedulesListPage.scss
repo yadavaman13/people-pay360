@@ -1,0 +1,157 @@
+@use '@/styles/variables' as variables;
+
+/* ─────────────────────────────────────────────
+   SchedulesListPage — SCSS
+   Zero !important. All tokens via variables.
+───────────────────────────────────────────── */
+
+.schedules-list-page {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-lg;
+    padding: variables.$spacing-lg;
+    max-width: 1280px;
+    margin: 0 auto;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md variables.$spacing-sm;
+        gap: variables.$spacing-md;
+    }
+
+    // ── Header ────────────────────────────────
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: variables.$spacing-md;
+
+        @include variables.mobile {
+            flex-direction: column;
+            gap: variables.$spacing-sm;
+        }
+    }
+
+    &__header-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    &__title {
+        font-size: variables.$font-size-xl;
+        font-weight: 700;
+        color: variables.$color-text-primary;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    &__subtitle {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-text-secondary;
+        margin: 0;
+    }
+
+    // ── Metric cards grid ─────────────────────
+    &__metrics {
+        // MetricCardGrid handles columns
+    }
+
+    // ── Error banner ──────────────────────────
+    &__error-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: variables.$spacing-sm;
+        padding: variables.$spacing-sm variables.$spacing-md;
+        background: color-mix(in srgb, variables.$color-danger 8%, transparent);
+        border: 1px solid color-mix(in srgb, variables.$color-danger 25%, transparent);
+        border-radius: variables.$radius-medium;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-danger;
+    }
+
+    // ── Table wrapper ─────────────────────────
+    &__table-wrapper {
+        background: variables.$color-bg-card;
+        border: 1px solid variables.$color-border-strong;
+        border-radius: variables.$radius-large;
+        overflow: hidden;
+    }
+
+    // ── Row-level cells ───────────────────────
+    &__desc-cell {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-text-secondary;
+        max-width: 300px;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__hours-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: variables.$font-size-sm;
+        font-weight: 600;
+        color: variables.$color-primary;
+        background: color-mix(in srgb, variables.$color-primary 8%, transparent);
+        border-radius: variables.$radius-small;
+        padding: 3px variables.$spacing-sm;
+    }
+
+    // ── Row actions ───────────────────────────
+    &__row-actions {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    &__delete-btn {
+        color: variables.$color-danger;
+
+        &:hover {
+            background: color-mix(in srgb, variables.$color-danger 10%, transparent);
+            color: variables.$color-danger;
+        }
+    }
+
+    // ── Delete confirmation text ───────────────
+    &__delete-confirm-text {
+        font-size: variables.$font-size-sm;
+        line-height: 1.6;
+        color: variables.$color-text-primary;
+        margin: 0;
+
+        strong {
+            color: variables.$color-danger;
+        }
+    }
+}
+
+// ── Schedule name cell ────────────────────────
+.schedule-name-cell {
+    display: flex;
+    align-items: center;
+    gap: variables.$spacing-sm;
+    cursor: pointer;
+
+    @include variables.transition-ease;
+
+    &__icon {
+        color: variables.$color-primary;
+        flex-shrink: 0;
+    }
+
+    &__text {
+        font-size: variables.$font-size-sm;
+        font-weight: 600;
+        color: variables.$color-text-primary;
+    }
+
+    &:hover &__text {
+        color: variables.$color-primary;
+        text-decoration: underline;
+    }
+}

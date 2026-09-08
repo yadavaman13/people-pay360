@@ -1,0 +1,384 @@
+@use '@/styles/variables' as variables;
+
+/* ─────────────────────────────────────────────
+   ScheduleDetailPage — SCSS
+   Zero !important. All tokens from variables.
+───────────────────────────────────────────── */
+
+.schedule-detail-page {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-lg;
+    padding: variables.$spacing-lg;
+    max-width: 1000px;
+    margin: 0 auto;
+
+    @include variables.mobile {
+        padding: variables.$spacing-md variables.$spacing-sm;
+        gap: variables.$spacing-md;
+    }
+
+    // ── Loading / Error centred states ─────────
+    &--loading,
+    &--error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 50vh;
+    }
+
+    // ── Top action bar ─────────────────────────
+    &__topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: variables.$spacing-md;
+    }
+
+    &__back-btn {
+        flex-shrink: 0;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+
+        @include variables.mobile {
+            gap: variables.$spacing-xs;
+        }
+    }
+
+    // ── Metadata card ──────────────────────────
+    &__meta-card {
+        border: 1px solid variables.$color-border-strong;
+        border-radius: variables.$radius-large;
+        background: variables.$color-bg-card;
+        box-shadow: variables.$shadow-sm;
+    }
+
+    &__meta-content {
+        display: flex;
+        align-items: flex-start;
+        gap: variables.$spacing-md;
+        padding: variables.$spacing-lg;
+
+        @include variables.mobile {
+            flex-direction: column;
+            padding: variables.$spacing-md;
+        }
+    }
+
+    &__meta-left {
+        display: flex;
+        align-items: flex-start;
+        gap: variables.$spacing-md;
+        flex: 1;
+    }
+
+    &__meta-icon-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: variables.$radius-medium;
+        background: color-mix(in srgb, variables.$color-primary 12%, transparent);
+        color: variables.$color-primary;
+        flex-shrink: 0;
+    }
+
+    &__meta-info {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-xs;
+        flex: 1;
+    }
+
+    &__meta-name-row {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        flex-wrap: wrap;
+    }
+
+    &__name {
+        font-size: variables.$font-size-xl;
+        font-weight: 700;
+        color: variables.$color-text-primary;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    &__description {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-text-secondary;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    &__meta-tags {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        flex-wrap: wrap;
+        margin-top: 4px;
+    }
+
+    &__tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: variables.$font-size-xs;
+        font-weight: 500;
+        color: variables.$color-text-secondary;
+        background: variables.$color-bg-subtle;
+        border: 1px solid variables.$color-border-subtle;
+        border-radius: variables.$radius-small;
+        padding: 3px variables.$spacing-sm;
+    }
+
+    // ── Shift Lines section ────────────────────
+    &__lines-section {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-md;
+        background: variables.$color-bg-card;
+        border: 1px solid variables.$color-border-strong;
+        border-radius: variables.$radius-large;
+        padding: variables.$spacing-lg;
+
+        @include variables.mobile {
+            padding: variables.$spacing-md;
+        }
+    }
+
+    &__lines-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: variables.$spacing-md;
+        flex-wrap: wrap;
+    }
+
+    &__lines-title {
+        font-size: variables.$font-size-md;
+        font-weight: 600;
+        color: variables.$color-text-primary;
+        margin: 0;
+    }
+
+    &__lines-subtitle {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-text-secondary;
+        margin: 4px 0 0;
+    }
+
+    &__lines-actions {
+        display: flex;
+        align-items: center;
+        gap: variables.$spacing-xs;
+    }
+
+    // ── Grid table ─────────────────────────────
+    &__lines-grid {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid variables.$color-border-subtle;
+        border-radius: variables.$radius-medium;
+        overflow: hidden;
+    }
+
+    &__lines-col-header {
+        display: grid;
+        grid-template-columns: 150px 120px 120px 120px 90px;
+        gap: variables.$spacing-sm;
+        padding: variables.$spacing-xs variables.$spacing-md;
+        background: variables.$color-bg-subtle;
+        border-bottom: 1px solid variables.$color-border-subtle;
+
+        span {
+            font-size: variables.$font-size-xxs;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: variables.$color-text-secondary;
+        }
+
+        @include variables.mobile {
+            display: none;
+        }
+    }
+
+    &__line-row {
+        display: grid;
+        grid-template-columns: 150px 120px 120px 120px 90px;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        padding: variables.$spacing-sm variables.$spacing-md;
+        border-bottom: 1px solid variables.$color-border-subtle;
+
+        @include variables.transition-ease;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &.is-off {
+            opacity: 0.4;
+            background: variables.$color-bg-subtle;
+        }
+
+        &.is-enabled {
+            background: variables.$color-bg-card;
+
+            &:hover {
+                background: color-mix(
+                    in srgb,
+                    variables.$color-primary 3%,
+                    variables.$color-bg-card
+                );
+            }
+        }
+
+        @include variables.mobile {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            padding: variables.$spacing-sm;
+            gap: variables.$spacing-xs;
+        }
+    }
+
+    // ── Cell types ─────────────────────────────
+    &__day-cell {
+        display: flex;
+        align-items: center;
+    }
+
+    &__day-label {
+        font-size: variables.$font-size-sm;
+        font-weight: 500;
+        color: variables.$color-text-secondary;
+
+        &.is-active {
+            color: variables.$color-text-primary;
+            font-weight: 600;
+        }
+    }
+
+    &__time-cell,
+    &__break-cell {
+        display: flex;
+        align-items: center;
+    }
+
+    &__time-display,
+    &__break-display {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-text-primary;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__net-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__net-badge {
+        font-size: variables.$font-size-sm;
+        font-weight: 700;
+        border-radius: variables.$radius-small;
+        padding: 3px variables.$spacing-sm;
+
+        &.is-valid {
+            color: variables.$color-success;
+            background: color-mix(in srgb, variables.$color-success 10%, transparent);
+        }
+
+        &.is-zero {
+            color: variables.$color-danger;
+            background: color-mix(in srgb, variables.$color-danger 10%, transparent);
+        }
+    }
+
+    &__net-off {
+        font-size: variables.$font-size-xs;
+        color: variables.$color-text-secondary;
+        font-style: italic;
+    }
+
+    // ── Time / Number editable inputs ──────────
+    &__time-input,
+    &__number-input {
+        width: 100%;
+        padding: 6px variables.$spacing-sm;
+        font-size: variables.$font-size-sm;
+        font-family: inherit;
+        color: variables.$color-text-primary;
+        background: variables.$color-bg-app;
+        border: 1px solid variables.$color-border-strong;
+        border-radius: variables.$radius-small;
+        outline: none;
+
+        @include variables.transition-ease;
+
+        &:focus {
+            border-color: variables.$color-primary;
+            box-shadow: 0 0 0 3px color-mix(in srgb, variables.$color-primary 15%, transparent);
+        }
+
+        &:disabled {
+            background: variables.$color-bg-subtle;
+            cursor: not-allowed;
+            color: variables.$color-text-secondary;
+        }
+    }
+
+    &__number-input {
+        appearance: textfield;
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            appearance: none;
+            margin: 0;
+        }
+    }
+
+    // ── Sticky save bar at bottom ──────────────
+    &__save-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: variables.$spacing-md;
+        padding: variables.$spacing-sm variables.$spacing-md;
+        background: color-mix(in srgb, variables.$color-primary 6%, variables.$color-bg-card);
+        border: 1px solid color-mix(in srgb, variables.$color-primary 20%, transparent);
+        border-radius: variables.$radius-medium;
+        font-size: variables.$font-size-sm;
+        color: variables.$color-text-secondary;
+
+        @include variables.mobile {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: variables.$spacing-xs;
+        }
+    }
+
+    &__save-bar-actions {
+        display: flex;
+        gap: variables.$spacing-xs;
+    }
+
+    // ── Delete confirm text ────────────────────
+    &__delete-text {
+        font-size: variables.$font-size-sm;
+        line-height: 1.6;
+        color: variables.$color-text-primary;
+        margin: 0;
+
+        strong {
+            color: variables.$color-danger;
+        }
+    }
+}

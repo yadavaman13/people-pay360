@@ -1,0 +1,172 @@
+@use '@/styles/variables' as variables;
+
+/* ─────────────────────────────────────────────
+   ScheduleFormModal — SCSS
+   Uses 3-tier design token system strictly.
+   Zero !important.
+───────────────────────────────────────────── */
+
+.schedule-form-modal {
+    display: flex;
+    flex-direction: column;
+    gap: variables.$spacing-lg;
+
+    // ── Section ──────────────────────────────
+    &__section {
+        display: flex;
+        flex-direction: column;
+        gap: variables.$spacing-md;
+    }
+
+    &__section-title {
+        font-size: variables.$font-size-sm;
+        font-weight: 600;
+        color: variables.$color-text-secondary;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+        padding-bottom: variables.$spacing-xs;
+        border-bottom: 1px solid variables.$color-border-subtle;
+    }
+
+    // ── Lines header with weekly total ────────
+    &__lines-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__weekly-total {
+        font-size: variables.$font-size-sm;
+        color: variables.$color-text-secondary;
+        background: color-mix(in srgb, variables.$color-primary 8%, transparent);
+        border: 1px solid color-mix(in srgb, variables.$color-primary 20%, transparent);
+        border-radius: variables.$radius-small;
+        padding: 4px variables.$spacing-sm;
+
+        strong {
+            color: variables.$color-primary;
+        }
+    }
+
+    // ── Lines grid ────────────────────────────
+    &__lines-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        background: variables.$color-bg-subtle;
+        border: 1px solid variables.$color-border-subtle;
+        border-radius: variables.$radius-medium;
+        overflow: hidden;
+    }
+
+    &__lines-col-headers {
+        display: grid;
+        grid-template-columns: 130px 100px 100px 110px 70px;
+        gap: variables.$spacing-sm;
+        padding: variables.$spacing-xs variables.$spacing-md;
+        background: variables.$color-bg-card;
+        border-bottom: 1px solid variables.$color-border-subtle;
+
+        span {
+            font-size: variables.$font-size-xxs;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: variables.$color-text-secondary;
+        }
+
+        @include variables.mobile {
+            display: none;
+        }
+    }
+
+    // ── Individual day row ────────────────────
+    &__line-row {
+        display: grid;
+        grid-template-columns: 130px 100px 100px 110px 70px;
+        align-items: center;
+        gap: variables.$spacing-sm;
+        padding: variables.$spacing-xs variables.$spacing-md;
+        background: variables.$color-bg-card;
+
+        @include variables.transition-ease;
+
+        &.is-disabled {
+            opacity: 0.45;
+            background: variables.$color-bg-subtle;
+        }
+
+        &:hover {
+            background: color-mix(in srgb, variables.$color-primary 4%, variables.$color-bg-card);
+        }
+
+        @include variables.mobile {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: variables.$spacing-xs;
+            padding: variables.$spacing-sm;
+            border-radius: variables.$radius-small;
+            border: 1px solid variables.$color-border-subtle;
+            margin: 0 variables.$spacing-xs;
+        }
+    }
+
+    // ── Time / Number inputs ──────────────────
+    &__time-input,
+    &__number-input {
+        width: 100%;
+        padding: 6px variables.$spacing-sm;
+        font-size: variables.$font-size-sm;
+        font-family: inherit;
+        color: variables.$color-text-primary;
+        background: variables.$color-bg-app;
+        border: 1px solid variables.$color-border-strong;
+        border-radius: variables.$radius-small;
+        outline: none;
+
+        @include variables.transition-ease;
+
+        &:focus {
+            border-color: variables.$color-primary;
+            box-shadow: 0 0 0 3px color-mix(in srgb, variables.$color-primary 15%, transparent);
+        }
+
+        &:disabled {
+            background: variables.$color-bg-subtle;
+            cursor: not-allowed;
+            color: variables.$color-text-secondary;
+        }
+
+        &.has-error {
+            border-color: variables.$color-danger;
+        }
+    }
+
+    &__number-input {
+        appearance: textfield;
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            appearance: none;
+            margin: 0;
+        }
+    }
+
+    // ── Net hours display ─────────────────────
+    &__net-hrs {
+        font-size: variables.$font-size-sm;
+        font-weight: 600;
+        text-align: center;
+        color: variables.$color-text-secondary;
+
+        &.is-valid {
+            color: variables.$color-success;
+        }
+
+        &.is-error {
+            color: variables.$color-danger;
+            cursor: help;
+        }
+    }
+}
