@@ -15,7 +15,7 @@
         justify-content: center;
         padding: 60px 0;
         gap: 16px;
-        color: var(--color-text-secondary, #64748b);
+        color: variables.$color-gray-600;
     }
 
     .section-intro {
@@ -26,10 +26,10 @@
         border-radius: 10px;
         padding: 12px 16px;
         font-size: variables.$font-size-sm;
-        color: var(--color-text-secondary, #475569);
+        color: variables.$color-gray-600;
 
         .intro-icon {
-            color: var(--color-primary, #2563eb);
+            color: variables.$color-primary;
             flex-shrink: 0;
         }
 
@@ -41,7 +41,7 @@
     .empty-hint {
         padding: 30px;
         text-align: center;
-        color: var(--color-text-muted, #94a3b8);
+        color: variables.$color-gray-400;
         font-style: italic;
     }
 
@@ -53,14 +53,14 @@
 
     // Contract Card styling
     .contract-item-card {
-        border: 1px solid var(--color-border-subtle, #e2e8f0);
+        border: 1px solid variables.$color-gray-200;
         border-radius: 12px;
         padding: 16px;
-        background-color: var(--color-surface, #fff);
+        background-color: variables.$color-white;
 
         &.is-active-contract {
-            border-color: variables.$color-blue-accent;
-            background-color: variables.$color-blue-hover;
+            border-color: variables.$color-gray-400;
+            background-color: variables.$color-gray-100;
         }
 
         .contract-header {
@@ -72,12 +72,12 @@
             .wage-amount {
                 font-size: variables.$font-size-xl;
                 font-weight: 700;
-                color: var(--color-text-primary, #0f172a);
+                color: variables.$color-gray-900;
             }
 
             .wage-period {
                 font-size: variables.$font-size-sm;
-                color: var(--color-text-secondary, #64748b);
+                color: variables.$color-gray-600;
                 margin-left: 4px;
             }
         }
@@ -94,12 +94,12 @@
                 font-size: variables.$font-size-sm;
 
                 .detail-label {
-                    color: var(--color-text-muted, #64748b);
+                    color: variables.$color-gray-400;
                     width: 75px;
                 }
 
                 .detail-value {
-                    color: var(--color-text-primary, #1e293b);
+                    color: variables.$color-gray-900;
                     font-weight: 500;
                 }
             }
@@ -108,7 +108,7 @@
 
     // Attendance Table styling
     .records-table-wrapper {
-        border: 1px solid var(--color-border-subtle, #e2e8f0);
+        border: 1px solid variables.$color-gray-200;
         border-radius: 12px;
         overflow: hidden;
 
@@ -122,14 +122,14 @@
                 padding: 10px 14px;
                 text-align: left;
                 font-weight: 600;
-                color: var(--color-text-secondary, #475569);
-                border-bottom: 1px solid var(--color-border-subtle, #e2e8f0);
+                color: variables.$color-gray-600;
+                border-bottom: 1px solid variables.$color-gray-200;
             }
 
             td {
                 padding: 10px 14px;
                 border-bottom: 1px solid variables.$color-gray-100;
-                color: var(--color-text-primary, #1e293b);
+                color: variables.$color-gray-900;
             }
 
             tr:last-child td {
@@ -146,7 +146,7 @@
             font-size: variables.$font-size-md;
             font-weight: 600;
             margin: 0 0 10px;
-            color: var(--color-text-primary, #1e293b);
+            color: variables.$color-gray-900;
         }
 
         .allocations-grid {
@@ -171,7 +171,7 @@
                 .remaining {
                     font-size: variables.$font-size-xl;
                     font-weight: 700;
-                    color: var(--color-primary, #2563eb);
+                    color: variables.$color-primary;
                 }
 
                 .total {
@@ -188,14 +188,15 @@
             font-size: variables.$font-size-md;
             font-weight: 600;
             margin: 0 0 10px;
-            color: var(--color-text-primary, #1e293b);
+            color: variables.$color-gray-900;
         }
 
         .request-card {
-            border: 1px solid var(--color-border-subtle, #e2e8f0);
+            border: 1px solid variables.$color-gray-200;
             border-radius: 10px;
             padding: 12px 16px;
             margin-bottom: 10px;
+            background-color: variables.$color-white;
 
             .request-header {
                 display: flex;
@@ -206,19 +207,19 @@
                 .request-type {
                     font-weight: 600;
                     font-size: variables.$font-size-sm;
-                    color: var(--color-text-primary, #1e293b);
+                    color: variables.$color-gray-900;
                 }
             }
 
             .request-period {
                 font-size: variables.$font-size-sm;
-                color: var(--color-text-secondary, #475569);
+                color: variables.$color-gray-600;
             }
 
             .request-reason {
                 margin: 6px 0 0;
                 font-size: variables.$font-size-xs;
-                color: var(--color-text-muted, #64748b);
+                color: variables.$color-gray-400;
             }
         }
     }
@@ -230,8 +231,8 @@
     }
 
     .add-bank-inline-form {
-        border: 1px solid variables.$color-blue-accent;
-        background-color: variables.$color-blue-hover;
+        border: 1px solid variables.$color-gray-300;
+        background-color: variables.$color-gray-50;
         border-radius: 12px;
         padding: 16px;
 
@@ -239,7 +240,7 @@
             margin: 0 0 14px;
             font-size: variables.$font-size-md;
             font-weight: 600;
-            color: variables.$color-blue-dark;
+            color: variables.$color-gray-900;
         }
 
         .form-grid {
@@ -275,9 +276,10 @@
         gap: 12px;
 
         .bank-card {
-            border: 1px solid var(--color-border-subtle, #e2e8f0);
+            border: 1px solid variables.$color-gray-200;
             border-radius: 12px;
             padding: 16px;
+            background-color: variables.$color-white;
 
             &.is-primary {
                 border-color: variables.$color-success-border;
@@ -292,12 +294,12 @@
 
                 .bank-title {
                     font-size: variables.$font-size-md;
-                    color: var(--color-text-primary, #0f172a);
+                    color: variables.$color-gray-900;
                 }
 
                 .account-type {
                     font-size: variables.$font-size-sm;
-                    color: var(--color-text-secondary, #64748b);
+                    color: variables.$color-gray-600;
                     margin-left: 6px;
                 }
             }
@@ -314,12 +316,12 @@
                     gap: 2px;
 
                     .label {
-                        color: var(--color-text-muted, #64748b);
+                        color: variables.$color-gray-400;
                         font-size: variables.$font-size-xs;
                     }
 
                     .value {
-                        color: var(--color-text-primary, #1e293b);
+                        color: variables.$color-gray-900;
                         font-weight: 500;
                     }
                 }

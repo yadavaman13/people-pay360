@@ -14,15 +14,17 @@
     --color-gray-800: var(--primi-gray-800);
     --color-gray-900: var(--primi-gray-900);
 
-    // ─── Semantic Surfaces, Text & Borders ───────────────────────────────────
-    --color-bg-app: var(--color-gray-50);
-    --color-bg-card: var(--color-white);
-    --color-bg-subtle: var(--color-gray-100);
-    --color-text-primary: var(--color-gray-900);
-    --color-text-secondary: var(--color-gray-600);
-    --color-text-muted: var(--color-gray-400);
-    --color-border-subtle: var(--color-gray-200);
-    --color-border-strong: var(--color-gray-300);
+    // ─── Semantic Aliases (Surface, Backgrounds, Text & Borders) ───────────────
+    --color-bg-app: var(--primi-gray-50);
+    --color-bg-card: var(--primi-white);
+    --color-bg-subtle: var(--primi-gray-100);
+    --color-surface: var(--primi-white);
+    --color-text-primary: var(--primi-gray-900);
+    --color-text-secondary: var(--primi-gray-600);
+    --color-text-muted: var(--primi-gray-400);
+    --color-border-subtle: var(--primi-gray-200);
+    --color-border-strong: var(--primi-gray-300);
+    --color-primary-light: var(--primi-gray-200);
 
     // ─── Brand / Accent ───────────────────────────────────────────────────────
     --color-primary: var(
